@@ -1,0 +1,73 @@
+name: Publish AVSecTester site
+
+# Builds https://avsecproject.github.io/ from the main branch of the public AVSecTester repository
+# and commits the result to this repository's main branch, which GitHub Pages serves.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-site
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v7
+        with:
+          path: site
+
+      - name: Check out AVSecTester
+        uses: actions/checkout@v7
+        with:
+          repository: AVSecProject/AVSecTester
+          ref: main
+          path: avsectester
+
+      - name: Compare with the published commit
+        id: source
+        run: |
+          commit=$(git -C avsectester rev-parse HEAD)
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          if [ "$(cat site/SOURCE_COMMIT 2>/dev/null)" = "$commit" ] && [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            echo "AVSecTester $commit is already published."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v7
+        if: steps.source.outputs.skip != 'true'
+        with:
+          python-version: "3.11"
+
+      - name: Build and check the site
+        if: steps.source.outputs.skip != 'true'
+        working-directory: avsectester
+        run: |
+          python -m pip install -r website/requirements.txt
+          # Links from the documentation to repository files point at this AVSecTester commit.
+          GITHUB_SHA="${{ steps.source.outputs.commit }}" mkdocs build --strict -f website/mkdocs.yml
+          python -m scripts.website.check_site website/site
+
+      - name: Commit the built site
+        if: steps.source.outputs.skip != 'true'
+        working-directory: site
+        run: |
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github ! -name README.md -exec rm -rf {} +
+          cp -r ../avsectester/website/site/. .
+          touch .nojekyll
+          echo "${{ steps.source.outputs.commit }}" > SOURCE_COMMIT
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The built site is unchanged."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Publish AVSecTester ${{ steps.source.outputs.commit }}"
+          git push
