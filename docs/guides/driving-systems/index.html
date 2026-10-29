@@ -1989,7 +1989,9 @@ vehicles can also overlap its path. <code>DrivingMetrics.collision</code> record
 <p><code>AlpamayoAVStack</code> uses AlpaSim's policy interface to turn camera input, ego pose history, speed,
 acceleration and navigation into a rig-frame trajectory. Navigation comes from
 <code>Observation.route</code>, which the simulator generates as route intent. It is independent of the
-executed future path; see <a href="../simulators/#navigation">Navigation</a>.</p>
+executed future path; see <a href="../simulators/#navigation">Navigation</a>. By default it uses the four
+cameras of AlpaSim's Alpamayo 1.5 driver: front wide, front tele and both cross cameras; the
+renderer must provide every listed camera.</p>
 <p>Component logs contain <code>policy</code>, <code>command</code>, <code>route_waypoints</code>, <code>navigation_command</code>,
 <code>navigation_note</code>, <code>history_pose_count</code> and <code>selected_image_times</code>. Without a route, the
 navigation command falls back to <code>STRAIGHT</code>.</p>

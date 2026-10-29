@@ -1917,25 +1917,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/5ed914d6860d21383d169ad70a9e7a8fe5facab3/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/5ed914d6860d21383d169ad70a9e7a8fe5facab3/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/5ed914d6860d21383d169ad70a9e7a8fe5facab3/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/5ed914d6860d21383d169ad70a9e7a8fe5facab3/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2208,9 +2208,9 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 <h3 id="custom-metric-example">Custom metric example<a class="headerlink" href="#custom-metric-example" title="Permanent link">&para;</a></h3>
 <p><code>ReplicaVisibility</code> demonstrates an importable <code>Metric</code> outside the built-in metric registry.
 Its <code>evaluate</code> reads saved capture evidence and returns <code>visible_steps</code>; <code>describe</code> supplies the
-field's meaning and unit. A treatment without a replica has an unavailable value. The default
-camera is inferred from unique recorded replica evidence; set <code>camera_id</code> when multiple cameras
-record it.</p>
+field's meaning and unit. A treatment without a replica has an unavailable value. A decision
+counts as visible when the replica reaches <code>min_visible_pixels</code> in at least one selected camera;
+by default <code>camera_ids</code> selects every camera that recorded the replica.</p>
 <p>Reference the class by its full path, as in the supplied YAML:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">evaluation</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
@@ -2219,7 +2219,7 @@ record it.</p>
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/5ed914d6860d21383d169ad70a9e7a8fe5facab3/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and

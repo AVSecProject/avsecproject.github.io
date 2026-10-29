@@ -25,7 +25,7 @@
     
     
       
-        <title>AVSecTester - AVSecTester</title>
+        <title>AVSecTester</title>
       
     
     
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              AVSecTester
+              Home
             
           </span>
         </div>
@@ -405,10 +405,12 @@
     <div class="md-grid avs-hero__inner">
       <h1 id="avs-hero-title" class="avs-hero__title">AVSecTester</h1>
       <p class="avs-hero__tagline">Adversarial security testing for autonomous driving.</p>
+      <p class="avs-hero__affiliations">University of Arizona · University of Southern California</p>
+      <p class="avs-hero__lead">Find out whether an attack actually changes how an autonomous vehicle drives.</p>
       <p class="avs-hero__text">
-        AVSecTester selects attack segments, prepares artifacts in an offline phase and runs clean
-        and attacked treatments of the same segment in closed loop.
-        Every run is saved, so evaluation works from the recorded logs after the simulator has closed.
+        AVSecTester is an open-source testbed for autonomous-vehicle security. Run attacks against a
+        driving system in closed loop, on real-world drives reconstructed with NVIDIA NuRec or in
+        CARLA, and compare what the vehicle does with and without the attack.
       </p>
       <div class="avs-hero__actions">
         <a class="avs-button avs-button--primary" href="docs/getting-started/quickstart/">Get started</a>
@@ -418,7 +420,6 @@
       <ul class="avs-badges" aria-label="Release information">
         <li class="avs-badge"><span class="avs-badge__key">version</span><span class="avs-badge__value">0.1.0</span></li>
         <li class="avs-badge"><span class="avs-badge__key">license</span><span class="avs-badge__value">MIT</span></li>
-        <li class="avs-badge"><span class="avs-badge__key">Python</span><span class="avs-badge__value">3.11</span></li>
       </ul>
     </div>
   </section>
@@ -548,22 +549,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#what-you-can-do-with-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        What you can do with it
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Features">
+    <nav class="md-nav" aria-label="What you can do with it">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#recorded-and-simulated-worlds" class="md-nav__link">
+  <a href="#test-a-new-attack-in-closed-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recorded and simulated worlds
+        Test a new attack in closed loop
       
     </span>
   </a>
@@ -571,10 +572,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modular-and-end-to-end-driving-systems" class="md-nav__link">
+  <a href="#stress-test-a-driving-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modular and end-to-end driving systems
+        Stress-test a driving system
       
     </span>
   </a>
@@ -582,10 +583,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#attack-lifecycle" class="md-nav__link">
+  <a href="#optimize-attacks-against-a-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Attack lifecycle
+        Optimize attacks against a system
       
     </span>
   </a>
@@ -593,10 +594,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#white-box-and-black-box-attacks" class="md-nav__link">
+  <a href="#record-what-the-system-saw-and-did" class="md-nav__link">
     <span class="md-ellipsis">
       
-        White-box and black-box attacks
+        Record what the system saw and did
       
     </span>
   </a>
@@ -604,21 +605,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#reproducible-experiments" class="md-nav__link">
+  <a href="#evaluate-defenses-planned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reproducible experiments
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#evaluation-and-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Evaluation and reports
+        Evaluate defenses (planned)
       
     </span>
   </a>
@@ -627,6 +617,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
   
 </li>
       
@@ -665,10 +666,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#stop-sign-patch" class="md-nav__link">
+  <a href="#stop-sign-patch-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stop-sign patch
+        Stop-sign patch attack
       
     </span>
   </a>
@@ -676,10 +677,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#image-object-insertion" class="md-nav__link">
+  <a href="#object-insertion-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Image object insertion
+        Object insertion attack
       
     </span>
   </a>
@@ -687,21 +688,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#physical-patch" class="md-nav__link">
+  <a href="#physical-patch-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Physical patch
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phantom-injection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Phantom injection
+        Physical patch attack
       
     </span>
   </a>
@@ -718,6 +708,17 @@
     <span class="md-ellipsis">
       
         Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-try" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you try
       
     </span>
   </a>
@@ -1844,22 +1845,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#what-you-can-do-with-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        What you can do with it
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Features">
+    <nav class="md-nav" aria-label="What you can do with it">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#recorded-and-simulated-worlds" class="md-nav__link">
+  <a href="#test-a-new-attack-in-closed-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recorded and simulated worlds
+        Test a new attack in closed loop
       
     </span>
   </a>
@@ -1867,10 +1868,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modular-and-end-to-end-driving-systems" class="md-nav__link">
+  <a href="#stress-test-a-driving-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modular and end-to-end driving systems
+        Stress-test a driving system
       
     </span>
   </a>
@@ -1878,10 +1879,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#attack-lifecycle" class="md-nav__link">
+  <a href="#optimize-attacks-against-a-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Attack lifecycle
+        Optimize attacks against a system
       
     </span>
   </a>
@@ -1889,10 +1890,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#white-box-and-black-box-attacks" class="md-nav__link">
+  <a href="#record-what-the-system-saw-and-did" class="md-nav__link">
     <span class="md-ellipsis">
       
-        White-box and black-box attacks
+        Record what the system saw and did
       
     </span>
   </a>
@@ -1900,21 +1901,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#reproducible-experiments" class="md-nav__link">
+  <a href="#evaluate-defenses-planned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reproducible experiments
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#evaluation-and-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Evaluation and reports
+        Evaluate defenses (planned)
       
     </span>
   </a>
@@ -1923,6 +1913,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1961,10 +1962,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#stop-sign-patch" class="md-nav__link">
+  <a href="#stop-sign-patch-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stop-sign patch
+        Stop-sign patch attack
       
     </span>
   </a>
@@ -1972,10 +1973,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#image-object-insertion" class="md-nav__link">
+  <a href="#object-insertion-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Image object insertion
+        Object insertion attack
       
     </span>
   </a>
@@ -1983,21 +1984,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#physical-patch" class="md-nav__link">
+  <a href="#physical-patch-attack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Physical patch
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phantom-injection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Phantom injection
+        Physical patch attack
       
     </span>
   </a>
@@ -2014,6 +2004,17 @@
     <span class="md-ellipsis">
       
         Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-try" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you try
       
     </span>
   </a>
@@ -2051,60 +2052,93 @@
          aria-label="Side-by-side video of a clean run and a white-box attack run of the same stop-sign approach in a NuRec scene, with the rule-based driving system's stop-sign detections and a speed plot">
     <source src="assets/media/stop-sign-white-box.mp4" type="video/mp4">
   </video>
-  <figcaption>In this example run, the rule-based driving system detects the unpatched replica stop sign early
-  in the clean run (left). With a patch from a white-box attack (algorithm used: PGD) on its detector
-  (right), it detects the sign later, brakes later and stops closer to the stop line; both runs
-  stop before the line.</figcaption>
+  <figcaption>In this example run, the rule-based driving system detects the replica stop sign from far
+  away in the clean run (left) and stops before the line. With a patch from a white-box attack
+  (algorithm used: PGD) on its detector (right), it first detects the sign too close to stop and
+  crosses the stop line.</figcaption>
 </figure>
 
 <h2 id="why-closed-loop">Why closed loop<a class="headerlink" href="#why-closed-loop" title="Permanent link">&para;</a></h2>
-<p>An attack on perception matters through what the vehicle does next. AVSecTester keeps the driving
-system in the loop: its commands move the simulated vehicle, the next observation follows from
-that motion, and the attack acts again at every decision.</p>
+<p>A patch can hide a stop sign in most camera frames and the vehicle can still stop: one detection
+at the right distance can be enough. Per-frame detection scores would call that attack a success;
+the driving outcome shows that it failed. AVSecTester keeps the driving system in the loop. Its
+commands move the simulated vehicle, the next camera frame follows from that motion, and the
+attack acts again at every decision.</p>
 <ul>
-<li>Measure driving consequences such as stopping, braking, stop-line distance and collisions.</li>
-<li>Compare clean and attacked treatments of one segment, started from the same origin and seed.</li>
-<li>Record the physical state separately from what the driving system received.</li>
+<li>Measure driving outcomes such as stopping, braking, stop-line distance and collisions.</li>
+<li>Compare clean and attacked drives of the same segment, started from the same state and seed.</li>
+<li>Keep the vehicle's physical state separate from what the driving system received.</li>
 </ul>
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<h2 id="what-you-can-do-with-it">What you can do with it<a class="headerlink" href="#what-you-can-do-with-it" title="Permanent link">&para;</a></h2>
+<p>AVSecTester is built for people who develop and evaluate autonomous-vehicle security: researchers
+who design attacks and defenses, and engineers who test driving systems against them.</p>
 <div class="avs-grid">
 <div class="avs-card">
-<h3 id="recorded-and-simulated-worlds">Recorded and simulated worlds<a class="headerlink" href="#recorded-and-simulated-worlds" title="Permanent link">&para;</a></h3>
-<p>Run CARLA scenario recipes, NuRec reconstructions of recorded drives or open-loop nuScenes
-playback through one <code>Simulator</code> interface.</p>
-<p><a class="avs-card__link" href="docs/guides/simulators/">Simulators</a></p>
+<h3 id="test-a-new-attack-in-closed-loop">Test a new attack in closed loop<a class="headerlink" href="#test-a-new-attack-in-closed-loop" title="Permanent link">&para;</a></h3>
+<p>Does your attack change how the vehicle drives, not just a detection score? Write it in Python or
+start from a supplied attack: choose where it applies, optimize it offline and act at every
+decision. Each test segment runs clean and attacked from the same start.</p>
+<p><a class="avs-card__link" href="docs/guides/attacks/">Write an attack</a></p>
 </div>
 <div class="avs-card">
-<h3 id="modular-and-end-to-end-driving-systems">Modular and end-to-end driving systems<a class="headerlink" href="#modular-and-end-to-end-driving-systems" title="Permanent link">&para;</a></h3>
-<p>Drive with avstack's modular pipeline, a rule-based stop-sign system, a camera collision policy or
-Alpamayo, or your own <code>AVStack</code>; a <code>DrivingAdapter</code> exposes its components and scorers to attacks.</p>
-<p><a class="avs-card__link" href="docs/guides/driving-systems/">Driving systems</a></p>
+<h3 id="stress-test-a-driving-system">Stress-test a driving system<a class="headerlink" href="#stress-test-a-driving-system" title="Permanent link">&para;</a></h3>
+<p>How does your driving system behave under known attacks? Wrap it as an <code>AVStack</code>; a
+<code>DrivingAdapter</code> exposes its components to attacks. Run supplied attacks over many drives and get
+paired reports of stopping, braking, stop-line and collision outcomes.</p>
+<p><a class="avs-card__link" href="docs/guides/driving-systems/">Connect a driving system</a></p>
 </div>
 <div class="avs-card">
-<h3 id="attack-lifecycle">Attack lifecycle<a class="headerlink" href="#attack-lifecycle" title="Permanent link">&para;</a></h3>
-<p>A metabuilder selects segments, the offline phase prepares artifacts, and the online phase
-returns world, sensor and <code>AVStack</code> attack actions in each run.</p>
-<p><a class="avs-card__link" href="docs/guides/attacks/">Attacks</a></p>
+<h3 id="optimize-attacks-against-a-system">Optimize attacks against a system<a class="headerlink" href="#optimize-attacks-against-a-system" title="Permanent link">&para;</a></h3>
+<p>How strong can an attack become with gradients, or with queries only? Optimize artifacts with a
+white-box attack (algorithm used: PGD) through the system's own detector, or a black-box attack
+(algorithm used: NES) through driving rollouts, then test them on held-out segments.</p>
+<p><a class="avs-card__link" href="docs/guides/optimization/">Optimize artifacts</a></p>
 </div>
 <div class="avs-card">
-<h3 id="white-box-and-black-box-attacks">White-box and black-box attacks<a class="headerlink" href="#white-box-and-black-box-attacks" title="Permanent link">&para;</a></h3>
-<p>Optimize artifacts with gradients of a differentiable score (algorithm used: PGD) or with score
-queries alone (algorithm used: NES), through scorers bound to the driving system.</p>
-<p><a class="avs-card__link" href="docs/guides/optimization/">Optimization</a></p>
+<h3 id="record-what-the-system-saw-and-did">Record what the system saw and did<a class="headerlink" href="#record-what-the-system-saw-and-did" title="Permanent link">&para;</a></h3>
+<p>Every run saves the camera input the driving system received, its outputs and the vehicle's
+physical state. Measure, compare, replay and export frames later without running the simulator
+again.</p>
+<p><a class="avs-card__link" href="docs/guides/evaluation/">Evaluate saved runs</a></p>
 </div>
 <div class="avs-card">
-<h3 id="reproducible-experiments">Reproducible experiments<a class="headerlink" href="#reproducible-experiments" title="Permanent link">&para;</a></h3>
-<p>Save selected metadata, artifacts and run logs, split segments into training and test units, reuse
-a saved preparation and resume interrupted work.</p>
-<p><a class="avs-card__link" href="docs/guides/experiments/">Experiments</a></p>
-</div>
-<div class="avs-card">
-<h3 id="evaluation-and-reports">Evaluation and reports<a class="headerlink" href="#evaluation-and-reports" title="Permanent link">&para;</a></h3>
-<p>Measure driving, stop-line and detection metrics from saved logs, compare treatments pairwise and
-write HTML and structured reports.</p>
-<p><a class="avs-card__link" href="docs/guides/evaluation/">Evaluation</a></p>
+<h3 id="evaluate-defenses-planned">Evaluate defenses (planned)<a class="headerlink" href="#evaluate-defenses-planned" title="Permanent link">&para;</a></h3>
+<p>Defense treatments, reference defenses and defense metrics are planned. Hooks already let you
+insert your own processing at driving-system stages, without a defense comparison protocol.</p>
+<p><a class="avs-card__link" href="docs/guides/defenses/">Defense status</a></p>
 </div>
 </div>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<div class="avs-steps">
+<ol>
+<li><strong>Choose where to drive.</strong> Use real-world drives reconstructed with NuRec or CARLA scenarios,
+   and a supplied driving system or your own.</li>
+<li><strong>Choose or write an attack.</strong> It selects the segments it applies to, prepares its artifacts in
+   an offline phase and acts on the world, the sensors or the driving system in the online phase.</li>
+<li><strong>Run and compare.</strong> One command prepares the attack, runs clean and attacked treatments of
+   every test segment in closed loop and writes metrics and an HTML report.</li>
+</ol>
+</div>
+<div class="highlight"><pre><span></span><code><span class="c1"># configs/nurec_stop_sign_patch_modular_2601.yaml, abridged</span>
+<span class="nt">dataset</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NuRecDataset</span><span class="w">            </span><span class="c1"># reconstructed real-world drives</span>
+<span class="nt">simulator</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NuRecSimulator</span><span class="w">          </span><span class="c1"># commands move the vehicle; the next frame follows</span>
+<span class="nt">avstack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuleBasedAVStack</span><span class="w">        </span><span class="c1"># or AlpamayoAVStack, or your own AVStack</span>
+<span class="nt">attacks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">noise_detector_pgd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">StopSignPatchAttack</span><span class="w">   </span><span class="c1"># or your own Attack</span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">initial_patch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">low_frequency_noise</span>
+<span class="w">      </span><span class="nt">optimization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w">         </span><span class="c1"># white-box attack (algorithm used: PGD)</span>
+<span class="nt">runs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">treatments</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">clean</span><span class="p p-Indicator">,</span><span class="nt"> attack_name</span><span class="p">:</span><span class="w"> </span><span class="nv">no_patch</span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">noise_detector_pgd</span><span class="p p-Indicator">,</span><span class="nt"> attack_name</span><span class="p">:</span><span class="w"> </span><span class="nv">noise_detector_pgd</span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>run<span class="w"> </span>configs/nurec_stop_sign_patch_modular_2601.yaml
+</code></pre></div>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <figure class="avs-figure">
 <p><a href="docs/assets/architecture.png"><img alt="Framework diagram. User configuration feeds a dataset, an attack and the closed loop. Inside the attack, the metabuilder produces metadata, the offline phase produces artifacts and the online phase acts on the closed loop, where a simulator sends observations to an AV stack and receives commands. Run logs go to evaluation." src="docs/assets/architecture.png" /></a></p>
@@ -2113,43 +2147,44 @@ simulator and a driving system; every run is logged for evaluation.</figcaption>
 </figure>
 <h2 id="supported-components">Supported components<a class="headerlink" href="#supported-components" title="Permanent link">&para;</a></h2>
 <div class="avs-components">
-<p><strong>Simulators:</strong> CARLA · NuRec · recorded playback (nuScenes)<br>
-<strong>Driving systems:</strong> <code>ModularAVStack</code> · <code>CameraForwardCollisionAVStack</code> · <code>RuleBasedAVStack</code> ·
-<code>AlpamayoAVStack</code><br>
+<p><strong>Closed-loop simulators:</strong> NuRec (reconstructed real-world drives) · CARLA<br>
+<strong>Driving systems:</strong> <code>RuleBasedAVStack</code> · <code>AlpamayoAVStack</code> (end-to-end) · <code>ModularAVStack</code> ·
+<code>CameraForwardCollisionAVStack</code><br>
 <a href="docs/concepts/architecture/#supported-configurations">Supported configurations</a></p>
 </div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <div class="avs-grid avs-grid--wide">
 <div class="avs-card">
-<h3 id="stop-sign-patch">Stop-sign patch<a class="headerlink" href="#stop-sign-patch" title="Permanent link">&para;</a></h3>
-<video aria-label="Video of Alpamayo driving a NuRec scene with a patched replica stop sign, overlaid with its planned trajectory and recorded reasoning text" autoplay="autoplay" class="avs-video" loop="loop" muted="muted" playsinline="playsinline" poster="assets/media/stop-sign-black-box.webp" preload="metadata">
-  <source src="assets/media/stop-sign-black-box.mp4" type="video/mp4">
+<h3 id="stop-sign-patch-attack">Stop-sign patch attack<a class="headerlink" href="#stop-sign-patch-attack" title="Permanent link">&para;</a></h3>
+<video aria-label="Video of Alpamayo driving a NuRec scene toward a replica stop sign carrying a white patch, overlaid with its planned trajectory and recorded reasoning text" autoplay="autoplay" class="avs-video" loop="loop" muted="muted" playsinline="playsinline" poster="assets/media/stop-sign-alpamayo.webp" preload="metadata">
+  <source src="assets/media/stop-sign-alpamayo.mp4" type="video/mp4">
 </video>
-<p>In this example run, Alpamayo approaches a replica stop sign carrying a patch from a black-box
-attack (algorithm used: NES, reduced budget for illustration). The overlay shows its planned
-trajectory and recorded reasoning.</p>
+<p>In this example run, a replica stop sign carrying a white patch is placed over the reconstructed sign in
+a NuRec drive, and Alpamayo, an end-to-end driving model with four cameras, drives the
+closed-loop rollout. The overlay shows its planned trajectory and recorded reasoning.</p>
 <p><a class="avs-card__link" href="docs/examples/stop-sign-patch/">Stop-sign patch example</a></p>
 </div>
 <div class="avs-card">
-<h3 id="image-object-insertion">Image object insertion<a class="headerlink" href="#image-object-insertion" title="Permanent link">&para;</a></h3>
+<h3 id="object-insertion-attack">Object insertion attack<a class="headerlink" href="#object-insertion-attack" title="Permanent link">&para;</a></h3>
 <div class="avs-pair">
 <figure>
-<p><img alt="Inserted stop sign beside a highway at dusk, brighter and sharper than the surrounding scene" src="assets/media/image-insertion.webp" /></p>
+<p><img alt="Stop sign inserted beside a CARLA road, brighter and sharper than the surrounding scene" src="assets/media/image-insertion.webp" /></p>
 <figcaption>Without harmonization</figcaption>
 </figure>
 <figure>
-<p><img alt="The same inserted stop sign, darkened to the dusk exposure of the surrounding scene" src="assets/media/image-insertion-harmonized.webp" /></p>
+<p><img alt="The same inserted stop sign, matched to the exposure of the surrounding CARLA scene" src="assets/media/image-insertion-harmonized.webp" /></p>
 <figcaption>With ExposureHarmonizer</figcaption>
 </figure>
 </div>
-<p>In these example runs, a stop sign is inserted into the NuRec front-camera image while Alpamayo
-drives. Only the camera image changes; the world contains no sign. The two images show the same
-decision of runs that differ only in compositing: without harmonization, and with exposure
-matching by <code>ExposureHarmonizer</code> and slight edge softening.</p>
-<p><a class="avs-card__link" href="docs/examples/image-insertion/">Image insertion example</a></p>
+<p>In this example in CARLA, a stop sign is inserted into the front-camera image while a
+camera-based forward-collision system drives. Only the camera image changes; the simulated world
+contains no sign. The two images show the same decision of treatments that differ only in
+compositing: without harmonization, and with exposure matching by <code>ExposureHarmonizer</code> and slight
+edge softening.</p>
+<p><a class="avs-card__link" href="docs/examples/image-insertion/">Object insertion example</a></p>
 </div>
 <div class="avs-card">
-<h3 id="physical-patch">Physical patch<a class="headerlink" href="#physical-patch" title="Permanent link">&para;</a></h3>
+<h3 id="physical-patch-attack">Physical patch attack<a class="headerlink" href="#physical-patch-attack" title="Permanent link">&para;</a></h3>
 <div class="avs-pair">
 <figure>
 <p><img alt="Checkerboard patch on the rear of a white car on a highway at dusk, brighter than the car" src="assets/media/physical-patch.webp" /></p>
@@ -2163,15 +2198,8 @@ matching by <code>ExposureHarmonizer</code> and slight edge softening.</p>
 <p>In these example runs, a checkerboard patch is composited onto the rear of a recorded vehicle in
 the NuRec front-camera image while Alpamayo drives. The two images show the same decision of runs
 that differ only in compositing: without harmonization, and with exposure matching by
-<code>ExposureHarmonizer</code> and slight edge softening. In CARLA the same attack deploys a native
-physical prop.</p>
+<code>ExposureHarmonizer</code> and slight edge softening.</p>
 <p><a class="avs-card__link" href="docs/examples/physical-patch/">Physical patch example</a></p>
-</div>
-<div class="avs-card">
-<h3 id="phantom-injection">Phantom injection<a class="headerlink" href="#phantom-injection" title="Permanent link">&para;</a></h3>
-<p>A runtime inserts a synthetic detection at the <code>perception.post</code> stage of <code>ModularAVStack</code> in
-CARLA; the physical world contains no corresponding actor.</p>
-<p><a class="avs-card__link" href="docs/examples/phantom-injection/">Phantom injection example</a></p>
 </div>
 </div>
 <h2 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h2>
@@ -2190,18 +2218,37 @@ top of this page.</figcaption>
 </figure>
 </div>
 <p><a href="docs/guides/evaluation/">Evaluation guide</a></p>
+<h2 id="before-you-try">Before you try<a class="headerlink" href="#before-you-try" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Requirements.</strong> Linux with NVIDIA GPUs, Docker Compose and the NVIDIA Container Toolkit.
+  Experiments run in the supplied Docker images. NuRec scenes, NRE images and model weights are
+  downloaded separately and need NGC and Hugging Face access; see
+  <a href="docs/getting-started/installation/">Installation</a>.</li>
+<li><strong>Status.</strong> AVSecTester is an early research release. The supported simulator and
+  driving-system combinations are listed in
+  <a href="docs/concepts/architecture/#supported-configurations">Supported configurations</a>; defenses are
+  planned.</li>
+</ul>
 <h2 id="responsible-use">Responsible use<a class="headerlink" href="#responsible-use" title="Permanent link">&para;</a></h2>
-<p>AVSecTester is intended for research and authorized security testing. Attacks run in simulation
-and on recorded data. Do not apply them to vehicles, road infrastructure or systems without
-permission.</p>
+<p>AVSecTester is intended for research, education and authorized security testing of autonomous
+driving systems. Its attacks run in simulation and on recorded or reconstructed data.</p>
+<ul>
+<li>Do not use the attacks, or physical artifacts produced with them, against vehicles, road
+  infrastructure or systems that you do not own or are not authorized to test, and never on
+  public roads.</li>
+<li>Follow applicable laws and the terms of the datasets and models you use.</li>
+<li>If you find a vulnerability in a real system, report it to the affected vendor before publishing
+  it.</li>
+<li>Results in simulation do not establish that a real vehicle is safe or unsafe. The software is
+  provided under the MIT License, without warranty.</li>
+</ul>
 <div class="avs-attribution">
 <p><a href="https://github.com/AVSecProject/AVSecTester/blob/main/LICENSE">MIT License</a> ·
 <a href="https://github.com/AVSecProject/AVSecTester">GitHub</a></p>
 <p>Media on this page are rendered from the NVIDIA PhysicalAI Autonomous Vehicles NuRec dataset
-(NVIDIA Corporation, NVIDIA Autonomous Vehicle Dataset License Agreement). The Alpamayo examples
-use NVIDIA Alpamayo 1.5 for research under the NVIDIA License (non-commercial use). The
-rule-based driving system detects stop signs with YOLOX-m trained on COCO. The replica
-face and the inserted sign use the MUTCD R1-1 stop sign, a public-domain traffic control device.</p>
+(NVIDIA Corporation, NVIDIA Autonomous Vehicle Dataset License Agreement) and the CARLA simulator.
+The Alpamayo examples use NVIDIA Alpamayo 1.5 for research under the NVIDIA License
+(non-commercial use).</p>
 </div>
 
               </article>
