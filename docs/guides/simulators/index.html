@@ -2185,7 +2185,7 @@ native and object depth. A view without native depth keeps <code>depth=None</cod
 </tr>
 <tr>
 <td>Recorded playback</td>
-<td>Actor cuboids. <strong>Not yet implemented.</strong> Static-scene occlusion. See <a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#recorded-static-occlusion">Recorded static occlusion</a>.</td>
+<td>Actor cuboids. <strong>Not yet implemented.</strong> Static-scene occlusion. See <a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#recorded-static-occlusion">Recorded static occlusion</a>.</td>
 </tr>
 </tbody>
 </table>
@@ -2203,7 +2203,7 @@ object membership until the next capture.</p>
 <p>See <a href="../attacks/#insert-a-world-object">Writing attacks</a> for insertion actions and
 <a href="../../reference/runtime/#runlog">Runtime records</a> for saved evidence.</p>
 <p><strong>Not yet implemented.</strong> Inserted objects in non-camera sensors.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
 <h2 id="carla">CARLA<a class="headerlink" href="#carla" title="Permanent link">&para;</a></h2>
 <p>A <code>CarlaDataset</code> supplies recipes describing map, spawns, sensors and prescribed motion.
 <code>CarlaSimulator</code> supplies the connection and synchronous timing settings. Each reset requires a
@@ -2227,7 +2227,7 @@ timeline and actors, then advances ego with the selected dynamics. Camera names 
 unless <code>camera_aliases</code> maps them to observation names. Aliases also apply to views
 and calibration.</p>
 <p><strong>Not yet implemented.</strong> NuRec and recorded-playback traffic-light state recording. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#traffic-light-state-recording">Traffic-light states</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#traffic-light-state-recording">Traffic-light states</a>.</p>
 <p>Constructing mesh-depth or ground-contact support requires the <code>nurec</code> extra.
 Reset checks required archive meshes before connecting to NRE. Missing resources fail preflight.
 A manually started NRE must enable <code>--enable-editing-actors</code>.</p>
@@ -2285,7 +2285,7 @@ dimensions actually returned by NRE. NRE preserves aspect ratio, so returned wid
 from the request. Subsequent captures must retain those dimensions.</p>
 <p>Captures render a single instant.</p>
 <p><strong>Not yet implemented.</strong> Rolling-shutter exposure.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#rolling-shutter-rendering">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#rolling-shutter-rendering">TODO</a>.</p>
 <p>The lens includes its f-theta model and recorded windshield distortion. Camera projection,
 mesh depth and object placement share the resulting geometry. Camera coordinate conventions
 and models are specified in the <a href="../../reference/python-api/">Python API</a>.</p>
@@ -2310,7 +2310,7 @@ backfills constant-velocity history and subsequent requests resend its complete 
 <p>Trajectories are not smoothed. Offline candidate rollouts also require the service.</p>
 <p><strong>Not yet implemented.</strong> Fitting traffic actors to the selected ground mesh, checkpointing
 traffic sessions and controlling CATK sampling through the caller seed. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#traffic-actor-ground-contact">Traffic actor ground contact</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#traffic-actor-ground-contact">Traffic actor ground contact</a>.</p>
 <h3 id="ego-dynamics">Ego dynamics<a class="headerlink" href="#ego-dynamics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2361,7 +2361,7 @@ sufficiently opaque asset pixels contribute probes. The renderer requires a clie
 directory visible inside the NRE service. Path and mount rules are
 in <a href="../../reference/configuration/#nurec-closed-loop-settings">Configuration</a>.</p>
 <p><strong>Not yet implemented.</strong> Published asset conventions for all probe axes, scaling and padding.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/f62a0eed215a8fc5583d5918178b483335fd1438/docs/development/TODO.md#nurec-rendered-probe-conventions">NuRec rendered-probe conventions</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/26d04438f94d96711be0dcb820bba14ea86d4309/docs/development/TODO.md#nurec-rendered-probe-conventions">NuRec rendered-probe conventions</a>.</p>
 <p>A captured <code>composition.plan</code> already contains this measured visibility. An arbitrary
 replacement object list needs a fresh render request. <code>SensorView.composite_plan</code> cannot obtain
 new reconstruction probes from a detached view. Geometry mode can build plans from its supplied
