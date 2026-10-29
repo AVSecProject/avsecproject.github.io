@@ -425,11 +425,11 @@
       <h1 id="avs-hero-title" class="avs-hero__title">AVSecTester</h1>
       <p class="avs-hero__tagline">Adversarial security testing for autonomous driving.</p>
       <p class="avs-hero__affiliations">The University of Arizona · University of Southern California</p>
-      <p class="avs-hero__lead">Find out whether an attack actually changes how an autonomous vehicle drives.</p>
+      <p class="avs-hero__lead">Measure how attacks and defenses change the way an autonomous vehicle drives.</p>
       <p class="avs-hero__text">
-        AVSecTester is an open-source testbed for autonomous-vehicle security. Run attacks against a
-        driving system in closed loop, on real-world drives reconstructed with NVIDIA NuRec or in
-        CARLA, and compare what the vehicle does with and without the attack.
+        AVSecTester is an open-source testbed for autonomous-vehicle security. Run a driving system
+        in closed loop, in CARLA or in real-world drives reconstructed with NVIDIA NuRec, then attack
+        it, add defenses and compare what the vehicle does.
       </p>
       <div class="avs-hero__actions">
         <a class="avs-button avs-button--primary" href="docs/getting-started/installation/">Get started</a>
@@ -2091,8 +2091,8 @@
 </figure>
 
 <h2 id="why-avsectester">Why AVSecTester<a class="headerlink" href="#why-avsectester" title="Permanent link">&para;</a></h2>
-<p>AVSecTester tests attacks the way they would play out on the road: in a vehicle that keeps
-driving.</p>
+<p>AVSecTester tests attacks and defenses the way they would play out on the road: in a vehicle that
+keeps driving.</p>
 <ul>
 <li><strong>Closed-loop rollouts.</strong> Open-loop evaluation can rate a driving system highly even when it
   ignores what is in front of it <a href="#references">[3]</a>. AVSecTester rolls the driving system out in
@@ -2277,30 +2277,32 @@ driving systems. Its attacks run in simulation and on recorded or reconstructed 
 <ol>
 <li>A. Madry, A. Makelov, L. Schmidt, D. Tsipras and A. Vladu. Towards Deep Learning Models
    Resistant to Adversarial Attacks. ICLR, 2018. <a href="https://arxiv.org/abs/1706.06083">arXiv:1706.06083</a></li>
-<li>Z. Ge, S. Liu, F. Wang, Z. Li and J. Sun. YOLOX: Exceeding YOLO Series in 2021. 2021.
-   <a href="https://arxiv.org/abs/2107.08430">arXiv:2107.08430</a></li>
+<li>Z. Ge, S. Liu, F. Wang, Z. Li and J. Sun. YOLOX: Exceeding YOLO Series in 2021. arXiv preprint,</li>
+<li><a href="https://arxiv.org/abs/2107.08430">arXiv:2107.08430</a></li>
 <li>C. Löwens, T. Funke and A. P. Condurache. Driving on Memory. NeurIPS, 2026.
    <a href="https://arxiv.org/abs/2608.31029">arXiv:2608.31029</a></li>
 <li>A. Ilyas, L. Engstrom, A. Athalye and J. Lin. Black-box Adversarial Attacks with Limited Queries
    and Information. ICML, 2018. <a href="https://arxiv.org/abs/1804.08598">arXiv:1804.08598</a></li>
-<li>NVIDIA. PhysicalAI-Autonomous-Vehicles-NuRec. Hugging Face dataset.
+<li>NVIDIA. PhysicalAI-Autonomous-Vehicles-NuRec. Hugging Face dataset, 2025.
    <a href="https://huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles-NuRec">huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles-NuRec</a></li>
 <li>Q. Wu, J. Martinez Esturo, A. Mirzaei, N. Moenne-Loccoz and Z. Gojcic. 3DGUT: Enabling
-   Distorted Cameras and Secondary Rays in Gaussian Splatting. CVPR, 2025.</li>
+   Distorted Cameras and Secondary Rays in Gaussian Splatting. CVPR, 2025.
+   <a href="https://arxiv.org/abs/2412.12507">arXiv:2412.12507</a></li>
 <li>NVIDIA, Y. Cao, R. de Lutio, S. Fidler et al. AlpaSim: A Modular, Lightweight, and Data-Driven
-   Research Simulator for Autonomous Driving. 2025.
+   Research Simulator for Autonomous Driving. Software, 2025.
    <a href="https://github.com/NVlabs/alpasim">github.com/NVlabs/alpasim</a></li>
 <li>A. Dosovitskiy, G. Ros, F. Codevilla, A. Lopez and V. Koltun. CARLA: An Open Urban Driving
    Simulator. CoRL, 2017. <a href="https://arxiv.org/abs/1711.03938">arXiv:1711.03938</a></li>
 <li>K. Eykholt, I. Evtimov, E. Fernandes, B. Li, A. Rahmati, C. Xiao, A. Prakash, T. Kohno and
-   D. Song. Robust Physical-World Attacks on Deep Learning Models. CVPR, 2018.
+   D. Song. Robust Physical-World Attacks on Deep Learning Visual Classification. CVPR, 2018.
    <a href="https://arxiv.org/abs/1707.08945">arXiv:1707.08945</a></li>
-<li>NVIDIA. Alpamayo 1.5. 2026. <a href="https://huggingface.co/nvidia/Alpamayo-1.5-10B">huggingface.co/nvidia/Alpamayo-1.5-10B</a></li>
+<li>NVIDIA. Alpamayo 1.5. Hugging Face model, 2026.
+    <a href="https://huggingface.co/nvidia/Alpamayo-1.5-10B">huggingface.co/nvidia/Alpamayo-1.5-10B</a></li>
 <li>NVIDIA, Y. Wang, W. Luo, J. Bai et al. Alpamayo-R1: Bridging Reasoning and Action Prediction for
-    Generalizable Autonomous Driving in the Long Tail. 2025.
+    Generalizable Autonomous Driving in the Long Tail. arXiv preprint, 2025.
     <a href="https://arxiv.org/abs/2511.00088">arXiv:2511.00088</a></li>
 <li>R. S. Hallyburton, S. Zhang and M. Pajic. AVstack: An Open-Source, Reconfigurable Platform for
-    Autonomous Vehicle Development. 2022. <a href="https://arxiv.org/abs/2212.13857">arXiv:2212.13857</a></li>
+    Autonomous Vehicle Development. arXiv preprint, 2022. <a href="https://arxiv.org/abs/2212.13857">arXiv:2212.13857</a></li>
 </ol>
 <div class="avs-attribution">
 <p><a href="https://github.com/AVSecProject/AVSecTester/blob/main/LICENSE">MIT License</a> ·
