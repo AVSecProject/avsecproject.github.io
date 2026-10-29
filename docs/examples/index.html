@@ -22,7 +22,7 @@
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
@@ -46,6 +46,8 @@
     
       
     
+    
+      <link rel="stylesheet" href="../../stylesheets/brand.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -104,8 +106,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="AVSecTester" class="md-header__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -416,8 +417,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="AVSecTester" class="md-nav__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     AVSecTester
@@ -1616,84 +1616,84 @@ environment; see <a href="../guides/attacks/">Writing attacks</a> for lifecycle 
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/carla_phantom.yaml">carla_phantom.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/carla_phantom.yaml">carla_phantom.yaml</a></td>
 <td>CARLA</td>
 <td><code>ModularAVStack</code></td>
 <td>CARLA Town03; <code>fetch_models.sh</code></td>
 <td><a href="phantom-injection/">Phantom injection</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/carla_patch.yaml">carla_patch.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/carla_patch.yaml">carla_patch.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>CARLA Town03; <code>fetch_models.sh</code></td>
 <td><a href="physical-patch/">Physical patch</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/carla_patch_optimized.yaml">carla_patch_optimized.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/carla_patch_optimized.yaml">carla_patch_optimized.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>CARLA Town03; <code>fetch_models.sh</code></td>
 <td><a href="physical-patch/">Physical patch</a>, white-box attack; algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/carla_object_insertion.yaml">carla_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/carla_object_insertion.yaml">carla_object_insertion.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>CARLA Town03; <code>fetch_models.sh</code></td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_patch.yaml">nurec_patch.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_patch.yaml">nurec_patch.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>; Alpamayo</td>
 <td><a href="physical-patch/">Physical patch</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_object_insertion.yaml">nurec_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_object_insertion.yaml">nurec_object_insertion.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>; Alpamayo</td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_speed_feedback.yaml">nurec_speed_feedback.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_speed_feedback.yaml">nurec_speed_feedback.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>; Alpamayo</td>
 <td><a href="speed-feedback-attack/">Speed feedback</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nuscenes_object_insertion.yaml">nuscenes_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nuscenes_object_insertion.yaml">nuscenes_object_insertion.yaml</a></td>
 <td>Recorded playback</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td><code>data/nuscenes</code>; <code>fetch_models.sh</code></td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td>NuRec</td>
 <td><code>RuleBasedAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>; COCO YOLOX-m</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, white-box attack; algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td>NuRec</td>
 <td><code>RuleBasedAVStack</code></td>
 <td><code>data/nurec/26.04_release</code>; COCO YOLOX-m</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, white-box attack; algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>; Alpamayo</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, black-box attack; algorithm used: <code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.04_release</code>; Alpamayo</td>
@@ -1715,7 +1715,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 establish preparation, execution and evaluation behavior. Report scientific impact separately
 using the <a href="../guides/evaluation/">evaluation workflow</a>.</p>
 <p><strong>Not yet implemented.</strong> Published effectiveness claims for supplied attacks; see
-<a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/docs/development/TODO.md#attack-impact">Attack impact</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/docs/development/TODO.md#attack-impact">Attack impact</a>.</p>
 
 
 

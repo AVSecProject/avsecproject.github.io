@@ -22,7 +22,7 @@
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
@@ -46,6 +46,8 @@
     
       
     
+    
+      <link rel="stylesheet" href="../../../stylesheets/brand.css">
     
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -104,8 +106,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="AVSecTester" class="md-header__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -416,8 +417,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="AVSecTester" class="md-nav__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     AVSecTester
@@ -1770,7 +1770,7 @@ scenes, hosts or placement rules.</p>
 <tbody>
 <tr>
 <td><code>DataSource</code></td>
-<td>Select <code>AdversarialSample</code> records</td>
+<td>Map-style dataset: <code>__len__</code> and <code>__getitem__</code> provide <code>AdversarialSample</code> records</td>
 </tr>
 <tr>
 <td><code>Perturbation</code></td>
@@ -1778,7 +1778,7 @@ scenes, hosts or placement rules.</p>
 </tr>
 <tr>
 <td><code>Scorer</code></td>
-<td>Measure a target score</td>
+<td><code>target_scores(images, targets)</code> returns one score per input</td>
 </tr>
 <tr>
 <td><code>OptimizationObjective</code></td>
@@ -1792,12 +1792,12 @@ scenes, hosts or placement rules.</p>
 </table>
 <p><code>HideObject</code> minimizes a score; <code>SpoofObject</code> maximizes it. <code>HideBelowThreshold</code> minimizes only
 the part of a score above a decision threshold minus a margin, for targets where one detection
-decides the outcome. An optional <code>monitor(step, delta)</code> passed to <code>run</code> observes the current
-variable before the first update and after every update, for example to score it on a full
-training set. <code>PGD</code> requires a differentiable
-score, while <code>NES</code> uses score queries. <code>PGD</code>'s <code>tv_weight</code> adds <code>Perturbation.smoothness</code>; the
-default is total variation of the whole variable, and a perturbation that realizes only part of it
-overrides the method. A <code>SessionScorer</code> connects either path to a
+decides the outcome. Objectives operate elementwise on score batches; scores can be detector
+confidence or a physical quantity such as distance. An optional <code>monitor(index, delta)</code> observes
+the initial variable at index 0, then each completed PGD epoch or NES step. <code>PGD</code> requires a
+differentiable score, while <code>NES</code> uses score queries. <code>PGD</code>'s <code>tv_weight</code> weights
+<code>Perturbation.smoothness</code>, which defaults to total variation of the whole variable. A perturbation
+that realizes only part of it overrides the method. A <code>SessionScorer</code> connects either path to a
 declared <code>DrivingAdapter</code> binding. <a href="../driving-systems/">Driving-system bindings</a> describes
 model integration; the <a href="../../reference/python-api/">Python API</a> lists signatures and
 optimizer constraints.</p>
@@ -1810,16 +1810,22 @@ optimizer constraints.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.data_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">FixedImageSource</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">AdversarialSample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">TargetSpec</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
-                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">)]</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AdversarialSample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">TargetSpec</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MeanIntensityScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">target_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">target_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Image and target batch lengths must match"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">images</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
 <span class="n">perturbation</span> <span class="o">=</span> <span class="n">LinfImage</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">image_hw</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">PGD</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">PGD</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
     <span class="n">FixedImageSource</span><span class="p">(),</span> <span class="n">perturbation</span><span class="p">,</span> <span class="n">MeanIntensityScorer</span><span class="p">(),</span> <span class="n">HideObject</span><span class="p">())</span>
 <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">delta</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">delta</span><span class="p">))</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.1</span>
@@ -1827,6 +1833,11 @@ optimizer constraints.</p>
 <p><code>LinfImage</code> applies a bounded additive image change. <code>PatchPerturbation</code> renders texture colors
 using the geometry supplied in each sample. The sample's target region belongs to the objective;
 it is independent of the placement rule.</p>
+<p><code>PGD</code> shuffles samples using <code>seed</code> and retains the final smaller batch. Images in one batch
+must have equal dimensions. Random augmentations are redrawn in <code>DataSource.__getitem__</code>.
+<code>OptimizationResult.history</code> records each epoch's mean sample objective, excluding TV.</p>
+<p><code>NES</code> uses <code>steps</code> because it optimizes one seeded dataset sample rather than traversing the
+dataset. It scores candidate perturbations in groups of at most <code>batch_size</code> per query.</p>
 <h2 id="use-a-driving-system-scorer">Use a driving-system scorer<a class="headerlink" href="#use-a-driving-system-scorer" title="Permanent link">&para;</a></h2>
 <p>Create a session inside the offline phase, select a declared scorer, and keep that session open
 for calibration, updates and evaluation:</p>
@@ -1835,8 +1846,8 @@ for calibration, updates and evaluation:</p>
 <span class="c1"># Requires OfflineContext context, a user DataSource and a Perturbation.</span>
 <span class="k">with</span> <span class="n">context</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
     <span class="n">scorer</span> <span class="o">=</span> <span class="n">SessionScorer</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="s2">"rule_based.detection_confidence"</span><span class="p">,</span> <span class="n">require_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                           <span class="n">input_format</span><span class="o">=</span><span class="s2">"CHW float tensor [0,1]"</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">PGD</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">perturbation</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">HideObject</span><span class="p">())</span>
+                           <span class="n">input_format</span><span class="o">=</span><span class="s2">"BCHW float tensor [0,1]"</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">PGD</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">perturbation</span><span class="p">,</span> <span class="n">scorer</span><span class="p">,</span> <span class="n">HideObject</span><span class="p">())</span>
 </code></pre></div>
 <p>Scorer declarations follow
 <a href="../driving-systems/#components-and-scorers-for-offline-work">Driving-system bindings</a>.

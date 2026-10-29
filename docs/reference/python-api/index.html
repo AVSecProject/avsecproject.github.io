@@ -22,7 +22,7 @@
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
@@ -46,6 +46,8 @@
     
       
     
+    
+      <link rel="stylesheet" href="../../../stylesheets/brand.css">
     
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -104,8 +106,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="AVSecTester" class="md-header__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -416,8 +417,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="AVSecTester" class="md-nav__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     AVSecTester
@@ -6237,11 +6237,11 @@ returns <code>None</code> when unsupported and an empty sequence for zero detect
 </tr>
 <tr>
 <td><code>ScorerDescriptor(id: str, inputs: Mapping[str, str], outputs: Mapping[str, str], codecs: Mapping[str, str], differentiable_inputs: tuple[str, ...] = (), output_shape: tuple[int, ...] = (), direction: str = "minimize", sensor_id: str | None = None, decision_threshold: float | None = None)</code></td>
-<td>Subclass of <code>ComponentDescriptor</code>. Description of a scoring component, gradient support and optional sensor decision threshold.</td>
+<td>Subclass of <code>ComponentDescriptor</code>. Describe a batch scorer returning one score per input; output_shape is the per-input shape.</td>
 </tr>
 <tr>
 <td><code>DrivingAdapter(factory: Callable[[int], AVStack], *, components: Sequence[tuple[ComponentDescriptor, Callable[..., Any]]] = (), scorers: Sequence[tuple[ScorerDescriptor, Callable[..., Any]]] = (), past_steps: int = 0, decision_time_step: float | None = None)</code></td>
-<td>Bind component callbacks <code>(avstack, inputs)</code> and scorer callbacks <code>(avstack, inputs, target)</code> to a fresh AVStack factory.</td>
+<td>Bind component callbacks <code>(avstack, inputs)</code> and scorer callbacks <code>(avstack, images, targets)</code> to a fresh AVStack factory.</td>
 </tr>
 <tr>
 <td><code>DrivingAdapter.past_steps: int</code></td>
@@ -6530,8 +6530,8 @@ tuple.</p>
 <td>Return original-image xyxy boxes, confidences and COCO labels after classwise NMS.</td>
 </tr>
 <tr>
-<td><code>YOLOXDetector.target_score(image: torch.Tensor, target: TargetSpec) -&gt; torch.Tensor</code></td>
-<td>Return a differentiable pre-NMS confidence for a labeled original-image target box.</td>
+<td><code>YOLOXDetector.target_scores(images: torch.Tensor, targets: Sequence[TargetSpec]) -&gt; torch.Tensor</code></td>
+<td>Return one differentiable pre-NMS confidence per BCHW image and target.</td>
 </tr>
 <tr>
 <td><code>YOLOXDetector.close() -&gt; None</code></td>
@@ -6545,9 +6545,10 @@ tuple.</p>
 <p><code>YOLOXDetector</code> raises <code>ValueError</code> for a nonpositive <code>input_size</code>, a <code>score_threshold</code>
 outside [0, 1], or <code>nms_iou</code> outside (0, 1]. Loading raises <code>FileNotFoundError</code> for missing
 weights; an injected model that is not a <code>torch.nn.Module</code> raises <code>TypeError</code>.
-<code>detect</code> requires nonempty uint8 RGB (H, W, 3). <code>target_score</code> requires finite floating RGB
-(3, H, W) in [0, 1], a COCO class name as <code>target.label</code>, and a finite nonempty xyxy target box;
-invalid inputs raise <code>ValueError</code>. Model outputs other than (1, N, 85) raise <code>ValueError</code>.
+<code>detect</code> requires nonempty uint8 RGB (H, W, 3). <code>target_scores</code> requires finite floating RGB
+(B, 3, H, W) in [0, 1] and B targets, each with a COCO class name and finite nonempty xyxy box;
+invalid inputs or mismatched batch lengths raise <code>ValueError</code>. Model outputs other than
+(B, N, 85) raise <code>ValueError</code>.
 Calling either method after <code>close</code> raises <code>RuntimeError</code>.</p>
 <p>Images are reduced to at most <code>input_size</code> on the longest side, without upscaling, then
 converted to BGR × 255 and padded on the right and bottom with 114 to multiples of 32.
@@ -6802,8 +6803,8 @@ when the factory has no <code>avstack_options</code> with a <code>YOLOXDetector<
 <td>Whether input-image gradients are supported by this component.</td>
 </tr>
 <tr>
-<td><code>MMDetRPNObjectnessScorer.target_score(image: torch.Tensor, target: data_types.TargetSpec) -&gt; torch.Tensor</code></td>
-<td>Return differentiable RPN objectness within the target region.</td>
+<td><code>MMDetRPNObjectnessScorer.target_scores(images: torch.Tensor, targets: Sequence[data_types.TargetSpec]) -&gt; torch.Tensor</code></td>
+<td>Return one differentiable mean RPN objectness per BCHW image and target box.</td>
 </tr>
 <tr>
 <td><code>MMDetInferenceScorer(model)</code></td>
@@ -6814,8 +6815,8 @@ when the factory has no <code>avstack_options</code> with a <code>YOLOXDetector<
 <td>Whether input-image gradients are supported by this component.</td>
 </tr>
 <tr>
-<td><code>MMDetInferenceScorer.target_score(image, target: data_types.TargetSpec) -&gt; float</code></td>
-<td>Return matched detection confidence without requiring input gradients.</td>
+<td><code>MMDetInferenceScorer.target_scores(images, targets: Sequence[data_types.TargetSpec]) -&gt; list[float]</code></td>
+<td>Return one matched detection confidence per RGB image and target box.</td>
 </tr>
 </tbody>
 </table>
@@ -8859,7 +8860,7 @@ Reusing a name within its kind replaces its value.</p>
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackoptimizationblackbox">avsectester.attack.optimization.blackbox<a class="headerlink" href="#avsectesterattackoptimizationblackbox" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.attack.optimization.blackbox -->
-<p>Natural Evolution Strategies over arbitrary user-defined samples and perturbations.</p>
+<p>Natural Evolution Strategies with batched candidate queries and deterministic sampling.</p>
 <table>
 <thead>
 <tr>
@@ -8869,22 +8870,25 @@ Reusing a name within its kind replaces its value.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>NES(steps: int = 40, population_size: int = 20, sigma: float = 0.08, learning_rate: float = 0.03, seed: int = 0, verbose: bool = False, log_every: int = 5)</code></td>
-<td>Subclass of <code>GradientOptimizer</code>. Natural Evolution Strategies — gradient-free; estimates a gradient by Gaussian sampling.</td>
+<td><code>NES(steps: int = 40, population_size: int = 20, sigma: float = 0.08, learning_rate: float = 0.03, seed: int = 0, verbose: bool = False, log_every: int = 5, batch_size: int = 4)</code></td>
+<td>Subclass of <code>GradientOptimizer</code>. Estimate gradients over one seeded sample, querying candidates in batches per step.</td>
 </tr>
 </tbody>
 </table>
 <!-- api:end -->
 
 <h4 id="constraints-and-errors_48">Constraints and errors<a class="headerlink" href="#constraints-and-errors_48" title="Permanent link">&para;</a></h4>
-<p><code>NES</code> raises <code>ValueError</code> for a nonpositive <code>steps</code> or <code>log_every</code>, a <code>population_size</code> that is
-not an even integer of at least two, a negative seed, or a nonpositive or non-finite <code>sigma</code> or
-<code>learning_rate</code>, and <code>TypeError</code> for a non-boolean <code>verbose</code>.</p>
+<p><code>NES</code> raises <code>ValueError</code> for a nonpositive <code>steps</code>, <code>batch_size</code> or <code>log_every</code>, a
+<code>population_size</code> that is not an even integer of at least two, a negative seed, or a nonpositive
+or non-finite <code>sigma</code> or <code>learning_rate</code>, and <code>TypeError</code> for a non-boolean <code>verbose</code>.
+<code>run</code> raises <code>ValueError</code> for an empty data source. A seeded dataset sample is fixed for the
+run; candidate query batches preserve their generated order. After the last step, the final
+perturbation is scored once more to set <code>final_score</code>; history continues to contain losses.</p>
 <h4 id="see-also_62">See also<a class="headerlink" href="#see-also_62" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackoptimizationinterface">avsectester.attack.optimization.interface<a class="headerlink" href="#avsectesterattackoptimizationinterface" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.attack.optimization.interface -->
-<p>Contracts for gradient-based and sampling-based optimization over perturbation models.</p>
+<p>Optimization contracts for map-style datasets, perturbations and batched scoring.</p>
 <table>
 <thead>
 <tr>
@@ -8899,11 +8903,15 @@ not an even integer of at least two, a negative seed, or a nonpositive or non-fi
 </tr>
 <tr>
 <td><code>DataSource()</code></td>
-<td>Yields batches of clean inputs. A single fixed image for an L-inf attack; sampled backgrounds + placements + photometric jitter (Expectation-over-Transformation) for a physical patch.</td>
+<td>A map-style dataset whose random augmentations are redrawn on each index access.</td>
 </tr>
 <tr>
-<td><code>DataSource.sample(batch: int) -&gt; list[AdversarialSample]</code></td>
-<td>Abstract. Return <code>batch</code> samples (with any per-sample randomness freshly drawn).</td>
+<td><code>DataSource.__len__() -&gt; int</code></td>
+<td>Abstract. Return the number of samples in one epoch.</td>
+</tr>
+<tr>
+<td><code>DataSource.__getitem__(index: int) -&gt; AdversarialSample</code></td>
+<td>Abstract. Return one sample; an out-of-range index raises <code>IndexError</code>.</td>
 </tr>
 <tr>
 <td><code>Perturbation()</code></td>
@@ -8931,23 +8939,23 @@ not an even integer of at least two, a negative seed, or a nonpositive or non-fi
 </tr>
 <tr>
 <td><code>Scorer()</code></td>
-<td>Access to the perception under attack: image -&gt; target detection confidence in [0, 1].</td>
+<td>Score a batch with one score per input; descriptors or objectives define the direction.</td>
 </tr>
 <tr>
 <td><code>Scorer.differentiable: bool = True</code></td>
 <td>Whether input-image gradients are supported by this component.</td>
 </tr>
 <tr>
-<td><code>Scorer.target_score(image: Tensor, target: data_types.TargetSpec) -&gt; Tensor</code></td>
-<td>Abstract. Return a scalar tensor in [0, 1] for detecting <code>target</code> in <code>image</code>.</td>
+<td><code>Scorer.target_scores(images: Tensor, targets: Sequence[data_types.TargetSpec]) -&gt; Tensor</code></td>
+<td>Abstract. Return one score per input; mismatched input and target lengths raise <code>ValueError</code>.</td>
 </tr>
 <tr>
 <td><code>OptimizationObjective()</code></td>
-<td>Shape the target confidence into a scalar loss to MINIMIZE (lower == attack succeeds).</td>
+<td>Transform scores elementwise into losses to minimize.</td>
 </tr>
 <tr>
 <td><code>OptimizationObjective.loss(score: Tensor) -&gt; Tensor</code></td>
-<td>Abstract. Map a target confidence in [0, 1] to the scalar loss to minimize.</td>
+<td>Abstract. Map (B,) scores to (B,) losses with elementwise operations.</td>
 </tr>
 <tr>
 <td><code>HideObject()</code></td>
@@ -8963,7 +8971,7 @@ not an even integer of at least two, a negative seed, or a nonpositive or non-fi
 </tr>
 <tr>
 <td><code>OptimizationResult(delta: Tensor, export: np.ndarray | None, history: list[float], final_score: float)</code></td>
-<td>Output of an optimization run.</td>
+<td>Output of optimization: PGD history is mean sample loss per epoch; NES history is loss per step.</td>
 </tr>
 <tr>
 <td><code>GradientOptimizer()</code></td>
@@ -8979,7 +8987,9 @@ not an even integer of at least two, a negative seed, or a nonpositive or non-fi
 
 <h4 id="constraints-and-errors_49">Constraints and errors<a class="headerlink" href="#constraints-and-errors_49" title="Permanent link">&para;</a></h4>
 <p><code>HideBelowThreshold</code> raises <code>ValueError</code> for a <code>threshold</code> or <code>margin</code> outside [0, 1]. Its loss is
-zero, with zero gradient, for scores below <code>threshold - margin</code>.</p>
+zero, with zero gradient, for scores below <code>threshold - margin</code>.
+<code>OptimizationResult.final_score</code> is the final scorer output, averaged over all samples for PGD
+and evaluated on the fixed sample for NES.</p>
 <h4 id="see-also_63">See also<a class="headerlink" href="#see-also_63" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackoptimizationperturbations">avsectester.attack.optimization.perturbations<a class="headerlink" href="#avsectesterattackoptimizationperturbations" title="Permanent link">&para;</a></h3>
@@ -9018,7 +9028,7 @@ mask is not (1, H, W), plane-sampling bounds leave the image, or the grid is not
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackoptimizationscorers">avsectester.attack.optimization.scorers<a class="headerlink" href="#avsectesterattackoptimizationscorers" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.attack.optimization.scorers -->
-<p>Score arbitrary images using a closed-loop session's driving-system binding.</p>
+<p>Adapt batches to a closed-loop session's declared scorer input format.</p>
 <table>
 <thead>
 <tr>
@@ -9029,24 +9039,29 @@ mask is not (1, H, W), plane-sampling bounds leave the image, or the grid is not
 <tbody>
 <tr>
 <td><code>SessionScorer(session, scorer_id, *, require_grad, input_format=None, device="cpu")</code></td>
-<td>Subclass of <code>Scorer</code>. Use a session scorer for user-generated images, preserving requested gradients.</td>
+<td>Subclass of <code>Scorer</code>. Call the bound batch scorer, preserving requested gradients when gradients are enabled.</td>
+</tr>
+<tr>
+<td><code>SessionScorer.target_scores(images, targets)</code></td>
+<td>Return one bound score per image; target and image batch lengths must agree.</td>
 </tr>
 </tbody>
 </table>
 <!-- api:end -->
 
 <h4 id="constraints-and-errors_51">Constraints and errors<a class="headerlink" href="#constraints-and-errors_51" title="Permanent link">&para;</a></h4>
-<p><code>SessionScorer.target_score</code> requests gradients only when <code>require_grad</code> is true and gradient
+<p><code>SessionScorer.target_scores</code> requests gradients only when <code>require_grad</code> is true and gradient
 recording is enabled, so the same scorer evaluates under <code>torch.no_grad()</code>. With
-<code>input_format="CHW float tensor [0,1]"</code>, HWC uint8 arrays are converted and other non-CHW inputs
-raise <code>ValueError</code>. With <code>"HWC RGB uint8"</code>, tensors are converted, and a tensor that requires
-gradients or a result that is not HWC uint8 RGB raises <code>ValueError</code>. Other formats pass through
-unchanged. Session scoring errors propagate.</p>
+<code>input_format="BCHW float tensor [0,1]"</code>, lists of HWC uint8 RGB arrays are converted and stacked;
+invalid image formats or unequal dimensions within a batch raise <code>ValueError</code>. With
+<code>"list of HWC RGB uint8"</code>, BCHW tensors are converted to image lists; tensors requiring
+gradients raise <code>ValueError</code>. Input and target batch lengths must agree, otherwise
+<code>ValueError</code> is raised. Other formats pass through unchanged. Session scoring errors propagate.</p>
 <h4 id="see-also_65">See also<a class="headerlink" href="#see-also_65" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackoptimizationwhitebox">avsectester.attack.optimization.whitebox<a class="headerlink" href="#avsectesterattackoptimizationwhitebox" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.attack.optimization.whitebox -->
-<p>Gradient-based optimization algorithms (torch).</p>
+<p>Epoch-based projected gradient descent over map-style perturbation samples.</p>
 <table>
 <thead>
 <tr>
@@ -9056,17 +9071,20 @@ unchanged. Session scoring errors propagate.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>PGD(steps: int = 200, step_size: float = 4.0 / 255.0, batch: int = 4, tv_weight: float = 0.0, seed: int = 0, verbose: bool = False, log_every: int = 25)</code></td>
-<td>Subclass of <code>GradientOptimizer</code>. Projected Gradient Descent (sign-gradient descent on the loss, minimizing it).</td>
+<td><code>PGD(epochs: int = 10, batch_size: int = 4, step_size: float = 4.0 / 255.0, tv_weight: float = 0.0, seed: int = 0, verbose: bool = False, log_every: int = 1)</code></td>
+<td>Subclass of <code>GradientOptimizer</code>. Projected sign-gradient descent with one batched forward, backward and update per batch.</td>
 </tr>
 </tbody>
 </table>
 <!-- api:end -->
 
 <h4 id="constraints-and-errors_52">Constraints and errors<a class="headerlink" href="#constraints-and-errors_52" title="Permanent link">&para;</a></h4>
-<p><code>PGD</code> raises <code>ValueError</code> for a nonpositive <code>steps</code>, <code>batch</code> or <code>log_every</code>, a negative seed,
-or a negative or non-finite <code>step_size</code> or <code>tv_weight</code>, and <code>TypeError</code> for a non-boolean
-<code>verbose</code>. <code>run</code> raises <code>ValueError</code> when <code>scorer.differentiable</code> is false.</p>
+<p><code>PGD</code> raises <code>ValueError</code> for a nonpositive <code>epochs</code>, <code>batch_size</code> or <code>log_every</code>, a negative
+seed, or a negative or non-finite <code>step_size</code> or <code>tv_weight</code>, and <code>TypeError</code> for a non-boolean
+<code>verbose</code>. <code>run</code> raises <code>ValueError</code> for an empty dataset, a non-differentiable scorer, unequal
+image dimensions within a batch, or scores or losses that do not have shape (B,). The final
+smaller batch is retained. History contains the mean sample objective of each epoch, excluding
+the smoothness term.</p>
 <h4 id="see-also_66">See also<a class="headerlink" href="#see-also_66" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/optimization/">Optimize attack artifacts</a>.</p>
 <h3 id="avsectesterattackruntime">avsectester.attack.runtime<a class="headerlink" href="#avsectesterattackruntime" title="Permanent link">&para;</a></h3>
@@ -9403,7 +9421,7 @@ decision raises <code>RuntimeError</code>.</p>
 </tr>
 <tr>
 <td><code>ScoreResult(value: Any, descriptor: driving_adapter.ScorerDescriptor, provenance: Mapping[str, Any])</code></td>
-<td>Score returned by a named scorer, including its serialized representation.</td>
+<td>One score per input returned by a named batch scorer.</td>
 </tr>
 <tr>
 <td><code>ClosedLoopCapabilities(dataset_kinds: tuple[str, ...], sensor_data: bool, render: bool, insert_objects: bool, rollout: bool, components: tuple[driving_adapter.ComponentDescriptor, ...], scorers: tuple[driving_adapter.ScorerDescriptor, ...])</code></td>
@@ -9470,8 +9488,8 @@ decision raises <code>RuntimeError</code>.</p>
 <td>Evaluate an explicitly bound driving-system component.</td>
 </tr>
 <tr>
-<td><code>ClosedLoopSession.score(scorer_id: str, inputs: Any, target: Any, require_grad: bool = False) -&gt; ScoreResult</code></td>
-<td>Evaluate a bound scorer with the requested target and codec.</td>
+<td><code>ClosedLoopSession.score(scorer_id: str, inputs: Any, targets: Any, require_grad: bool = False) -&gt; ScoreResult</code></td>
+<td>Evaluate a batch, passing inputs and targets unchanged to the bound callback.</td>
 </tr>
 <tr>
 <td><code>ClosedLoopSession.rollout(request: CandidateRequest) -&gt; RunLog</code></td>
@@ -10286,7 +10304,7 @@ cameras. A treatment with no replica returns an unavailable value rather than ze
 </thead>
 <tbody>
 <tr>
-<td><code>DetectorPatchOptimization(optimizer: GradientOptimizer, scorer_id: str | None = None, device: str = "cpu", max_training_segments: int | None = None, samples_per_scene: int | Literal["all"] = "all", min_visible_pixels: int = 100, braking_deceleration_mps2: float = 6., confidence_margin: float = .1, progress_interval: int = 20)</code></td>
+<td><code>DetectorPatchOptimization(optimizer: GradientOptimizer, scorer_id: str | None = None, device: str = "cpu", max_training_segments: int | None = None, samples_per_scene: int | Literal["all"] = "all", min_visible_pixels: int = 100, braking_deceleration_mps2: float = 6., confidence_margin: float = .1, progress_interval: int = 1)</code></td>
 <td>White-box attack settings (algorithm used: PGD).</td>
 </tr>
 <tr>

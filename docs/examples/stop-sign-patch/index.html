@@ -22,7 +22,7 @@
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
@@ -46,6 +46,8 @@
     
       
     
+    
+      <link rel="stylesheet" href="../../../stylesheets/brand.css">
     
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -104,8 +106,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="AVSecTester" class="md-header__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -416,8 +417,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="AVSecTester" class="md-nav__button md-logo" aria-label="AVSecTester" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     AVSecTester
@@ -1917,25 +1917,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2115,8 +2115,9 @@ segment start. <code>braking_deceleration_mps2</code> is the driving system's st
 to 6 m/s², the <code>RuleBasedAVStack</code> planner limit. The sign-face projection defines the target box.
 Frames below <code>min_visible_pixels</code> are skipped; its default is 100 visible replica pixels.</p>
 <p>The configurations use all five training segments, every eligible frame (<code>samples_per_scene: all</code>),
-200 updates, batch 4 and step size 4/255. An integer <code>samples_per_scene</code> of at least four instead
-selects that many time-uniform frames per segment. Every selected frame is a training sample;
+<code>epochs: 100</code>, <code>batch_size: 16</code>, <code>tv_weight: 0.3</code> and step size 4/255.
+An integer <code>samples_per_scene</code> of at least four instead selects that many time-uniform frames
+per segment. Every selected frame is a training sample;
 validation, when needed, uses separate segments from the
 <a href="../../reference/configuration/#data-split">data split</a>.</p>
 <p>The objective is <code>HideBelowThreshold</code>: <code>max(0, s − (τ − m))</code> for detector confidence <code>s</code>, the
@@ -2130,14 +2131,15 @@ survives printing and camera sampling. The term is the mean Charbonnier RGB dist
 that are both inside the mask. Pairs across the patch outline are excluded, so a uniform patch
 has zero smoothness cost against the red face.</p>
 <p>The offline report contains calibration and sample tables, the <code>pgd_objective</code> series, the final
-<code>patch_smoothness</code>, and initial/optimized replica textures. <code>pgd_objective</code> records the hinge
-objective only. After optimization every training frame is scored for the clean reconstruction,
+<code>patch_smoothness</code>, and initial/optimized replica textures. <code>pgd_objective</code> records the mean
+training hinge objective per epoch, excluding the smoothness term, at epochs 1 through
+<code>epochs</code>. After optimization every training frame is scored for the clean reconstruction,
 unpatched replica, initial patch and optimized patch; <code>detected_frame_fraction</code> and
 <code>max_confidence</code> summarize the optimized patch, and detection rates are binned by route distance
-to the stop line. Every <code>progress_interval</code> PGD steps, default 20, and after the last step, the
-current patch is scored on every training frame; the <code>training_progress</code> table and its series
-record the full-set hinge loss, the detected fraction and the detected fraction per 10 m bin. The
-batch <code>pgd_objective</code> varies with the sampled frames, so these full-set curves show convergence.
+to the stop line. The configurations set <code>progress_interval: 10</code> to score the current patch on
+every training frame every 10 epochs and after the last epoch; the option defaults to 1.
+The <code>training_progress</code> table and its series record the full-set hinge loss, detected fraction
+and detected fraction per 10 m bin; epoch 0 is the initial patch.
 <a href="../../guides/optimization/">Optimization tools</a> explains report usage.</p>
 <h2 id="prepare-the-black-box-attack">Prepare the black-box attack<a class="headerlink" href="#prepare-the-black-box-attack" title="Permanent link">&para;</a></h2>
 <p>The black-box attack scores the mean planned forward distance from the driving command;
@@ -2217,7 +2219,7 @@ record it.</p>
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/d42a16034c8ca21ba7cdfc5e29f150cf5f103be8/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/c53d1b6b2df527cbd45c74128429e355f6668e45/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and
