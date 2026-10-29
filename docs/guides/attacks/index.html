@@ -1880,7 +1880,7 @@ Constructor signatures, constraints and errors are in the
 <span class="w">      </span><span class="nt">reported_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
 </code></pre></div>
 <p>A supplied attack uses the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
+<a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
 constructor parameters as attributes with the same names, or override
 <code>configuration_parameters()</code> to describe the configured inputs. Filesystem options follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">Path resolution</a>.</p>
@@ -1951,6 +1951,8 @@ includes an eligible tail:</p>
     <span class="n">environment</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">recording</span><span class="o">=</span><span class="n">RecordingPolicy</span><span class="p">(),</span>
     <span class="n">attack</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifacts</span><span class="o">=</span><span class="n">artifacts</span><span class="p">)</span>
 </code></pre></div>
+<p>Set <code>terminate_when</code> to a predicate on each recorded <code>StepRecord</code> to finish a candidate early
+while retaining its recorded steps and normal attack cleanup.</p>
 <p>The metabuilder is not run again after the offline phase. Use
 <a href="../../reference/configuration/#data-split">data split settings</a> to control training, validation
 and execution membership.</p>

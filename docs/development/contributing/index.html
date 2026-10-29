@@ -1846,8 +1846,8 @@ preparation, per-run state and recorded evidence in their owning components. The
 <a href="../../guides/attacks/">attacks</a>, <a href="../../guides/simulators/">simulators</a>,
 <a href="../../guides/driving-systems/">driving systems</a> and <a href="../../guides/datasets/">datasets</a>.</p>
 <h2 id="tests-and-ci">Tests and CI<a class="headerlink" href="#tests-and-ci" title="Permanent link">&para;</a></h2>
-<p>Follow <a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/tests/README.md#writing-tests">Writing tests</a>. The
-<a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/tests/README.md">test guide</a> owns commands, prerequisites, optional external checks and
+<p>Follow <a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/tests/README.md#writing-tests">Writing tests</a>. The
+<a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/tests/README.md">test guide</a> owns commands, prerequisites, optional external checks and
 CI job descriptions.</p>
 <h2 id="documentation-rules">Documentation rules<a class="headerlink" href="#documentation-rules" title="Permanent link">&para;</a></h2>
 <p>Consult this table before adding information. Keep the complete explanation in its owner
@@ -1938,11 +1938,11 @@ document. Elsewhere use one sentence and a link.</p>
 </tr>
 <tr>
 <td>Implemented-attack directory rules</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/avsectester/implemented_attacks/README.md">Attack implementations</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/avsectester/implemented_attacks/README.md">Attack implementations</a></td>
 </tr>
 <tr>
 <td>Unfinished work and Not yet implemented targets</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/docs/development/TODO.md">TODO</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/docs/development/TODO.md">TODO</a></td>
 </tr>
 <tr>
 <td>Defense status</td>
@@ -1950,19 +1950,19 @@ document. Elsewhere use one sentence and a link.</p>
 </tr>
 <tr>
 <td>Test commands, prerequisites and CI</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/tests/README.md">Tests</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/tests/README.md">Tests</a></td>
 </tr>
 <tr>
 <td>Site navigation</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/website/mkdocs.yml">website/mkdocs.yml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/website/mkdocs.yml">website/mkdocs.yml</a></td>
 </tr>
 <tr>
 <td>Homepage text and media</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/tree/446da8b4d1cec498ab1e894493212aeacdbbe603/website/content">website/content/</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/tree/1ba0fbf8909280d2074c2af60a8153affba74a30/website/content">website/content/</a></td>
 </tr>
 <tr>
 <td>Homepage media sources</td>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/scripts/README.md#website-media">Website media</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/scripts/README.md#website-media">Website media</a></td>
 </tr>
 </tbody>
 </table>
@@ -1978,7 +1978,7 @@ URLs are exempt. Task pages begin with Audience, Outcome and Prerequisites. Guid
 Next steps.</p>
 <p>Describe behavior and defaults. Keep measurements, investigation notes and version histories out
 of the documentation. Mark missing capabilities with <strong>Not yet implemented.</strong> and link to a
-specific heading in <a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/docs/development/TODO.md">TODO</a>.</p>
+specific heading in <a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/docs/development/TODO.md">TODO</a>.</p>
 <p>Self-contained examples place <code>&lt;!-- runnable --&gt;</code> immediately before their code fence. Python
 and py blocks execute offline. Runnable YAML blocks load as complete experiment configurations.
 External-service examples state their prerequisites. Other Python blocks must parse and use
@@ -1986,17 +1986,17 @@ resolvable framework imports.</p>
 <p>Public modules declare <code>__all__</code>. The API reference lists exactly those names with checked
 signatures. Internal modules are implementation details.</p>
 <p>After changing a public docstring, follow the generator command in
-<a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/scripts/README.md#api-reference-generation">Repository tools</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/scripts/README.md#api-reference-generation">Repository tools</a>.</p>
 <p>The project site publishes docs/ unchanged under /docs/, except the TODO page, which stays on
 GitHub. Site links to it open it there. Every page must render correctly both on GitHub and on the
 site, so use only standard Markdown and GitHub tables. Do not use Material for MkDocs syntax such
 as admonitions or content tabs. Add every new docs page to <code>nav</code> in
-<a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/website/mkdocs.yml">website/mkdocs.yml</a>. The strict site build fails on omitted pages. To
+<a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/website/mkdocs.yml">website/mkdocs.yml</a>. The strict site build fails on omitted pages. To
 preview the site, create a separate virtual environment, run
 <code>pip install -r website/requirements.txt</code> and then <code>mkdocs serve -f website/mkdocs.yml</code>. This is a
 documentation tool and runs outside the Compose experiment services.</p>
 <h2 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/AVSecProject/AVSecTester/blob/446da8b4d1cec498ab1e894493212aeacdbbe603/docs/development/TODO.md">TODO</a> lists remaining capabilities.</p>
+<p><a href="https://github.com/AVSecProject/AVSecTester/blob/1ba0fbf8909280d2074c2af60a8153affba74a30/docs/development/TODO.md">TODO</a> lists remaining capabilities.</p>
 
 
 

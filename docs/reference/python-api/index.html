@@ -9400,7 +9400,7 @@ decision raises <code>RuntimeError</code>.</p>
 <td>Apply the sensor recording policy while preserving observation metadata.</td>
 </tr>
 <tr>
-<td><code>RunRequest(decision_steps: int, hooks: HookSet | None = None, attacks: Sequence[Any] = (), recording: RecordingPolicy = RecordingPolicy(), output_path: str | Path | None = None, retain_steps: bool = True, metadata: Mapping[str, Any] = dict(), start: Any = None, initialization: Any = None, deployment: Any = None, environment: Mapping[str, Any] = dict())</code></td>
+<td><code>RunRequest(decision_steps: int, hooks: HookSet | None = None, attacks: Sequence[Any] = (), recording: RecordingPolicy = RecordingPolicy(), output_path: str | Path | None = None, retain_steps: bool = True, metadata: Mapping[str, Any] = dict(), start: Any = None, initialization: Any = None, deployment: Any = None, environment: Mapping[str, Any] = dict(), terminate_when: Callable[[StepRecord], bool] | None = None)</code></td>
 <td>One caller-owned simulator/driving-system run, independent of experiment orchestration.</td>
 </tr>
 <tr>
@@ -9429,7 +9429,7 @@ decision raises <code>RuntimeError</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>CandidateRequest(segment: AttackSegment, seed: int, decision_steps: int, environment: Mapping[str, Any], recording: RecordingPolicy, attack: Any = None, artifacts: Any = None, output_path: str | Path | None = None)</code></td>
+<td><code>CandidateRequest(segment: AttackSegment, seed: int, decision_steps: int, environment: Mapping[str, Any], recording: RecordingPolicy, attack: Any = None, artifacts: Any = None, output_path: str | Path | None = None, terminate_when: Callable[[StepRecord], bool] | None = None)</code></td>
 <td>One candidate rollout. <code>attack</code> creates the deployed runtime with its create_runtime.</td>
 </tr>
 <tr>
@@ -10341,7 +10341,7 @@ cameras. A treatment with no replica returns an unavailable value rather than ze
 <td>White-box attack settings (algorithm used: PGD).</td>
 </tr>
 <tr>
-<td><code>RolloutPatchOptimization(optimizer: GradientOptimizer, start_distances_m: tuple[float, ...] = (40., 30., 20.), horizon_s: float = 3., max_training_segments: int | None = None)</code></td>
+<td><code>RolloutPatchOptimization(optimizer: GradientOptimizer, stop_speed_mps: float = .5, min_stop_command_step: int = 5, max_training_segments: int | None = None)</code></td>
 <td>Black-box attack settings (algorithm used: NES).</td>
 </tr>
 </tbody>
@@ -10358,10 +10358,11 @@ several differentiable scorers, or a scorer without <code>sensor_id</code> or <c
 trained route distance to the stop line is <code>d_min = v² / (2a)</code>, where <code>a</code> is
 <code>braking_deceleration_mps2</code>.</p>
 <p><code>RolloutPatchOptimization</code> raises <code>TypeError</code> for an optimizer other than <code>NES</code> and
-<code>ValueError</code> for empty or nonpositive <code>start_distances_m</code>, a nonpositive <code>horizon_s</code> or
-<code>max_training_segments</code>. Each training segment contributes one rollout start per start
-distance. NES uses <code>1 + steps × (population_size + 1)</code> rollouts per start. Neither path uses
-<code>validation_metadata</code>.</p>
+<code>ValueError</code> for a nonpositive <code>stop_speed_mps</code> or <code>max_training_segments</code>, or a
+<code>min_stop_command_step</code> that is not a nonnegative integer. The offline phase raises
+<code>ValueError</code> when no training segment passes unpatched-replica calibration. See the
+<a href="../../examples/stop-sign-patch/#prepare-the-black-box-attack">black-box workflow</a> for the
+calibration rules and query budget. Neither path uses <code>validation_metadata</code>.</p>
 <h4 id="see-also_95">See also<a class="headerlink" href="#see-also_95" title="Permanent link">&para;</a></h4>
 <p><a href="../../examples/stop-sign-patch/">Stop-sign patch attack</a>.</p>
 <h3 id="avsectesterexperiment">avsectester.experiment<a class="headerlink" href="#avsectesterexperiment" title="Permanent link">&para;</a></h3>

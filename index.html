@@ -424,7 +424,7 @@
     <div class="md-grid avs-hero__inner">
       <h1 id="avs-hero-title" class="avs-hero__title">AVSecTester</h1>
       <p class="avs-hero__tagline">Adversarial security testing for autonomous driving.</p>
-      <p class="avs-hero__affiliations">University of Arizona · University of Southern California</p>
+      <p class="avs-hero__affiliations">The University of Arizona · University of Southern California</p>
       <p class="avs-hero__lead">Find out whether an attack actually changes how an autonomous vehicle drives.</p>
       <p class="avs-hero__text">
         AVSecTester is an open-source testbed for autonomous-vehicle security. Run attacks against a
@@ -557,10 +557,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-closed-loop" class="md-nav__link">
+  <a href="#why-avsectester" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why closed loop
+        Why AVSecTester
       
     </span>
   </a>
@@ -738,6 +738,17 @@
     <span class="md-ellipsis">
       
         Responsible use
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
       
     </span>
   </a>
@@ -1856,10 +1867,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-closed-loop" class="md-nav__link">
+  <a href="#why-avsectester" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why closed loop
+        Why AVSecTester
       
     </span>
   </a>
@@ -2043,6 +2054,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2063,22 +2085,25 @@
          aria-label="Side-by-side video of a clean run and a white-box attack run of the same stop-sign approach in a NuRec scene, with the rule-based driving system's stop-sign detections and a speed plot">
     <source src="assets/media/stop-sign-white-box.mp4" type="video/mp4">
   </video>
-  <figcaption>In this example run, the rule-based driving system detects the replica stop sign from far
-  away in the clean run (left) and stops before the line. With a patch from a white-box attack
-  (algorithm used: PGD) on its detector (right), it first detects the sign too close to stop and
-  crosses the stop line.</figcaption>
+  <figcaption>Left: the driving system sees the stop sign early and stops before the line. Right: with a
+  patch from a white-box attack (PGD) <a href="#references">[1]</a> on its detector
+  <a href="#references">[2]</a>, it sees the sign too late and runs the stop line.</figcaption>
 </figure>
 
-<h2 id="why-closed-loop">Why closed loop<a class="headerlink" href="#why-closed-loop" title="Permanent link">&para;</a></h2>
-<p>A patch can hide a stop sign in most camera frames and the vehicle can still stop: one detection
-at the right distance can be enough. Per-frame detection scores would call that attack a success.
-The driving outcome shows that it failed. AVSecTester keeps the driving system in the loop. Its
-commands move the simulated vehicle, the next camera frame follows from that motion, and the
-attack acts again at every decision.</p>
+<h2 id="why-avsectester">Why AVSecTester<a class="headerlink" href="#why-avsectester" title="Permanent link">&para;</a></h2>
+<p>AVSecTester tests attacks the way they would play out on the road: in a vehicle that keeps
+driving.</p>
 <ul>
-<li>Measure driving outcomes such as stopping, braking, stop-line distance and collisions.</li>
-<li>Compare clean and attacked drives of the same segment, started from the same state and seed.</li>
-<li>Keep the vehicle's physical state separate from what the driving system received.</li>
+<li><strong>Closed-loop rollouts.</strong> Open-loop evaluation can rate a driving system highly even when it
+  ignores what is in front of it <a href="#references">[3]</a>. AVSecTester rolls the driving system out in
+  closed loop. Its commands move the vehicle, the next camera frame follows from that motion, and
+  the attack acts at every step. You see whether the vehicle actually stops, brakes or crashes.</li>
+<li><strong>Comparable, reproducible experiments.</strong> Every attack runs through the same workflow and one
+  YAML file configures the whole experiment. Clean and attacked runs start from the same state, and
+  every run is logged, so results can be re-evaluated, compared across attacks and resumed after an
+  interruption.</li>
+<li><strong>Bring your own code.</strong> Add attacks, driving systems or metrics in your own package and
+  reference them from the YAML, without changing the framework.</li>
 </ul>
 <h2 id="what-you-can-do-with-it">What you can do with it<a class="headerlink" href="#what-you-can-do-with-it" title="Permanent link">&para;</a></h2>
 <p>AVSecTester is built for people who develop and evaluate autonomous-vehicle security: researchers
@@ -2100,9 +2125,9 @@ paired reports of stopping, braking, stop-line and collision outcomes.</p>
 </div>
 <div class="avs-card">
 <h3 id="optimize-an-attack">Optimize an attack<a class="headerlink" href="#optimize-an-attack" title="Permanent link">&para;</a></h3>
-<p>How strong can an attack become with gradients, or with queries only? Optimize artifacts with a
-white-box attack (algorithm used: PGD) through the system's own detector, or a black-box attack
-(algorithm used: NES) through driving rollouts, then test them on held-out segments.</p>
+<p>How strong can an attack get? Optimize a patch with gradients through the driving system's own
+model (white-box, PGD <a href="#references">[1]</a>) or with queries only (black-box, NES
+<a href="#references">[4]</a>), then test it on new scenes.</p>
 <p><a class="avs-card__link" href="docs/guides/optimization/">Optimization</a></p>
 </div>
 <div class="avs-card">
@@ -2151,7 +2176,8 @@ again.</p>
 </figure>
 <h2 id="supported-components">Supported components<a class="headerlink" href="#supported-components" title="Permanent link">&para;</a></h2>
 <div class="avs-components">
-<p><strong>Closed-loop simulators:</strong> NuRec (reconstructed real-world drives) · CARLA<br>
+<p><strong>Closed-loop simulators:</strong> NuRec <a href="#references">[5]</a><a href="#references">[6]</a> with AlpaSim
+<a href="#references">[7]</a> · CARLA <a href="#references">[8]</a><br>
 <strong>Driving systems:</strong> modular · end-to-end<br>
 <a href="docs/concepts/architecture/#supported-configurations">Supported configurations</a></p>
 </div>
@@ -2169,10 +2195,9 @@ again.</p>
 <figcaption>With harmonization</figcaption>
 </figure>
 </div>
-<p>In these example runs, a replica stop sign with a white patch is placed over the reconstructed
-sign in a NuRec drive while Alpamayo drives. The two images show the same decision of runs that
-differ only in compositing: without harmonization, and with exposure matching by
-<code>ExposureHarmonizer</code>. The sign on the left of each image is a real stop sign in the scene.</p>
+<p>A patch is added to a stop sign <a href="#references">[9]</a> in a NuRec drive while Alpamayo
+<a href="#references">[10]</a><a href="#references">[11]</a> drives. Harmonization matches the sign to the lighting of
+the scene. Compare it with the real stop sign on the left.</p>
 <p><a class="avs-card__link" href="docs/examples/stop-sign-patch/">Stop-sign patch attack</a></p>
 </div>
 <div class="avs-card">
@@ -2187,11 +2212,9 @@ differ only in compositing: without harmonization, and with exposure matching by
 <figcaption>With harmonization</figcaption>
 </figure>
 </div>
-<p>In this example in CARLA, a stop sign is inserted into the front-camera image while a
-camera-based forward-collision system drives. Only the camera image changes. The simulated world
-contains no sign. The two images show the same decision of treatments that differ only in
-compositing: without harmonization, and with exposure matching by <code>ExposureHarmonizer</code> and slight
-edge softening.</p>
+<p>A stop sign is added to the camera image in CARLA <a href="#references">[8]</a> while a driving system built
+on AVstack <a href="#references">[12]</a> drives. The world itself has no sign. Harmonization matches the sign
+to the lighting of the scene.</p>
 <p><a class="avs-card__link" href="docs/examples/image-insertion/">Object insertion attack</a></p>
 </div>
 <div class="avs-card">
@@ -2206,10 +2229,8 @@ edge softening.</p>
 <figcaption>With harmonization</figcaption>
 </figure>
 </div>
-<p>In these example runs, a checkerboard patch is composited onto the rear of a recorded vehicle in
-the NuRec front-camera image while Alpamayo drives. The two images show the same decision of runs
-that differ only in compositing: without harmonization, and with exposure matching by
-<code>ExposureHarmonizer</code> and slight edge softening.</p>
+<p>A patch is added to the back of a car in a NuRec drive while Alpamayo drives. Harmonization
+matches the patch to the lighting of the car.</p>
 <p><a class="avs-card__link" href="docs/examples/physical-patch/">Physical patch attack</a></p>
 </div>
 </div>
@@ -2252,6 +2273,35 @@ driving systems. Its attacks run in simulation and on recorded or reconstructed 
 <li>Results in simulation do not establish that a real vehicle is safe or unsafe. The software is
   provided under the MIT License, without warranty.</li>
 </ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ol>
+<li>A. Madry, A. Makelov, L. Schmidt, D. Tsipras and A. Vladu. Towards Deep Learning Models
+   Resistant to Adversarial Attacks. ICLR, 2018. <a href="https://arxiv.org/abs/1706.06083">arXiv:1706.06083</a></li>
+<li>Z. Ge, S. Liu, F. Wang, Z. Li and J. Sun. YOLOX: Exceeding YOLO Series in 2021. 2021.
+   <a href="https://arxiv.org/abs/2107.08430">arXiv:2107.08430</a></li>
+<li>C. Löwens, T. Funke and A. P. Condurache. Driving on Memory. NeurIPS, 2026.
+   <a href="https://arxiv.org/abs/2608.31029">arXiv:2608.31029</a></li>
+<li>A. Ilyas, L. Engstrom, A. Athalye and J. Lin. Black-box Adversarial Attacks with Limited Queries
+   and Information. ICML, 2018. <a href="https://arxiv.org/abs/1804.08598">arXiv:1804.08598</a></li>
+<li>NVIDIA. PhysicalAI-Autonomous-Vehicles-NuRec. Hugging Face dataset.
+   <a href="https://huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles-NuRec">huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles-NuRec</a></li>
+<li>Q. Wu, J. Martinez Esturo, A. Mirzaei, N. Moenne-Loccoz and Z. Gojcic. 3DGUT: Enabling
+   Distorted Cameras and Secondary Rays in Gaussian Splatting. CVPR, 2025.</li>
+<li>NVIDIA, Y. Cao, R. de Lutio, S. Fidler et al. AlpaSim: A Modular, Lightweight, and Data-Driven
+   Research Simulator for Autonomous Driving. 2025.
+   <a href="https://github.com/NVlabs/alpasim">github.com/NVlabs/alpasim</a></li>
+<li>A. Dosovitskiy, G. Ros, F. Codevilla, A. Lopez and V. Koltun. CARLA: An Open Urban Driving
+   Simulator. CoRL, 2017. <a href="https://arxiv.org/abs/1711.03938">arXiv:1711.03938</a></li>
+<li>K. Eykholt, I. Evtimov, E. Fernandes, B. Li, A. Rahmati, C. Xiao, A. Prakash, T. Kohno and
+   D. Song. Robust Physical-World Attacks on Deep Learning Models. CVPR, 2018.
+   <a href="https://arxiv.org/abs/1707.08945">arXiv:1707.08945</a></li>
+<li>NVIDIA. Alpamayo 1.5. 2026. <a href="https://huggingface.co/nvidia/Alpamayo-1.5-10B">huggingface.co/nvidia/Alpamayo-1.5-10B</a></li>
+<li>NVIDIA, Y. Wang, W. Luo, J. Bai et al. Alpamayo-R1: Bridging Reasoning and Action Prediction for
+    Generalizable Autonomous Driving in the Long Tail. 2025.
+    <a href="https://arxiv.org/abs/2511.00088">arXiv:2511.00088</a></li>
+<li>R. S. Hallyburton, S. Zhang and M. Pajic. AVstack: An Open-Source, Reconfigurable Platform for
+    Autonomous Vehicle Development. 2022. <a href="https://arxiv.org/abs/2212.13857">arXiv:2212.13857</a></li>
+</ol>
 <div class="avs-attribution">
 <p><a href="https://github.com/AVSecProject/AVSecTester/blob/main/LICENSE">MIT License</a> ·
 <a href="https://github.com/AVSecProject/AVSecTester">GitHub</a></p>

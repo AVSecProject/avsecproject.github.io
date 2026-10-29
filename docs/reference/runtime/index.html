@@ -2178,7 +2178,8 @@ use object ID → camera name → <code>ObjectVisibility</code>. <code>ObjectVis
 under <a href="../../guides/simulators/#inserted-world-objects">Object visibility</a>.</p>
 <p><code>EventRecord</code> captures initialization, termination and failure/cleanup information outside a
 decision. NuRec termination includes <code>ground_contact_failures</code>, counts by rejected ground-fit
-reason. <code>RunLog.status</code> distinguishes <code>completed</code>, <code>failed</code>, <code>cancelled</code> and <code>incomplete</code> runs.</p>
+reason. A run ended by its <code>terminate_when</code> predicate records <code>terminated_by_condition: true</code>.
+<code>RunLog.status</code> distinguishes <code>completed</code>, <code>failed</code>, <code>cancelled</code> and <code>incomplete</code> runs.</p>
 <p>Parquet stores typed scalar and nested values. Large arrays occupy payload shards. Payloads
 publish before referring record parts. Completion metadata publishes last. A crash leaves
 published parts readable and may lose an open part. Readers ignore <code>*.open</code> files.</p>
