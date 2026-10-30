@@ -2007,7 +2007,9 @@ YAML <code>device</code> option.</p>
 <p>Managed services cover preparation, execution and evaluation. Startup, reuse and shutdown each
 print a progress line. On completion, exceptions or Ctrl-C, only containers started by this
 command are stopped and removed, in reverse startup order. Cleanup errors are attached to an
-active exception. After a completed experiment they are reported without replacing its result.</p>
+active exception. After a completed experiment they are reported without replacing its result.
+A killed command can leave its exited container behind. The next start removes it, following the
+<a href="#nre">NRE rules</a> for existing containers.</p>
 <p>NRE startup creates its client probe directory. Docker mounts each archive read-only at
 <code>/mnt/nre-data/&lt;filename&gt;</code> and mounts the probe directory at <code>server_probe_directory</code>, or at the
 same absolute client path when that option is <code>null</code>. Archive filenames must be unique. The
@@ -2071,9 +2073,10 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>nre<span class="w"> </span>stop<span class="w"> </span>configs/nurec_stop_sign_patch_alpamayo_2601.yaml
 </code></pre></div>
 <p><code>--dry-run</code> prints a shell-quoted Docker command without creating directories or containers and
-does not require Docker on PATH. A normal launch requires Docker. A container with the chosen
-name is left untouched and reported as an error. Successful startup prints endpoint, GPU, scene
-count, container name and the corresponding stop command.</p>
+does not require Docker on PATH. A normal launch requires Docker. An exited container with the
+chosen name that an earlier AVSecTester start by the same user created is removed first. Any
+other container with that name is left untouched and reported as an error. Successful startup
+prints endpoint, GPU, scene count, container name and the corresponding stop command.</p>
 <p>Startup failure or timeout includes the last 50 log lines and removes the newly created
 container. The container is created without Docker's <code>--rm</code> so startup diagnostics
 remain readable.</p>
