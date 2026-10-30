@@ -10311,7 +10311,7 @@ nonpositive <code>noise_cell_texels</code>.</p>
 <p><a href="../../examples/stop-sign-patch/">Stop-sign patch attack</a>.</p>
 <h3 id="avsectesterimplemented_attacksstop_sign_patch_attackmetrics">avsectester.implemented_attacks.stop_sign_patch_attack.metrics<a class="headerlink" href="#avsectesterimplemented_attacksstop_sign_patch_attackmetrics" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.implemented_attacks.stop_sign_patch_attack.metrics -->
-<p>Replica visibility and sign-detection measurements from saved decision captures.</p>
+<p>Attack success, replica visibility and sign-detection measurements from saved decision captures.</p>
 <table>
 <thead>
 <tr>
@@ -10320,6 +10320,10 @@ nonpositive <code>noise_cell_texels</code>.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>AttackSuccess(reference_treatment: str = "clean")</code></td>
+<td>Subclass of <code>Metric</code>. Decide per comparison group whether each attacked treatment ran the stop line.</td>
+</tr>
 <tr>
 <td><code>ReplicaVisibility(camera_ids: Sequence[str] | None = None, min_visible_pixels: int = 100)</code></td>
 <td>Subclass of <code>Metric</code>. Count decisions where the inserted replica reaches the pixel threshold in a selected camera.</td>

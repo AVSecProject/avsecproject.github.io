@@ -1313,6 +1313,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#attack-success-rate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attack success rate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-metric-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1877,6 +1888,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#attack-success-rate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attack success rate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-metric-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1950,25 +1972,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2062,7 +2084,7 @@ configurations contain the rollout-optimized treatments. Both include the same c
 </table>
 <p>Each attack has an offline phase and an online phase. With no optimization, the offline phase
 returns the initial texture. The online phase inserts that texture through the same placement
-path used during optimization. The <code>clean</code> treatment runs the <code>no_patch</code> attack, which uses
+path used during optimization. The <code>clean</code> treatment runs the <code>clean</code> attack, which uses
 <code>initial_patch: none</code> and cannot be optimized, so every treatment shows the same inserted
 replica and differs only in its patch.</p>
 <p><code>low_frequency_noise</code> draws independent color values on a grid of one value per
@@ -2297,14 +2319,21 @@ Prepare the traffic image and weights following
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--entrypoint<span class="w"> </span>python<span class="w"> </span>nurec-experiment<span class="w"> </span>-m<span class="w"> </span>scripts.visualization.plot_stop_line_approaches<span class="w"> </span>configs/nurec_stop_sign_patch_modular_2601.yaml
 </code></pre></div>
 <p>The <a href="../../reference/cli/">CLI reference</a> defines the HTML and structured-output locations.
-<a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.</p>
+<a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.
+<code>RuleBasedAVStack</code> has no reasoning text, so its configuration omits <code>ReasoningPhraseRate</code>.</p>
 <p>The repository includes the white-box results of both modular configurations in
-<a href="https://github.com/AVSecProject/AVSecTester/tree/0cdc5e927955893c387610fe736793ba1b919df1/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
-and <a href="https://github.com/AVSecProject/AVSecTester/tree/0cdc5e927955893c387610fe736793ba1b919df1/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
+<a href="https://github.com/AVSecProject/AVSecTester/tree/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
+and <a href="https://github.com/AVSecProject/AVSecTester/tree/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
 They contain the reports and deployed textures. Run logs and saved maps are not included, so
 <code>evaluate</code> cannot recompute these results. To rerun the closed loop with these textures, copy a
-configuration, set <code>runs.output</code> to a new directory and run it with <code>--prepared</code>.
-<code>RuleBasedAVStack</code> has no reasoning text, so its configuration omits <code>ReasoningPhraseRate</code>.</p>
+configuration, set <code>runs.output</code> to a new directory and run it with <code>--prepared</code>.</p>
+<h3 id="attack-success-rate">Attack success rate<a class="headerlink" href="#attack-success-rate" title="Permanent link">&para;</a></h3>
+<p><code>AttackSuccess</code> defines the attack success rate (ASR) of this example. In each comparison group,
+an attacked treatment succeeds when <code>clean</code> stops before the stop line and the attacked run
+crosses the line without stopping. Groups where <code>clean</code> does not stop before the line are
+excluded, because the attack has no stop to suppress there. The ASR of a treatment is the true
+fraction of <code>AttackSuccess.success</code> in its treatment summary. Stopping and crossing follow
+<code>StopLineMetrics</code> with its default settings. All four stop-sign configurations enable it.</p>
 <h3 id="custom-metric-example">Custom metric example<a class="headerlink" href="#custom-metric-example" title="Permanent link">&para;</a></h3>
 <p><code>ReplicaVisibility</code> demonstrates an importable <code>Metric</code> outside the built-in metric registry.
 Its <code>evaluate</code> reads saved capture evidence and returns <code>visible_steps</code>. <code>describe</code> supplies the
@@ -2320,6 +2349,7 @@ among those where the replica is visible in <code>camera_id</code>, the camera t
 <p>Reference the classes by their full paths, as in the supplied YAML:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">evaluation</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.implemented_attacks.stop_sign_patch_attack.metrics:AttackSuccess</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.implemented_attacks.stop_sign_patch_attack.metrics:ReplicaVisibility</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.implemented_attacks.stop_sign_patch_attack.metrics:SignDetection</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">camera_id</span><span class="p">:</span><span class="w"> </span><span class="nv">camera_front_wide_120fov</span><span class="p p-Indicator">}</span>
@@ -2327,7 +2357,7 @@ among those where the replica is visible in <code>camera_id</code>, the camera t
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and
