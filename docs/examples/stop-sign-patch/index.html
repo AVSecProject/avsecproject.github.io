@@ -1950,25 +1950,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2142,7 +2142,7 @@ the camera and decision threshold. A <code>SessionScorer</code> reuses it for ca
 The <a href="../../guides/driving-systems/">driving-system guide</a> describes the binding behavior.</p>
 <p>The driving system stops once the detector fires, so the patch must suppress every detection
 until the vehicle can no longer stop before the line. Training therefore covers recorded frames by
-route distance to the stop line, from the farthest frame where the unpatched replica reaches the
+route distance to the stop line, from the farthest frame where the clean texture reaches the
 decision threshold down to <code>v² / (2 × braking_deceleration_mps2)</code>. <code>v</code> is the recorded speed at the
 segment start. <code>braking_deceleration_mps2</code> is the driving system's strongest braking and defaults
 to 6 m/s², the <code>RuleBasedAVStack</code> planner limit. The sign-face projection defines the target box.
@@ -2163,16 +2163,50 @@ survives printing and camera sampling. The term is the mean Charbonnier RGB dist
 <code>sqrt(||c_p - c_q||² + ε²) - ε</code> with ε = 0.001, over vertically and horizontally adjacent texels
 that are both inside the mask. Pairs across the patch outline are excluded, so a uniform patch
 has zero smoothness cost against the red face.</p>
-<p>The offline report contains calibration and sample tables, the <code>pgd_objective</code> series, the final
-<code>patch_smoothness</code>, and initial/optimized replica textures. <code>pgd_objective</code> records the mean
-training hinge objective per epoch, excluding the smoothness term, at epochs 1 through
-<code>epochs</code>. After optimization every training frame is scored for the clean reconstruction,
-unpatched replica, initial patch and optimized patch. <code>detected_frame_fraction</code> and
-<code>max_confidence</code> summarize the optimized patch, and detection rates are binned by route distance
-to the stop line. The configurations set <code>progress_interval: 10</code> to score the current patch on
-every training frame every 10 epochs and after the last epoch. The option defaults to 1.
-The <code>training_progress</code> table and its series record the full-set hinge loss, detected fraction
-and detected fraction per 10 m bin. Epoch 0 is the initial patch.
+<p>The report compares three textures. <code>clean</code> is the unpatched replica. <code>initial</code> is the replica
+with the initial patch. <code>optimized</code> is the replica with the optimized patch.</p>
+<p>Each table is saved as a CSV with the same name:</p>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>training_segment_ranges</code></td>
+<td>Training-segment speed, distance bounds, search frames and status</td>
+</tr>
+<tr>
+<td><code>rendered_frames</code></td>
+<td>Render stages, distances, visibility, target boxes and <code>clean_score</code></td>
+</tr>
+<tr>
+<td><code>training_progress</code></td>
+<td>Epoch, losses, detection rate, maximum confidence and rates per distance bin</td>
+</tr>
+<tr>
+<td><code>texture_detection_summary</code></td>
+<td>Confidence and detection statistics for the three textures</td>
+</tr>
+<tr>
+<td><code>frame_detection_scores</code></td>
+<td>Clean, initial and optimized confidence for each training frame</td>
+</tr>
+<tr>
+<td><code>detection_rate_vs_distance</code></td>
+<td>Detection rates for the three textures in 10 m distance bins</td>
+</tr>
+</tbody>
+</table>
+<p><code>detection_loss</code> is the mean <code>HideBelowThreshold</code> loss over all training frames.
+<code>smoothness_loss</code> is <code>tv_weight</code> times patch smoothness. <code>total_loss</code> is their sum.
+The four curves are <code>total_loss</code>, <code>detection_loss</code>, <code>smoothness_loss</code> and <code>detection_rate</code>,
+with epoch on the horizontal axis. Initial and optimized texture images are also saved.
+<code>detected_frame_fraction</code> and <code>max_confidence</code> summarize the optimized patch.</p>
+<p>The configurations set <code>progress_interval: 5</code> to evaluate every training frame every five epochs.
+The option defaults to 1. Epoch 0 and the final epoch are always recorded.
 <a href="../../guides/optimization/">Optimization tools</a> explains report usage.</p>
 <h2 id="prepare-the-black-box-attack">Prepare the black-box attack<a class="headerlink" href="#prepare-the-black-box-attack" title="Permanent link">&para;</a></h2>
 <p>The black-box attack minimizes the mean stop-command distance over retained training segments.
@@ -2185,12 +2219,13 @@ is the first column of <code>sign_pose</code>. A rollout that passes the sign wi
 scores 0. A rollout whose decisions run out before either event scores its remaining distance to
 the sign after the last decision, so ending early is not rewarded. The <code>outcome</code> column records
 which case applies.</p>
-<p>Calibration evaluates the unpatched replica once per training segment, in metadata order. A
-segment is retained only if it issues a stop command at step <code>min_stop_command_step</code> or later,
-default 5, before passing the sign. Segments with an earlier command, no command before passing
-or decisions that run out first are excluded with a reason. Calibration stops after
-<code>max_training_segments</code> retained segments, or uses every eligible training segment when this
-limit is <code>None</code>. Calibration raises <code>ValueError</code> if no segment is retained.</p>
+<p>Training-segment eligibility is checked with the clean texture once per segment, in metadata
+order. The clean texture is the replica without a patch. A segment is retained only if it issues
+a stop command at step <code>min_stop_command_step</code> or later, default 5, before passing the sign.
+Segments with an earlier command, no command before passing or decisions that run out first are
+excluded with a reason. Eligibility checks stop after <code>max_training_segments</code> retained segments,
+or use every eligible training segment when this limit is <code>None</code>. No eligible segment raises
+<code>ValueError</code>.</p>
 <p>Each candidate starts at each retained segment's recorded origin and runs for at most
 <code>segment.decision_steps</code> decisions. It ends when the first stop command is issued or the ego
 passes the sign. The scalar score is the mean stop-command distance across those segments.</p>
@@ -2202,11 +2237,15 @@ and <code>min_stop_command_step: 5</code>, and use <code>steps: 10</code>, <code
 <code>learning_rate: 0.1</code>, <code>batch_size: 1</code> and <code>seed: 0</code>. The candidate query budget is:</p>
 <div class="highlight"><pre><span></span><code>retained training segments × (1 + steps × (population_size + 1))
 </code></pre></div>
-<p>Calibration adds one rollout per examined segment.</p>
-<p>The offline report contains a <code>calibration</code> table with selection reasons, a <code>rollouts</code> table
-with per-query distances and run details, the <code>stop_command_distance_m</code> series, and initial and
-optimized textures. <code>final_stop_command_distance_m</code> is the final texture's evaluated mean
-distance. No additional rollout is used for that value. The
+<p>Eligibility checks add one rollout per examined segment.</p>
+<p>The offline report contains <code>training_segment_eligibility</code> with eligibility reasons and
+<code>optimization_rollouts</code> with query distances and run details. <code>query_index</code> numbers queried
+textures in order, starting at 0 for the initial texture. <code>optimization_rollout_count</code> counts
+optimization closed loops and excludes eligibility checks. Their RunLogs are saved under
+<code>files/eligibility_rollouts/</code> and <code>files/optimization_rollouts/</code>.</p>
+<p>The report also contains the <code>stop_command_distance_m</code> curve and initial and optimized textures.
+<code>final_stop_command_distance_m</code> is the final texture's evaluated mean distance.
+No additional rollout is used for that value. The
 <a href="../../reference/python-api/#avsectesterimplemented_attacksstop_sign_patch_attackoffline">attack API</a>
 describes the optimization options.</p>
 <h2 id="reuse-segments-and-resume">Reuse segments and resume<a class="headerlink" href="#reuse-segments-and-resume" title="Permanent link">&para;</a></h2>
@@ -2219,6 +2258,9 @@ optimized textures across driving systems.</p>
 </code></pre></div>
 <p>Completed attack offline phases and matching completed runs are reused. Unfinished work follows
 <a href="../../guides/experiments/">the experiment resume workflow</a>.</p>
+<p>Each attack saves its artifact, the texture deployed on the inserted sign, as the lossless RGBA
+image <code>attacks/&lt;attack&gt;/artifacts/deployed_texture.png</code>. Loading checks that the alpha channel and
+the pixels outside the patch mask match the canonical sign.</p>
 <h2 id="run-from-python">Run from Python<a class="headerlink" href="#run-from-python" title="Permanent link">&para;</a></h2>
 <p>To run the workflow from Python, open <code>local_services</code> around preparation and execution, or
 start NRE with <code>nre serve</code> first. Save this module as <code>my_module.py</code> in the repository root,
@@ -2255,7 +2297,13 @@ Prepare the traffic image and weights following
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--entrypoint<span class="w"> </span>python<span class="w"> </span>nurec-experiment<span class="w"> </span>-m<span class="w"> </span>scripts.visualization.plot_stop_line_approaches<span class="w"> </span>configs/nurec_stop_sign_patch_modular_2601.yaml
 </code></pre></div>
 <p>The <a href="../../reference/cli/">CLI reference</a> defines the HTML and structured-output locations.
-<a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.
+<a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.</p>
+<p>The repository includes the white-box results of both modular configurations in
+<a href="https://github.com/AVSecProject/AVSecTester/tree/0cdc5e927955893c387610fe736793ba1b919df1/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
+and <a href="https://github.com/AVSecProject/AVSecTester/tree/0cdc5e927955893c387610fe736793ba1b919df1/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
+They contain the reports and deployed textures. Run logs and saved maps are not included, so
+<code>evaluate</code> cannot recompute these results. To rerun the closed loop with these textures, copy a
+configuration, set <code>runs.output</code> to a new directory and run it with <code>--prepared</code>.
 <code>RuleBasedAVStack</code> has no reasoning text, so its configuration omits <code>ReasoningPhraseRate</code>.</p>
 <h3 id="custom-metric-example">Custom metric example<a class="headerlink" href="#custom-metric-example" title="Permanent link">&para;</a></h3>
 <p><code>ReplicaVisibility</code> demonstrates an importable <code>Metric</code> outside the built-in metric registry.
@@ -2263,15 +2311,23 @@ Its <code>evaluate</code> reads saved capture evidence and returns <code>visible
 field's meaning and unit. A treatment without a replica has an unavailable value. A decision
 counts as visible when the replica reaches <code>min_visible_pixels</code> in at least one selected camera.
 By default <code>camera_ids</code> selects every camera that recorded the replica.</p>
-<p>Reference the class by its full path, as in the supplied YAML:</p>
+<p><code>SignDetection</code> measures closed-loop detections from the <code>detections</code> entry that
+<code>RuleBasedAVStack</code> writes to its component log. The modular configurations enable it, and the
+Alpamayo configurations omit it because Alpamayo logs no detections. <code>detected_steps</code> counts
+decisions with a sign detection. <code>detection_rate</code> is the fraction of decisions with a detection
+among those where the replica is visible in <code>camera_id</code>, the camera the detector reads.
+<code>first_detection_line_distance_m</code> is the signed distance to the stop line at the first detection.</p>
+<p>Reference the classes by their full paths, as in the supplied YAML:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">evaluation</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.implemented_attacks.stop_sign_patch_attack.metrics:ReplicaVisibility</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.implemented_attacks.stop_sign_patch_attack.metrics:SignDetection</span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">camera_id</span><span class="p">:</span><span class="w"> </span><span class="nv">camera_front_wide_120fov</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/0cdc5e927955893c387610fe736793ba1b919df1/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and

@@ -9848,7 +9848,7 @@ than fabricated measurements. Describe those fields through <code>describe</code
 </tr>
 <tr>
 <td><code>EvaluationReport.save(directory: str | Path) -&gt; Path</code></td>
-<td>Write report.json and runs.csv. Metric names prefix columns to protect identities.</td>
+<td>Write report.json, runs.csv, treatment_summary.csv and pair_summary.csv.</td>
 </tr>
 </tbody>
 </table>
@@ -10291,6 +10291,14 @@ with <code>PGD</code>. <code>device=None</code> selects <code>cuda:0</code> for 
 <td><code>StopSignPatchAttack.replica_texture(artifacts: object) -&gt; np.ndarray</code></td>
 <td>Return the replica face with the supplied patch in its editable region.</td>
 </tr>
+<tr>
+<td><code>StopSignPatchAttack.save_artifacts(artifacts: object, directory: str | Path) -&gt; None</code></td>
+<td>Save the deployed texture as a lossless RGBA PNG.</td>
+</tr>
+<tr>
+<td><code>StopSignPatchAttack.load_artifacts(directory: str | Path) -&gt; np.ndarray</code></td>
+<td>Load the deployed texture and validate its alpha and the pixels outside the patch mask.</td>
+</tr>
 </tbody>
 </table>
 <!-- api:end -->
@@ -10303,7 +10311,7 @@ nonpositive <code>noise_cell_texels</code>.</p>
 <p><a href="../../examples/stop-sign-patch/">Stop-sign patch attack</a>.</p>
 <h3 id="avsectesterimplemented_attacksstop_sign_patch_attackmetrics">avsectester.implemented_attacks.stop_sign_patch_attack.metrics<a class="headerlink" href="#avsectesterimplemented_attacksstop_sign_patch_attackmetrics" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.implemented_attacks.stop_sign_patch_attack.metrics -->
-<p>Replica-specific visibility measurements from saved decision captures.</p>
+<p>Replica visibility and sign-detection measurements from saved decision captures.</p>
 <table>
 <thead>
 <tr>
@@ -10315,6 +10323,10 @@ nonpositive <code>noise_cell_texels</code>.</p>
 <tr>
 <td><code>ReplicaVisibility(camera_ids: Sequence[str] | None = None, min_visible_pixels: int = 100)</code></td>
 <td>Subclass of <code>Metric</code>. Count decisions where the inserted replica reaches the pixel threshold in a selected camera.</td>
+</tr>
+<tr>
+<td><code>SignDetection(camera_id: str, min_visible_pixels: int = 100, endpoint_tolerance_m: float = 3.)</code></td>
+<td>Subclass of <code>Metric</code>. Count decisions where the driving system logged a sign detection.</td>
 </tr>
 </tbody>
 </table>
@@ -10360,9 +10372,9 @@ trained route distance to the stop line is <code>d_min = v² / (2a)</code>, wher
 <p><code>RolloutPatchOptimization</code> raises <code>TypeError</code> for an optimizer other than <code>NES</code> and
 <code>ValueError</code> for a nonpositive <code>stop_speed_mps</code> or <code>max_training_segments</code>, or a
 <code>min_stop_command_step</code> that is not a nonnegative integer. The offline phase raises
-<code>ValueError</code> when no training segment passes unpatched-replica calibration. See the
+<code>ValueError</code> when no training segment is eligible with the clean texture. See the
 <a href="../../examples/stop-sign-patch/#prepare-the-black-box-attack">black-box workflow</a> for the
-calibration rules and query budget. Neither path uses <code>validation_metadata</code>.</p>
+eligibility rules and query budget. Neither path uses <code>validation_metadata</code>.</p>
 <h4 id="see-also_95">See also<a class="headerlink" href="#see-also_95" title="Permanent link">&para;</a></h4>
 <p><a href="../../examples/stop-sign-patch/">Stop-sign patch attack</a>.</p>
 <h3 id="avsectesterexperiment">avsectester.experiment<a class="headerlink" href="#avsectesterexperiment" title="Permanent link">&para;</a></h3>

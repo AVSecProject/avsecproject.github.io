@@ -2139,23 +2139,28 @@ Checkpoint and retry behavior follow
   preparation-progress.json
   prepared.json
   attacks/&lt;attack&gt;/metadata.json
-  attacks/&lt;attack&gt;/artifacts.pkl
-  attacks/&lt;attack&gt;/manifest.json
-  offline/&lt;attack&gt;/report.json
-  offline/&lt;attack&gt;/&lt;table&gt;.csv
-  offline/&lt;attack&gt;/&lt;image-or-series&gt;.png
-  offline/&lt;attack&gt;/files/
-  offline-incomplete/&lt;attack&gt;-&lt;UTC timestamp&gt;/
+  attacks/&lt;attack&gt;/artifacts/artifacts.pkl
+  attacks/&lt;attack&gt;/artifacts/manifest.json
+  attacks/&lt;attack&gt;/offline_report/report.json
+  attacks/&lt;attack&gt;/offline_report/&lt;table&gt;.csv
+  attacks/&lt;attack&gt;/offline_report/&lt;image-or-series&gt;.png
+  attacks/&lt;attack&gt;/offline_report/files/
+  attacks/&lt;attack&gt;/incomplete_offline_reports/&lt;UTC timestamp&gt;/
   offline_report.html
   maps/&lt;scenario&gt;.json
   runs/segment-&lt;NNNNN&gt;/seed-&lt;S&gt;/&lt;treatment&gt;/
   evaluation/report.json
   evaluation/runs.csv
+  evaluation/treatment_summary.csv
+  evaluation/pair_summary.csv
   evaluation/plots/
   evaluation_report.html
 </code></pre></div>
-<p>Artifact filenames above describe the default trusted-pickle format. Attacks may override
-artifact persistence. Segment numbers are global unit indexes. Each run directory contains
+<p>Each attack directory holds the selected segments in <code>metadata.json</code>, its artifacts in
+<code>artifacts/</code> and its offline report in <code>offline_report/</code>. A failed or interrupted offline phase
+moves its partial report to <code>incomplete_offline_reports/</code> before the phase runs again. Artifact
+filenames above describe the default trusted-pickle format. Attacks may override artifact
+persistence, and their files stay inside <code>artifacts/</code>. Segment numbers are global unit indexes. Each run directory contains
 <code>manifest.json</code>, published Parquet step/event parts and payload shards belonging to its
 <a href="../runtime/#runlog">RunLog</a>. Offline report content is described in
 <a href="../../guides/optimization/">Optimization</a>, and evaluation content

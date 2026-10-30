@@ -1930,6 +1930,9 @@ unchanged appearance reference when scene statistics should not depend on the op
 <code>Harmonizer</code> formulas, parameters and non-differentiable restrictions are described in
 the <a href="../../reference/python-api/#avsectesterrenderingharmonizers">rendering API</a>.</p>
 <h2 id="offline-reports">Offline reports<a class="headerlink" href="#offline-reports" title="Permanent link">&para;</a></h2>
+<p>The framework does not record optimization outputs automatically. <code>PGD</code> and <code>NES</code> return
+<code>history</code> and <code>final_score</code> in <code>OptimizationResult</code>. The attack decides which values, curves,
+tables and images to record through <code>context.report</code> during its offline phase.</p>
 <p><code>report.json</code> contains <code>status</code>, <code>values</code>, <code>series</code>, <code>tables</code> and <code>images</code>. Values retain their
 unit and description. Series retain coordinates, axis labels, units and description. Tables
 retain rows, column descriptions and CSV filenames. Images retain descriptions and PNG

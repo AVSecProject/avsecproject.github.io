@@ -1896,8 +1896,6 @@ parameters and unavailable conditions. The default set and YAML validation are d
 provide that evidence. Collision is bird's-eye oriented-box overlap, not a native
 collision-sensor event. <code>TrajectoryDeviation</code> compares true ego positions at equal decision
 indices, without time or route alignment.</p>
-<p><strong>Not yet implemented.</strong> Matched-window driving-impact measures with prior-motion and duration
-requirements. See <a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/docs/development/TODO.md#driving-impact-metrics">Driving-impact metrics</a>.</p>
 <p><code>DetectionMetrics</code> matches detections to true actors in the capture-time ego frame, using sensor
 mounting geometry independently of model localization. Its range filtering is horizontal.
 Category matching follows <code>category_map</code> when configured. The thresholded detections do not
@@ -1933,13 +1931,20 @@ images and CSV files are linked relative to the page. JSON and CSV retain full p
 treatment pair. Numeric summaries use the mean and population standard deviation (ddof=0), with
 a separate available-group count for each field. Boolean summaries use the true fraction.
 <code>Unavailable</code> values are excluded from that field's denominator.</p>
+<p><code>treatment_summary.csv</code> is a long table with one row per part, treatment and measurement field.
+<code>pair_summary.csv</code> has one row per part, treatment pair, measurement type and field.
+Its <code>measurement</code> column is <code>paired_difference</code> for treatment B minus treatment A, with booleans
+represented as 0 and 1, or <code>pair_metric</code> for a <code>PairMetric</code> result. Numeric fields retain mean and
+standard deviation. Boolean fields retain the true fraction. Unused statistical cells are empty.
+Both CSVs contain the summaries from <code>report.json</code> and preserve full numeric precision.</p>
 <p>Paired differences are computed inside each group before aggregation. <code>PairMetric</code> measurements
 are summarized separately. Statistics do not infer an attack-success label. See the
 <a href="../../examples/#attack-impact">example interpretation rule</a>.</p>
 <p>The HTML report presents experiment setup, metric definitions, run status, per-part results,
 paired differences and group details. Group details retain unavailable reasons and saved plots.
 The command line shows per-part metric tables, notes and errors. Paired tables are in the HTML
-and structured report. <code>format_summary</code> returns a string, so Python callers print it explicitly.</p>
+and structured report and in <code>pair_summary.csv</code>. <code>format_summary</code> returns a string, so Python
+callers print it explicitly.</p>
 <p>Output locations follow the <a href="../../reference/cli/#output-layout">CLI reference</a>.
 Offline phase results are separate. <a href="../optimization/">Optimization</a> describes their report
 interface.</p>

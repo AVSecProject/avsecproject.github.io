@@ -1968,8 +1968,6 @@ environment explicitly.</p>
 <p><code>PreparedExperiment</code> retains all units, including those excluded from execution. Unit identity,
 the split schema and deterministic allocation are defined in
 <a href="../../reference/configuration/#data-split">Data split</a>.</p>
-<p><strong>Not yet implemented.</strong> Sharing unattacked runs across units with different <code>user_data</code>. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/e83f3f601b07b28f20fe3b01afa4b0570d123515/docs/development/TODO.md#shared-runs-across-different-user-data">shared runs across different user data</a>.</p>
 <h2 id="input-validation">Input validation<a class="headerlink" href="#input-validation" title="Permanent link">&para;</a></h2>
 <p><code>validate</code> and <code>prepare</code> reject existing preparation output without <code>resume=True</code>. Environment
 checks run for fresh and resumed preparations. A fresh loaded metadata file is validated once
