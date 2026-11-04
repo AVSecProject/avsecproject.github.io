@@ -1096,6 +1096,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#scene-insertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scene insertion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lidar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LiDAR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#recorded-past-observations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1355,6 +1377,8 @@
       
         
       
+        
+      
     
     
     
@@ -1480,6 +1504,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1945,6 +1997,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#scene-insertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scene insertion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lidar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LiDAR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#recorded-past-observations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2160,50 +2234,76 @@ bound hooks. Advancement also requires an initialized runtime and replay capabil
 <p>Services reuse forward scans where advancement is supported. NuRec instead resets prescribed
 motion at each requested frame.</p>
 <h2 id="inserted-world-objects">Inserted world objects<a class="headerlink" href="#inserted-world-objects" title="Permanent link">&para;</a></h2>
-<p><code>insert_object</code> registers an <code>ObjectAsset</code> under a unique ID and rigid world pose.
+<p><code>insert_object</code> registers an <code>ObjectAsset</code> or <code>MeshAsset</code> under a unique ID and rigid world pose.
 <code>remove_object</code> removes it. The physical <code>state().objects</code> changes immediately, while images
 change at the next capture. Inserted objects stay separate from native actors, have zero
-velocity and do not participate in native physics or collisions.</p>
-<p>Shared camera composition projects the asset, resolves nearest surfaces and applies visibility.
-The returned camera view contains composed RGB. Existing depth becomes the pixelwise minimum of
-native and object depth. A view without native depth keeps <code>depth=None</code>.</p>
+velocity and do not participate in native physics or collisions. Built-in metrics still count
+overlap with them as a collision. See <a href="../evaluation/#built-in-metrics">Built-in metrics</a>.</p>
+<p><code>ObjectAsset</code> contains textured planes. <code>MeshAsset</code> contains colored triangle meshes and requires
+NuRec scene insertion. Both use forward-left-up axes and a bottom-center bounding box.
+Only base colors are rendered, without material, reflection or lighting simulation.
+Alpha values of at least 128 are opaque. Mesh triangles used to occlude sensor-inserted content
+are treated as opaque regardless of their color alpha.</p>
+<p><strong>Not yet implemented.</strong> Mesh composite insertion, including white-box texture optimization.
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#mesh-composite-insertion">TODO</a>.</p>
+<p><strong>Not yet implemented.</strong> CARLA mesh insertion. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#carla-mesh-insertion">TODO</a>.</p>
+<p>Composite insertion projects each asset into captured camera images, resolves nearest surfaces
+and applies visibility. NuRec also supports scene insertion, where NRE renders assets with the
+reconstruction into camera images and LiDAR. Set <code>object_insertion</code> to <code>composite</code> (the default)
+or <code>scene</code> on <code>NuRecSimulator</code>. The insertion actions and <code>harmonizer</code> interface are the same.</p>
 <table>
 <thead>
 <tr>
-<th><code>Simulator</code></th>
-<th>Occlusion</th>
+<th>Simulator</th>
+<th>Insertion</th>
+<th>Composite occlusion</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>CARLA</td>
+<td>Composite</td>
 <td>Aligned scene depth for <code>depth_camera</code>, actor cuboids for other cameras</td>
 </tr>
 <tr>
 <td>NuRec</td>
+<td>Composite or scene</td>
 <td>Reconstruction visibility from rendered probes, or mesh/actor geometry</td>
 </tr>
 <tr>
 <td>Recorded playback</td>
+<td>Composite</td>
 <td>Actor cuboids only</td>
 </tr>
 </tbody>
 </table>
-<p><code>SensorView.composition</code> records the unmodified background and its <code>CompositePlan</code>.
-<code>plan.apply(background)</code> reproduces the capture. Differentiable composition follows the same
-calculation where all harmonizers support it. See <a href="../optimization/">Optimization</a> and the
-<a href="../../reference/python-api/">compositing API</a>.</p>
-<p>Occlusion tolerance keeps scene surfaces within the configured tolerance in front of an object
-from hiding it. The same rule applies to geometry and reconstruction probes. Option defaults
-are listed in the <a href="../../reference/configuration/#simulator">configuration reference</a>.</p>
-<p><code>object_visibility</code> describes the latest capture. A projected but fully hidden object has a
-camera entry with zero visible pixels. An object outside a camera projection has no entry.
-<code>SensorView.objects</code> holds the corresponding immutable placed objects. Captures retain their own
-object membership until the next capture.</p>
+<p>Both modes describe each object's visible pixels in the captured image.
+<code>SensorView.object_masks</code> maps the same IDs as <code>SensorView.objects</code> to boolean H×W masks.
+Composite insertion uses the pixels that the composition actually assigns to each object.
+Scene insertion measures coverage with white and black asset copies and keeps coverage of at
+least 0.5. Each <code>ObjectVisibility.visible_pixels</code> equals the corresponding mask's pixel count.
+A projected but fully hidden object has an empty mask and a camera entry with zero visible
+pixels. An object outside a camera projection has no entry. Captures retain their own object
+membership until the next capture.</p>
+<p><code>SensorView.composition</code> exists only for composite insertion. It records the unmodified
+background and its <code>CompositePlan</code>, whose <code>plan.apply(background).image</code> reproduces the capture.
+Scene insertion has <code>composition=None</code>. An attack can build its own differentiable plan using
+the captured camera geometry and <code>object_masks</code>. See <a href="../optimization/">Optimization</a> and the
+<a href="../../reference/python-api/#avsectesterrenderingcompositing">compositing API</a>.</p>
+<p>Composite insertion combines native depth with object surface depth. Rendered visibility and
+scene insertion replace depth only at visible object pixels and preserve the rest. A view
+without native depth keeps <code>depth=None</code>.</p>
+<p>Occlusion tolerance applies only to composite insertion. It keeps scene surfaces within the
+configured tolerance in front of an object from hiding it, for both geometry and reconstruction
+probes. See <a href="../../reference/configuration/#simulator">Configuration</a> for defaults.</p>
+<p>A single-sided plane or mesh shows its front colors from behind. Add a rear face when the object
+must have a distinct back. Sensor insertion through <code>InsertionAttackAction</code> remains independent
+of world insertion.</p>
 <p>See <a href="../attacks/#insert-a-world-object">Writing attacks</a> for insertion actions and
 <a href="../../reference/runtime/#runlog">Runtime records</a> for saved evidence.</p>
-<p><strong>Not yet implemented.</strong> Inserted objects in non-camera sensors.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
+<p><strong>Not yet implemented.</strong> CARLA scene insertion and non-camera insertion in composite mode.
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
 <h2 id="carla">CARLA<a class="headerlink" href="#carla" title="Permanent link">&para;</a></h2>
 <p>A <code>CarlaDataset</code> supplies recipes describing map, spawns, sensors and prescribed motion.
 <code>CarlaSimulator</code> supplies the connection and synchronous timing settings. Each reset requires a
@@ -2249,17 +2349,90 @@ the injection and consistency rules.</p>
 <span class="p">)</span>
 <span class="k">assert</span> <span class="n">simulator</span><span class="o">.</span><span class="n">command_modes</span> <span class="o">==</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"trajectory"</span><span class="p">})</span>
 </code></pre></div>
+<h3 id="scene-insertion">Scene insertion<a class="headerlink" href="#scene-insertion" title="Permanent link">&para;</a></h3>
+<p>Scene insertion requires <code>NuRecRenderer.asset_directory</code>. The renderer writes generated asset
+files there for NRE to read. See
+<a href="../../reference/configuration/#nurec-closed-loop-settings">Configuration</a> for directory and mount
+settings.</p>
+<p>Plane assets use 5 mm grid spacing, capped at one Gaussian per texture pixel. Grid centers
+with alpha below 128 are omitted. Colors are alpha-weighted area averages. Gaussian
+lateral sizes are twice the grid-cell dimensions. The textured asset and its white and black
+coverage copies share their Gaussian geometry. Thickness is one millimeter and opacity logit
+is eight, with zeroth-order spherical harmonics only.</p>
+<p>Mesh triangles use the same grid spacing, and every nonzero-area triangle has at least one
+sample. Samples with alpha below 128 are omitted. The others become Gaussians that lie flat on
+their triangles and take their base colors. Their lateral sizes are twice the requested grid
+spacing. Textured colors are alpha-weighted averages over each Gaussian's texture footprint.
+Mesh assets have no nominal textures. See
+<a href="../../reference/configuration/#mesh-assets">mesh loading settings</a> for file formats and axes.</p>
+<p>Composite visibility probes use a one-centimeter nearest-count grid, capped at one Gaussian
+per texture pixel. Their lateral sizes are nine tenths of the grid-cell dimensions. White and
+black probes share their Gaussian geometry. Because scene-asset Gaussians are wider than their
+grid cells, image edges are slightly soft and coverage extends slightly beyond the exact asset
+silhouette.</p>
+<p>NRE registers one track for each object and texture. Moving an object reuses its track. Tracks
+remain until the NRE process restarts.</p>
+<p>For each projected object, visibility requires two additional camera renders with white and
+black copies. A harmonizer also needs a background render. A differentiable harmonizer also
+needs a nominal-texture render when its object has nominal textures. These extra
+renders use the capture's request pose and bypass hooks. They add rendering work in proportion
+to the projected objects and cameras. A harmonizer also adjusts partially covered pixels at
+object edges, outside <code>object_masks</code>. With scene insertion, <code>render.post</code> receives images and
+point clouds that already contain the inserted objects. With composite insertion, the hook
+receives the native capture before camera composition.</p>
+<p>Reconstructed objects remain in the scene and can hide an inserted object placed very close
+to them.</p>
+<p><strong>Not yet implemented.</strong> Removing real objects from reconstructed scenes. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#remove-real-objects-from-reconstructed-scenes">TODO</a>.</p>
+<p>Scene-inserted assets appear in LiDAR for 26.04 scenes. In 26.01 scenes, LiDAR can pass through
+inserted assets. This is a limitation of that scene release.</p>
+<p>LiDAR returns from scene-inserted assets can lie behind the asset surface. The offset is larger
+for surfaces near the ground and varies with the asset's position. NRE blends the Gaussians
+along each LiDAR ray in an approximate order, so large road Gaussians can add range from the
+road behind the asset. This is a limitation of NRE's LiDAR rendering and applies to plane and
+mesh assets.</p>
+<h3 id="lidar">LiDAR<a class="headerlink" href="#lidar" title="Permanent link">&para;</a></h3>
+<p>Set <code>NuRecRenderer.lidar</code> to a scene's logical sensor name, such as <code>lidar_gt_top_p128</code>, to
+collect LiDAR alongside the cameras. The default <code>None</code> disables LiDAR. The selected scene must
+contain exactly one LiDAR with a <code>row-offset-spinning</code> model. The sensor-to-rig transform comes
+from calibration. The scan period is the median duration of recorded LiDAR frames. See
+<a href="../../reference/runtime/#lidar-data">LiDAR records</a> for the payload format.</p>
+<p>The decision interval must match the scan period within 1% of the decision interval. This is
+checked after scene loading and before the first render. Each scan covers the previous decision
+timestamp through the current decision timestamp. Its start pose is the previous decision pose.
+For decision zero, that pose comes from the recorded trajectory at the scan's start time.
+Recorded past observations also include LiDAR, using recorded ego and actor poses at both scan
+endpoints.</p>
+<p>With LiDAR enabled, one additional recorded step is needed before the earliest observation.
+Segment selection therefore reserves at least one more step than the driving-system history
+alone requires. A past-observation request whose scans begin before the recording raises
+<code>ValueError</code>.</p>
+<p>Cameras precede LiDAR in <code>Observation.sensor_data</code>. Current LiDAR captures pass through
+<code>render.post</code> with the LiDAR sensor name. They do not pass through <code>render.pre</code>, whose
+<code>CameraPoseRequest</code> is specific to cameras. A LiDAR <code>SensorView</code> has no camera geometry and uses
+the scan-end sensor transform. Supplied driving systems continue to read their configured
+cameras.</p>
+<p>Reconstructed-scene defects may produce a small number of below-ground points in a scan.</p>
+<p>Supplied scenes provide no intensity. Intensity and no-return-ray simulation are
+<strong>Not yet implemented.</strong> See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-lidar-simulation">NuRec LiDAR simulation</a>.
+Inserted objects appear in LiDAR with <a href="#scene-insertion">scene insertion</a>. Composite insertion
+changes camera images only.</p>
+<p><strong>Not yet implemented.</strong> Offline renders of a dataset's first frame while LiDAR is enabled. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-offline-lidar-sampling">TODO</a>.</p>
 <h3 id="recorded-past-observations">Recorded past observations<a class="headerlink" href="#recorded-past-observations" title="Permanent link">&para;</a></h3>
 <p>After reset, <code>observe_past(count)</code> returns actual recorded observations before the selected
 start, oldest first, with negative run-relative timestamps and frames. It rejects insufficient
 history and preserves the current world, clock and capture. Start eligibility uses the larger
-history requirement of the simulator and <code>DrivingAdapter</code>.</p>
+of the simulator's own history and the <code>DrivingAdapter</code> history plus the simulator's observation
+lead steps.</p>
 <p>Past captures use recorded ego poses and actors, including the same short-track filtering as
-current captures. Objects installed during reset or setup are composed using those recorded
-camera poses. Later insertions and actor overrides are excluded. Past captures bypass stage
-hooks and sensor attack actions. The runner applies sensor corruptions at each absolute dataset
-position, then passes history directly to <code>AVStack.reset</code>. It bypasses localization and the
-observation pipeline. See <a href="../../reference/runtime/#initialization">initialization records</a> and
+current captures. Objects installed during reset or setup use those recorded poses with the
+configured insertion mode. Later insertions and actor overrides are excluded. Past captures
+bypass stage hooks and sensor attack actions. The runner applies sensor corruptions at each
+absolute dataset position, then passes history directly to <code>AVStack.reset</code>. It bypasses
+localization and the observation pipeline. See
+<a href="../../reference/runtime/#initialization">initialization records</a> and
 <a href="../environments/#randomness">environment randomness</a>.</p>
 <h3 id="navigation">Navigation<a class="headerlink" href="#navigation" title="Permanent link">&para;</a></h3>
 <p>Map navigation matches the recorded ego path to driving lanes and extends the route through
@@ -2279,9 +2452,8 @@ dynamics prediction.</p>
 for ego contact where that asset is available. Ground contact is an approximate fit rather than
 a penetration solver. It does not correct traffic actors.</p>
 <h3 id="camera-resolution">Camera resolution<a class="headerlink" href="#camera-resolution" title="Permanent link">&para;</a></h3>
-<p>The renderer probes each configured camera when loading a scene and scales its lens to the image
-dimensions actually returned by NRE. NRE preserves aspect ratio, so returned width can differ
-from the request. Subsequent captures must retain those dimensions.</p>
+<p>Cameras render at their native resolution. A returned image whose dimensions differ from the
+camera's native model raises <code>ValueError</code>.</p>
 <p>Captures render a single instant.</p>
 <p>The lens includes its f-theta model and recorded windshield distortion. Camera projection,
 mesh depth and object placement share the resulting geometry. Camera coordinate conventions
@@ -2297,6 +2469,8 @@ never duration-filtered.</p>
 explicit world velocity advances the actor at fixed orientation until reset or another override.
 <code>control_actor</code> is unsupported. Without traffic simulation, checkpoints preserve actor
 overrides. Restoring a checkpoint creates a new capture of the restored state.</p>
+<p><strong>Not yet implemented.</strong> Checkpoint restoration with active render hooks. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-checkpoint-restoration-with-active-render-hooks">TODO</a>.</p>
 <h3 id="reactive-traffic">Reactive traffic<a class="headerlink" href="#reactive-traffic" title="Permanent link">&para;</a></h3>
 <p>Enable <code>AlpaSimTraffic</code> through <code>simulator.options.traffic</code>. YAML, timing and history follow
 <a href="../../reference/configuration/#reactive-traffic">Reactive traffic configuration</a>.</p>
@@ -2307,7 +2481,7 @@ backfills constant-velocity history and subsequent requests resend its complete 
 <p>Trajectories are not smoothed. Offline candidate rollouts also require the service.</p>
 <p><strong>Not yet implemented.</strong> Fitting traffic actors to the selected ground mesh, checkpointing
 traffic sessions and controlling CATK sampling through the run seed. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
 <h3 id="ego-dynamics">Ego dynamics<a class="headerlink" href="#ego-dynamics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2354,8 +2528,8 @@ therefore continue to occlude its recorded location. Cuboid silhouettes can diff
 vehicles. Rendered probes instead measure the reconstruction's visibility directly.</p>
 <h3 id="rendered-probe-occlusion">Rendered-probe occlusion<a class="headerlink" href="#rendered-probe-occlusion" title="Permanent link">&para;</a></h3>
 <p>Opaque white and black probe copies measure whether scene content hides inserted surfaces. Only
-sufficiently opaque asset pixels contribute probes. The renderer requires a client probe
-directory visible inside the NRE service. Path and mount rules are
+sufficiently opaque asset pixels contribute probes. The renderer requires <code>asset_directory</code>
+to be visible inside the NRE service. Path and mount rules are
 in <a href="../../reference/configuration/#nurec-closed-loop-settings">Configuration</a>.</p>
 <p>A captured <code>composition.plan</code> already contains this measured visibility. An arbitrary
 replacement object list needs a fresh render request. <code>SensorView.composite_plan</code> cannot obtain
@@ -2374,8 +2548,11 @@ operation-isolation rules.</p>
 <p>Subclass <code>Simulator</code> for configuration and <code>SimulatorRuntime</code> for native world operations.
 Declare dataset kinds, timing, command modes, stages, world settings, capture capabilities and
 identity.</p>
+<p>Declare the simulator's own recorded-history requirement in <code>past_steps</code>. If a sensor needs
+recorded data before the earliest observation, declare it in <code>observation_lead_steps</code>, which
+adds to the driving system's history.</p>
 <p>Declare every view-capable sensor in <code>sensors</code> and cameras in <code>camera_sensors</code>. Native views
-supply capture data and sensor geometry. The shared runtime owns camera composition. A
+supply capture data and sensor geometry. The shared runtime owns object-capture integration. A
 lightweight <code>sensor_geometry</code> implementation avoids image/depth work for projection-only
 requests. Past-capable implementations supply recorded observations and recorded camera views
 for start-object composition.</p>

@@ -1076,6 +1076,8 @@
       
         
       
+        
+      
     
     
     
@@ -1201,6 +1203,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1512,6 +1542,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lidar-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LiDAR data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#carla-lidar-data" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1800,6 +1841,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lidar-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LiDAR data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#carla-lidar-data" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1938,7 +1990,7 @@ sensor images.</p>
     R-&gt;&gt;L: initialization event
     loop each decision
         R-&gt;&gt;S: observe and state without advancement
-        S--&gt;&gt;R: capture with composed world objects
+        S--&gt;&gt;R: capture with inserted world objects
         R-&gt;&gt;A: step subscribed snapshots
         A--&gt;&gt;R: world, sensor and AVStack actions
         R-&gt;&gt;R: sensor actions, then sensor environment
@@ -1960,7 +2012,7 @@ observation for <code>AVStack.reset</code> and the first driving call. The local
 them. World actions returned during a decision affect the next capture. Sensor and <code>AVStack</code>
 actions affect the current decision.</p>
 <p><code>InsertObject</code> is a <code>WorldAttackAction</code> with <code>setup_ticks=0</code>. A setup insertion appears in the
-first capture. A step insertion appears in the next capture. Camera composition precedes
+first capture. A step insertion appears in the next capture. World-object capture precedes
 sensor actions, sensor environment and <code>ObservationPipeline</code>. Framework objects remain separate
 from native actors in <code>WorldSnapshot.objects</code>.</p>
 <h3 id="attack-actions">Attack actions<a class="headerlink" href="#attack-actions" title="Permanent link">&para;</a></h3>
@@ -1998,7 +2050,68 @@ are x right, y down, z forward. <code>sensor_from_world</code> describes the sen
 left, z up. It is <code>None</code> when the sensor pose is unavailable. The two transforms are distinct for
 cameras. <code>SimulatorRuntime.sensors</code> lists all views. <code>camera_sensors</code> lists its camera subset.
 <code>SensorView.objects</code> contains the inserted objects associated with the capture.</p>
+<p><code>object_masks</code> maps those same object IDs to boolean H×W masks of visible pixels in <code>data</code>.
+Each mask's pixel count equals the corresponding <code>ObjectVisibility.visible_pixels</code>.
+<code>composition</code> exists only for composite insertion. It describes how the framework composed
+objects into <code>data</code>, and <code>composition.plan.apply(composition.background).image</code> reproduces it.
+Other captures have <code>composition=None</code>. <code>object_occlusion</code> is <code>geometry</code>, <code>rendered_probes</code> or
+<code>scene_render</code>. Scene insertion uses <code>occlusion_tolerance_m=0.0</code>. See
+<a href="../../guides/simulators/#inserted-world-objects">Simulators</a> for insertion and visibility behavior.</p>
+<h3 id="lidar-data">LiDAR data<a class="headerlink" href="#lidar-data" title="Permanent link">&para;</a></h3>
+<p><code>PointCloud</code> stores a scan in the sensor coordinate frame at scan end. Its axes are x forward,
+y left and z up, with distances in meters. <code>Observation.sensor_data</code> stores the cloud and
+<code>Observation.calibration</code> stores its <code>LidarCalibration</code> under the same sensor name.</p>
+<table>
+<thead>
+<tr>
+<th>Record</th>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PointCloud</code></td>
+<td><code>points</code></td>
+<td>Finite float32 array of shape <code>(N, 3)</code> in scan-end sensor coordinates</td>
+</tr>
+<tr>
+<td><code>PointCloud</code></td>
+<td><code>intensity</code></td>
+<td>Float32 array of shape <code>(N,)</code> in <code>[0, 1]</code>, or <code>None</code> when unavailable</td>
+</tr>
+<tr>
+<td><code>LidarCalibration</code></td>
+<td><code>rig_from_lidar</code></td>
+<td>A 4×4 rigid transform from sensor coordinates to rig coordinates</td>
+</tr>
+<tr>
+<td><code>LidarCalibration</code></td>
+<td><code>spin_period_s</code></td>
+<td>Duration of one complete scan in seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Both records can be saved in <code>RunLog</code>. Point and intensity arrays use payload shards.
+<code>sensor_from_world</code> in a LiDAR view uses the scan-end sensor pose.</p>
+<p>This action shifts a framework point cloud one meter forward without changing its intensity:</p>
+<!-- runnable -->
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.attack.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">SensorAttackAction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.data_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointCloud</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ShiftPointCloudAction</span><span class="p">(</span><span class="n">SensorAttackAction</span><span class="p">):</span>
+    <span class="n">sensor</span> <span class="o">=</span> <span class="s2">"lidar_gt_top_p128"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">1.0</span>
+        <span class="n">intensity</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">intensity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">intensity</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">PointCloud</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">intensity</span><span class="p">)</span>
+</code></pre></div>
+<p>Return it from <code>AttackRuntime.step</code>. The runner replaces the whole <code>PointCloud</code> payload.</p>
 <h3 id="carla-lidar-data">CARLA LiDAR data<a class="headerlink" href="#carla-lidar-data" title="Permanent link">&para;</a></h3>
+<p>CARLA LiDAR keeps avstack's native format, which <code>ModularAVStack</code> passes to avstack unchanged.</p>
 <p>A CARLA LiDAR view contains an owned <code>SensorCapture</code>. <code>raw_data</code> holds packed float32 records x,
 y, z, intensity: four values, or 16 bytes, per point. These bytes use CARLA sensor axes: x
 forward, y right, z up. <code>sensor_from_world</code> uses the canonical body axes whose y points left.</p>
@@ -2174,8 +2287,34 @@ receipt has a <code>details</code> mapping, empty when there is no detail. <code
 <code>object_id</code>, <code>asset_category</code> and <code>world_from_object</code>.</p>
 <p><code>StepRecord.object_visibility</code>, the initialization event and <code>RenderResult.object_visibility</code>
 use object ID → camera name → <code>ObjectVisibility</code>. <code>ObjectVisibility</code> contains <code>occlusion_source</code>,
-<code>ignored_occluders</code> and <code>visible_pixels</code>. Visibility and composition behavior is described
-under <a href="../../guides/simulators/#inserted-world-objects">Object visibility</a>.</p>
+<code>ignored_occluders</code> and <code>visible_pixels</code>.</p>
+<table>
+<thead>
+<tr>
+<th><code>occlusion_source</code></th>
+<th>Visibility evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depth</code></td>
+<td>Aligned scene depth</td>
+</tr>
+<tr>
+<td><code>actor_cuboids</code></td>
+<td>Actor box geometry</td>
+</tr>
+<tr>
+<td><code>scene_visibility</code></td>
+<td>Rendered probes used during composite insertion</td>
+</tr>
+<tr>
+<td><code>scene_render</code></td>
+<td>Objects rendered together with the scene</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../../guides/simulators/#inserted-world-objects">Simulators</a> for visibility and composition.</p>
 <p><code>EventRecord</code> captures initialization, termination and failure/cleanup information outside a
 decision. NuRec termination includes <code>ground_contact_failures</code>, counts by rejected ground-fit
 reason. A run ended by its <code>terminate_when</code> predicate records <code>terminated_by_condition: true</code>.

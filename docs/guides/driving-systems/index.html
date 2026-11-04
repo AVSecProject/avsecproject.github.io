@@ -1092,6 +1092,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="NuRec rule-based driving system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-vehicle-following" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional vehicle following
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1272,6 +1300,8 @@
       
         
       
+        
+      
     
     
     
@@ -1397,6 +1427,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1830,6 +1888,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="NuRec rule-based driving system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-vehicle-following" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional vehicle following
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1984,14 +2070,16 @@ throttle. Its learned model loads lazily and can be shared with bound scorers.</
 <p>This policy exposes 2D component diagnostics, not canonical 3D detections. <code>DetectionMetrics</code>
 requires a driving system that provides 3D detections. See <a href="../evaluation/">Evaluation</a>.</p>
 <h2 id="nurec-rule-based-driving-system">NuRec rule-based driving system<a class="headerlink" href="#nurec-rule-based-driving-system" title="Permanent link">&para;</a></h2>
-<p><code>RuleBasedAVStack</code> composes a <code>YOLOXDetector</code>, <code>StopSignTracker</code> and <code>StopSignPlanner</code>.
-Its processing chain is detection, known-size ranging, bearing EKF tracking and trajectory
-planning. <code>YOLOXDetector</code> is a general COCO detector. The stack uses its <code>stop sign</code> detections.
-It requires the selected camera's <code>CameraCalibration</code> and a planar ego state.</p>
+<p><code>RuleBasedAVStack</code> composes a <code>YOLOXDetector</code>, <code>StopSignTracker</code> and <code>RuleBasedPlanner</code>.
+It requires the selected camera's <code>CameraCalibration</code> and a planar ego state. Detection runs
+once per decision. Stop-sign detections use known-size ranging and bearing EKF tracking.
+Supplying a <code>VehicleTracker</code> also enables vehicle following, which additionally requires the
+selected LiDAR's <code>PointCloud</code> and <code>LidarCalibration</code>. With <code>vehicle_tracker: null</code>, vehicle
+detections are ignored and the stop-sign driving behavior is preserved.</p>
 <p>The cruise reference <code>v0</code> is <code>cruise_speed_mps</code>, or the speed at reset bounded below by
-<code>min_cruise_speed_mps</code> when cruise speed is omitted. The tracker never deletes tracks, adds no
-process noise, and wraps bearing residuals across ±π. Stop signs facing another direction can
-still trigger a stop if they pass the route filters. <code>provides_detections=False</code> makes this
+<code>min_cruise_speed_mps</code> when cruise speed is omitted. The stop-sign tracker never deletes tracks,
+adds no process noise, and wraps bearing residuals across ±π. Stop signs facing another direction
+can still trigger a stop if they pass the route filters. <code>provides_detections=False</code> makes this
 stack incompatible with <code>DetectionMetrics</code>.</p>
 <p>The stack selects stop-sign boxes and confidence. Ranging uses the angular height of a
 box and the assumed sign height, then transforms the point from optical-camera coordinates into
@@ -2011,13 +2099,218 @@ available and can produce a stop beyond the target.</p>
 <p>After the speed and position criteria are met, the planner holds its stop for the configured
 duration, marks that track served, and resumes cruise. Reset clears tracking and planning state.
 The <a href="../../reference/python-api/">Python API</a> lists defaults, parameter meanings and errors.</p>
-<p>The component log records boxes, estimated positions, tracks with covariance summaries, target
-distance, state and braking. <code>acceleration_mps2</code> and <code>planned_speed_mps</code> describe the first
+<h3 id="optional-vehicle-following">Optional vehicle following<a class="headerlink" href="#optional-vehicle-following" title="Permanent link">&para;</a></h3>
+<p>Enable the tracker in the driving-system options:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">avstack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuleBasedAVStack</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">vehicle_tracker</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.closed_loop.avstacks.implemented.modules:VehicleTracker</span>
+</code></pre></div>
+<p>Keep the detector options from the supplied configuration. <code>vehicle_labels</code> defaults to
+<code>[car, truck, bus]</code> and can select other detector class names. <code>lidar_id</code> defaults to
+<code>lidar_gt_top_p128</code>. The calibrated sensor transform converts LiDAR points to rig coordinates.</p>
+<p>With following enabled, detection uses
+<code>min(detector.score_threshold, vehicle_tracker.low_score_threshold)</code> for that call.
+Stop signs still require <code>detector.score_threshold</code>. This remains the detector's configured
+threshold and the bound scorer's <code>decision_threshold</code>. With following disabled, detection uses
+the configured threshold and does not read LiDAR.</p>
+<p><code>estimate_vehicle_face_points(box_xyxy, calibration, rig_points)</code> projects the rig-coordinate
+LiDAR points into the camera. It keeps points more than 0.5 m forward in camera coordinates,
+then selects the box's middle 80% horizontally and 10% to 60% vertically from its top.
+Horizontal distance to the camera defines a near cluster: points no farther than the 20th
+percentile plus 1 m. Both the selected region and this cluster require at least five points.
+Insufficient points raise <code>ValueError</code>, and the stack skips and counts that vehicle detection.</p>
+<p>The result is a <code>(3, 3)</code> rig-coordinate array in meters, ordered left, center and right, with
+<code>z = 0</code> as a horizontal representation. All three x coordinates use the near cluster's 10th
+percentile. Left and right y use its 95th and 5th percentiles, respectively. Center y is the
+midpoint of those two endpoints.</p>
+<p><code>VehicleTracker.update(vehicle_state, t, face_points_rig, scores)</code> transforms each three-point
+measurement into horizontal world coordinates using ego's planar pose. Scores correspond
+one-to-one with measurements and must be finite in <code>[0, 1]</code>. Each track has a constant-velocity
+Kalman state <code>[x, y, vx, vy]</code>. Prediction uses white acceleration noise.
+The face midpoint supplies the position measurement, with isotropic standard deviation
+<code>max(min_measurement_noise_m, measurement_noise_fraction * horizontal_range)</code>.
+Here horizontal range is measured from the rig origin to the face midpoint.
+Initial position covariance uses that measurement variance. Initial velocity is zero, with
+standard deviation <code>initial_velocity_sigma_mps</code>.</p>
+<p>ByteTrack-style association has two stages. Measurements at or above <code>high_score_threshold</code>
+first associate with all retained tracks, including lost tracks. Measurements from
+<code>low_score_threshold</code> up to but excluding the high threshold then associate only with tracks
+matched in the previous update and still unmatched in the current update. Each stage greedily
+selects the smallest squared Mahalanobis innovation within <code>association_gate_chi2</code>, using each
+track and measurement once. Only unmatched high-score measurements create tracks.
+The score thresholds must satisfy <code>0 &lt;= low_score_threshold &lt;= high_score_threshold &lt;= 1</code>.</p>
+<p>Associated tracks receive a Kalman update. <code>half_width_m</code> is half the measured visible face's
+lateral span. Unassociated tracks retain their predicted motion for re-association and are
+deleted after <code>max_missed_updates</code> consecutive misses. <code>tracks</code> returns independent snapshots
+only for tracks matched in the latest update and with at least <code>min_hits</code> measurements,
+counting initialization as the first hit. Lost tracks remain internal. Equal timestamps allow
+measurement updates without prediction. Backward timestamps are rejected. <code>reset()</code> clears
+the tracks and timestamp history.</p>
+<table>
+<thead>
+<tr>
+<th>Tracker option</th>
+<th style="text-align: right;">Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>acceleration_noise_mps2</code></td>
+<td style="text-align: right;">2 m/s²</td>
+</tr>
+<tr>
+<td><code>min_measurement_noise_m</code></td>
+<td style="text-align: right;">0.3 m</td>
+</tr>
+<tr>
+<td><code>measurement_noise_fraction</code></td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr>
+<td><code>initial_velocity_sigma_mps</code></td>
+<td style="text-align: right;">5 m/s</td>
+</tr>
+<tr>
+<td><code>association_gate_chi2</code></td>
+<td style="text-align: right;">9.21</td>
+</tr>
+<tr>
+<td><code>high_score_threshold</code></td>
+<td style="text-align: right;">0.5</td>
+</tr>
+<tr>
+<td><code>low_score_threshold</code></td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr>
+<td><code>min_hits</code></td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td><code>max_missed_updates</code></td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+<p>The planner projects each vehicle onto the navigation route, with signed lateral offset
+positive to the left. The vehicle's lateral interval is its center offset plus or minus
+<code>half_width_m</code>. It is relevant when that interval overlaps the ego corridor
+<code>[-(ego_half_width_m + lateral_margin_m), +(ego_half_width_m + lateral_margin_m)]</code> and its
+forward arc distance is positive and within <code>vehicle_lookahead_m</code>. Touching interval edges
+counts as overlap. The nearest eligible vehicle ahead supplies the lead.
+The planner takes its velocity along the route tangent, bounded below by zero.
+The distance from ego's origin to that visible face is reduced by <code>ego_front_offset_m</code> to
+obtain the following gap <code>s</code>. The points represent the near side of the detected vehicle,
+so the planner does not subtract another vehicle half-length.</p>
+<p>Following uses the IDM interaction term:</p>
+<div class="highlight"><pre><span></span><code>s_star = s0 + max(0, v*T + v*(v - v_lead)/(2*sqrt(a_max*b)))
+a_follow = a_max * (1 - (v/v0)**delta - (s_star/s)**2)
+</code></pre></div>
+<p>Here <code>v</code> is ego speed, <code>v0</code> the cruise reference, <code>v_lead</code> the lead speed and <code>delta</code> the existing
+acceleration exponent. <code>a_max</code> is <code>max_acceleration_mps2</code>, and <code>b</code> is
+<code>comfortable_deceleration_mps2</code>. A nonpositive gap requests maximum deceleration. Every forecast
+step uses the smaller of the sign/free-road acceleration and following acceleration, then
+applies the existing acceleration limits. The lead advances along the route at constant speed
+within the forecast. Timed stop-sign holds still keep ego stationary.</p>
+<table>
+<thead>
+<tr>
+<th>Planner option</th>
+<th>Meaning</th>
+<th style="text-align: right;">Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vehicle_lookahead_m</code></td>
+<td>Maximum forward route distance of an eligible lead</td>
+<td style="text-align: right;">60 m</td>
+</tr>
+<tr>
+<td><code>ego_half_width_m</code></td>
+<td>Half of ego's horizontal width</td>
+<td style="text-align: right;">1 m</td>
+</tr>
+<tr>
+<td><code>lateral_margin_m</code></td>
+<td>Additional corridor width on each side</td>
+<td style="text-align: right;">0.3 m</td>
+</tr>
+<tr>
+<td><code>min_gap_m</code> (<code>s0</code>)</td>
+<td>Desired stationary following gap</td>
+<td style="text-align: right;">2 m</td>
+</tr>
+<tr>
+<td><code>time_headway_s</code> (<code>T</code>)</td>
+<td>Desired time headway</td>
+<td style="text-align: right;">1.5 s</td>
+</tr>
+<tr>
+<td><code>ego_front_offset_m</code></td>
+<td>Distance from the rig origin to ego's front</td>
+<td style="text-align: right;">3.7 m</td>
+</tr>
+</tbody>
+</table>
+<p><code>min_gap_m</code> is a desired gap, not a guaranteed minimum clearance. A very close lead can cease
+to be detected. Without a matched lead, the planner resumes cruise unless a stop sign constrains
+it. Occlusion and truncated boxes can distort the estimated face position and width.
+NuRec LiDAR returns from scene-inserted assets have larger surface error near the ground. See
+<a href="../simulators/#scene-insertion">Scene insertion</a>. The system follows the centerline without lane
+changes. Limited braking and late detection can cause an overlap. Recorded non-reactive traffic
+can also hit ego from behind. <code>DrivingMetrics.collision</code> records physical box overlaps.</p>
+<h3 id="component-outputs">Component outputs<a class="headerlink" href="#component-outputs" title="Permanent link">&para;</a></h3>
+<p>The component log retains sign boxes, position estimates, world tracks, target distance, state
+and braking. <code>state</code> describes stop-sign handling. Vehicle following adds:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vehicle_detections</code></td>
+<td>Vehicle boxes, scores and class labels at the per-call detection threshold</td>
+</tr>
+<tr>
+<td><code>vehicle_estimates</code></td>
+<td><code>rig_face_points_m</code> left/center/right points and <code>detection_index</code></td>
+</tr>
+<tr>
+<td><code>vehicle_tracks</code></td>
+<td>Currently matched, confirmed track IDs, world positions/velocities, <code>half_width_m</code> and <code>hits</code></td>
+</tr>
+<tr>
+<td><code>skipped_vehicle_detections</code></td>
+<td>Number of vehicle boxes without enough LiDAR points</td>
+</tr>
+<tr>
+<td><code>lead_track_id</code></td>
+<td>Selected vehicle track ID, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>lead_gap_m</code></td>
+<td>Along-route distance from ego's front to the visible face, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>lead_speed_mps</code></td>
+<td>Lead speed along the route, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>lead_lateral_interval_m</code></td>
+<td>Lead's signed lateral interval in meters, or <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>lead_gap_m</code> is an estimated face distance. It differs from the ground-truth bounding-box clearance
+reported by <code>DrivingMetrics</code>. <code>acceleration_mps2</code> and <code>planned_speed_mps</code> describe the first
 planned trajectory step. A controller tracks the whole forecast and can slow the vehicle while
-that planned first-step acceleration is positive.</p>
-<p>This system handles stop signs only. It follows the navigation centerline without perceiving
-other vehicles or obstacles. Recorded non-reactive traffic can hit ego from behind. Intruding
-vehicles can also overlap its path. <code>DrivingMetrics.collision</code> records those physical overlaps.</p>
+that planned first-step acceleration is positive. Reset clears both trackers and planning state.</p>
 <h2 id="alpamayo">Alpamayo<a class="headerlink" href="#alpamayo" title="Permanent link">&para;</a></h2>
 <p><code>AlpamayoAVStack</code> uses AlpaSim's policy interface to turn camera input, ego pose history, speed,
 acceleration and navigation into a rig-frame trajectory. Navigation comes from

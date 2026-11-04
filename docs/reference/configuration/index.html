@@ -1076,6 +1076,8 @@
       
         
       
+        
+      
     
     
     
@@ -1201,6 +1203,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1529,6 +1559,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mesh-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mesh assets
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1977,6 +2018,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mesh-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mesh assets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#driving-specification" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2149,7 +2201,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>attacks.&lt;name&gt;.type</code></td>
-<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
+<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
 </tr>
 <tr>
 <td><code>environment.sensors[].type</code></td>
@@ -2397,14 +2449,19 @@ from <code>NuRecDataset</code>. Reset requires <code>ScenarioStart</code>. Const
 <td><code>mesh</code>, <code>mesh_ground</code></td>
 </tr>
 <tr>
+<td><code>object_insertion</code></td>
+<td><code>composite</code></td>
+<td><code>composite</code>, <code>scene</code>. Scene insertion requires <code>renderer.asset_directory</code></td>
+</tr>
+<tr>
 <td><code>object_occlusion</code></td>
 <td><code>rendered_probes</code></td>
-<td><code>rendered_probes</code>, <code>geometry</code></td>
+<td><code>rendered_probes</code>, <code>geometry</code>. Applies only to composite insertion</td>
 </tr>
 <tr>
 <td><code>occlusion_tolerance_m</code></td>
 <td>0.15</td>
-<td>Nonnegative scene occlusion tolerance in meters</td>
+<td>Nonnegative scene occlusion tolerance in meters. Applies only to composite insertion</td>
 </tr>
 <tr>
 <td><code>traffic</code></td>
@@ -2434,16 +2491,21 @@ ground contact with <code>AlpaSimController</code>.</p>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">127.0.0.1:50051</span>
 <span class="w">        </span><span class="nt">cameras</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">camera_front_wide_120fov</span><span class="p p-Indicator">]</span>
-<span class="w">        </span><span class="nt">probe_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../results/nre-probes</span>
-<span class="w">        </span><span class="nt">server_probe_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/mnt/nre-probes</span>
+<span class="w">        </span><span class="nt">lidar</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lidar_gt_top_p128</span>
+<span class="w">        </span><span class="nt">asset_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../results/nre-assets</span>
 <span class="w">    </span><span class="nt">dynamics</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.closed_loop.simulators.ego_dynamics:AlpaSimController</span>
 </code></pre></div>
 <p>NuRec cameras render at their native resolution.
-<code>probe_directory</code> is a client-side path resolved relative to the YAML file.
-<code>server_probe_directory</code> is an unchanged string in the server's filesystem namespace. The server
-must be able to read the probe files. See
+<code>NuRecRenderer.lidar</code> defaults to <code>null</code>. Set it to the scene's logical LiDAR sensor name to
+collect scans. See <a href="../../guides/simulators/#lidar">NuRec LiDAR</a> for timing and sensor constraints.</p>
+<p><code>NuRecRenderer.asset_directory</code> defaults to <code>null</code>. It is the client-side directory for generated
+NRE assets, including occlusion probes and scene objects. Its path resolves relative to the YAML
+file. <code>server_asset_directory</code> also defaults to <code>null</code>, using the same absolute path as the
+client. Set this unchanged server-side string only when connecting to an externally managed NRE
+whose asset mount has a different path. See
 <a href="../cli/#automatic-local-services">automatic local services</a> for startup and mounts.</p>
+<p>For insertion behavior, see <a href="../../guides/simulators/#inserted-world-objects">Inserted world objects</a>.</p>
 <h3 id="reactive-traffic">Reactive traffic<a class="headerlink" href="#reactive-traffic" title="Permanent link">&para;</a></h3>
 <p>Add the following under <code>simulator.options</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">traffic</span><span class="p">:</span>
@@ -2456,6 +2518,76 @@ must be able to read the probe files. See
 <p>Traffic defaults to <code>null</code>. Enabling it requires 0.1 s decisions and <code>history_steps - 1</code> preceding
 recorded decisions. Traffic configuration affects preparation identity. <code>metadata.load</code> can
 share segments between modes. Services are managed by <a href="../cli/#automatic-local-services">run</a>.</p>
+<h2 id="mesh-assets">Mesh assets<a class="headerlink" href="#mesh-assets" title="Permanent link">&para;</a></h2>
+<p>An attack option can construct a <code>MeshAsset</code> with <code>load_mesh_asset</code>. This example assumes a
+user-provided attack with an <code>asset</code> option:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">attacks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">vehicle</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_attacks:MeshInsertionAttack</span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">asset</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.rendering:load_mesh_asset</span>
+<span class="w">        </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../models/vehicle.glb</span>
+<span class="w">          </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vehicle</span>
+<span class="w">          </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">          </span><span class="nt">forward_axis</span><span class="p">:</span><span class="w"> </span><span class="s">"+z"</span>
+<span class="w">          </span><span class="nt">up_axis</span><span class="p">:</span><span class="w"> </span><span class="s">"+y"</span>
+<span class="w">          </span><span class="nt">origin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bottom_center</span>
+</code></pre></div>
+<p><code>path</code> is relative to the YAML file. Supported suffixes are OBJ, glTF/GLB, mesh PLY and STL,
+case-insensitively. OBJ materials and textures, and glTF buffers and textures, are resolved
+relative to the model file.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>category</code></td>
+<td>required</td>
+<td>Nonempty category recorded for the object</td>
+</tr>
+<tr>
+<td><code>scale</code></td>
+<td>1.0</td>
+<td>Positive finite conversion from file units to meters</td>
+</tr>
+<tr>
+<td><code>forward_axis</code></td>
+<td><code>"+x"</code></td>
+<td>File axis mapped to forward</td>
+</tr>
+<tr>
+<td><code>up_axis</code></td>
+<td><code>"+z"</code></td>
+<td>Orthogonal file axis mapped to up</td>
+</tr>
+<tr>
+<td><code>origin</code></td>
+<td><code>bottom_center</code></td>
+<td>Recenter the bounding box horizontally and place its bottom at zero</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td><code>null</code></td>
+<td>RGB or RGBA fallback required only when the file has no colors</td>
+</tr>
+</tbody>
+</table>
+<p>Axis names are <code>±x</code>, <code>±y</code> or <code>±z</code>, with right-handed file coordinates.
+For glTF files with +Y up and +Z forward, use <code>up_axis: "+y"</code> and <code>forward_axis: "+z"</code>.
+The loader does not infer axes. With <code>origin: file</code>, the transformed file origin is retained,
+including a model's ground clearance, and vertices below z = 0 are rejected.
+Supplying <code>color</code> for an already colored file is an error.</p>
+<p><strong>Not yet implemented.</strong> FBX and USD loading. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
+<p><strong>Not yet implemented.</strong> 3DGS Gaussian PLY assets. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
 <h2 id="driving-specification">Driving specification<a class="headerlink" href="#driving-specification" title="Permanent link">&para;</a></h2>
 <p><code>avstack.type</code> selects an <code>AVStack</code> class or factory. Its options are passed to each fresh
 instance. A constructor declaring <code>seed</code> receives the run seed. Explicitly writing that reserved
@@ -2644,7 +2776,8 @@ Severity is in [0, 1] and defaults to 0.5. <code>ColorTemp</code> also accepts
 </table>
 <p>Empty <code>sensor_ids</code> retains no image payloads. State, commands, actions, outputs, available
 components and detections are recorded every decision. Reevaluation cannot recover omitted
-sensor payloads.</p>
+sensor payloads. With an output directory, recorded sensor payloads stay on disk. Logs in
+experiment results then have empty observation <code>sensor_data</code>, and <code>RunLog.read(path)</code> loads it.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">runs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">recording</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">sensor_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">front</span><span class="p p-Indicator">]</span>

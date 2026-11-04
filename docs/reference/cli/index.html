@@ -1076,6 +1076,8 @@
       
         
       
+        
+      
     
     
     
@@ -1201,6 +1203,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -2010,10 +2040,10 @@ command are stopped and removed, in reverse startup order. Cleanup errors are at
 active exception. After a completed experiment they are reported without replacing its result.
 A killed command can leave its exited container behind. The next start removes it, following the
 <a href="#nre">NRE rules</a> for existing containers.</p>
-<p>NRE startup creates its client probe directory. Docker mounts each archive read-only at
-<code>/mnt/nre-data/&lt;filename&gt;</code> and mounts the probe directory at <code>server_probe_directory</code>, or at the
-same absolute client path when that option is <code>null</code>. Archive filenames must be unique. The
-Compose host-path and Docker access setup is described
+<p>NRE startup creates its client asset directory. Docker mounts each archive read-only at
+<code>/mnt/nre-data/&lt;filename&gt;</code> and mounts the asset directory read-only at the same absolute client
+and server path by default. An explicit <code>server_asset_directory</code> sets a different mount path.
+Archive filenames must be unique. The Compose host-path and Docker access setup is described
 in <a href="../../getting-started/installation/">Installation</a>.</p>
 <p>The optional manual service commands below support reuse across multiple experiments.</p>
 <h2 id="evaluate">Evaluate<a class="headerlink" href="#evaluate" title="Permanent link">&para;</a></h2>
@@ -2066,7 +2096,7 @@ loads the configuration, starts Docker and waits for <code>Serving on</code>.</p
 </tbody>
 </table>
 <p>The configuration must contain <code>NuRecDataset</code> and <code>NuRecRenderer</code> with a local endpoint. This
-command does not validate experiment environments. Archive and probe mounts follow the
+command does not validate experiment environments. Archive and asset mounts follow the
 <a href="#automatic-local-services">automatic service rules</a>.</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>nre<span class="w"> </span>serve<span class="w"> </span>configs/nurec_stop_sign_patch_alpamayo_2601.yaml<span class="w"> </span>--gpu<span class="w"> </span>N
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>nre<span class="w"> </span>serve<span class="w"> </span>configs/nurec_stop_sign_patch_alpamayo_2601.yaml<span class="w"> </span>--gpu<span class="w"> </span>N<span class="w"> </span>--dry-run
@@ -2157,14 +2187,20 @@ Checkpoint and retry behavior follow
   evaluation_report.html
 </code></pre></div>
 <p>Each attack directory holds the selected segments in <code>metadata.json</code>, its artifacts in
-<code>artifacts/</code> and its offline report in <code>offline_report/</code>. A failed or interrupted offline phase
-moves its partial report to <code>incomplete_offline_reports/</code> before the phase runs again. Artifact
-filenames above describe the default trusted-pickle format. Attacks may override artifact
-persistence, and their files stay inside <code>artifacts/</code>. Segment numbers are global unit indexes. Each run directory contains
+<code>artifacts/</code> and its offline report in <code>offline_report/</code>. The <code>artifacts/</code> directory is created
+only when the offline phase returns a value other than <code>None</code>. A failed or interrupted offline
+phase moves its partial report to <code>incomplete_offline_reports/</code> before the phase runs again.
+Artifact filenames above describe the default trusted-pickle format. Attacks may override
+artifact persistence, and their files stay inside <code>artifacts/</code>. Segment numbers are global unit
+indexes. Each run directory contains
 <code>manifest.json</code>, published Parquet step/event parts and payload shards belonging to its
 <a href="../runtime/#runlog">RunLog</a>. Offline report content is described in
 <a href="../../guides/optimization/">Optimization</a>, and evaluation content
 in <a href="../../guides/evaluation/">Evaluation</a>.</p>
+<p>Preparation manifests list attacks with saved artifacts in <code>attacks_with_artifacts</code>, in
+configuration order. <code>preparation-progress.json</code> includes only completed attacks in this list.
+Loading uses the list and ignores unlisted artifact directories. Manifests without this field
+load artifacts for every completed attack.</p>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

@@ -706,6 +706,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vehicle-insertion-attack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vehicle insertion attack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1356,6 +1367,8 @@
       
         
       
+        
+      
     
     
     
@@ -1481,6 +1494,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="docs/examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -2016,6 +2057,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vehicle-insertion-attack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vehicle insertion attack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2132,9 +2184,8 @@ model (white-box, PGD <a href="#references">[1]</a>) or with queries only (black
 </div>
 <div class="avs-card">
 <h3 id="record-and-replay-runs">Record and replay runs<a class="headerlink" href="#record-and-replay-runs" title="Permanent link">&para;</a></h3>
-<p>Every run saves the camera input the driving system received, its outputs and the vehicle's
-physical state. Measure, compare, replay and export frames later without running the simulator
-again.</p>
+<p>Every run saves the vehicle's state, the driving system's outputs and the sensor data you choose
+to record. Measure, compare, replay and export frames later without running the simulator again.</p>
 <p><a class="avs-card__link" href="docs/guides/evaluation/">Evaluation</a></p>
 </div>
 </div>
@@ -2178,11 +2229,12 @@ again.</p>
 <div class="avs-components">
 <p><strong>Closed-loop simulators:</strong> NuRec <a href="#references">[5]</a><a href="#references">[6]</a> with AlpaSim
 <a href="#references">[7]</a> · CARLA <a href="#references">[8]</a><br>
+<strong>Sensors:</strong> cameras · LiDAR<br>
 <strong>Driving systems:</strong> modular · end-to-end<br>
 <a href="docs/concepts/architecture/#supported-configurations">Supported configurations</a></p>
 </div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<div class="avs-grid avs-grid--wide">
+<div class="avs-grid avs-grid--two">
 <div class="avs-card">
 <h3 id="stop-sign-patch-attack">Stop-sign patch attack<a class="headerlink" href="#stop-sign-patch-attack" title="Permanent link">&para;</a></h3>
 <div class="avs-pair">
@@ -2232,6 +2284,22 @@ to the lighting of the scene.</p>
 <p>A patch is added to the back of a car in a NuRec drive while Alpamayo drives. Harmonization
 matches the patch to the lighting of the car.</p>
 <p><a class="avs-card__link" href="docs/examples/physical-patch/">Physical patch attack</a></p>
+</div>
+<div class="avs-card">
+<h3 id="vehicle-insertion-attack">Vehicle insertion attack<a class="headerlink" href="#vehicle-insertion-attack" title="Permanent link">&para;</a></h3>
+<div class="avs-pair">
+<figure>
+<p><img alt="Blue car inserted into the lane ahead on a NuRec road at dusk, seen by the front camera" src="assets/media/vehicle-insertion-camera.webp" /></p>
+<figcaption>Camera</figcaption>
+</figure>
+<figure>
+<p><img alt="The same moment in the LiDAR scan, drawn from the camera's viewpoint, where the inserted car appears as a dense car-shaped cluster of points" src="assets/media/vehicle-insertion-lidar.webp" /></p>
+<figcaption>LiDAR</figcaption>
+</figure>
+</div>
+<p>A car is added to a NuRec drive. It appears in both the camera image and the LiDAR scan, so the
+driving system sees the same car with both sensors.</p>
+<p><a class="avs-card__link" href="docs/examples/vehicle-insertion/">Vehicle insertion attack</a></p>
 </div>
 </div>
 <h2 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h2>

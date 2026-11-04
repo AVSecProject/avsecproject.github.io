@@ -1216,6 +1216,8 @@
       
         
       
+        
+      
     
     
     
@@ -1341,6 +1343,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1880,7 +1910,7 @@ Constructor signatures, constraints and errors are in the
 <span class="w">      </span><span class="nt">reported_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
 </code></pre></div>
 <p>A supplied attack uses the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/46e8f710c6e42a8ba726cfd67a1b0b1eb2c345ba/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
 constructor parameters as attributes with the same names, or override
 <code>configuration_parameters()</code> to describe the configured inputs. Filesystem options follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">Path resolution</a>.</p>
@@ -2040,7 +2070,9 @@ removal with the run's resources. This example needs no simulator server or mode
 <span class="k">assert</span> <span class="n">log</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"completed"</span>
 </code></pre></div>
 <p><code>ObjectAsset</code> uses a bottom-center local origin. Convert a map feature's reference point before
-placing the asset. Geometry records and asset constraints are in the
+placing the asset. <code>InsertObject</code> also accepts a <code>MeshAsset</code> for NuRec scene insertion.
+See <a href="../simulators/#inserted-world-objects">inserted world objects</a> for supported insertion modes.
+Geometry records and asset constraints are in the
 <a href="../../reference/python-api/">Python API</a>. This example derives a sign placement from a
 semantic map:</p>
 <!-- runnable -->
@@ -2122,6 +2154,7 @@ action. <a href="../optimization/">Optimization tools</a> explains the different
 <h2 id="persist-artifacts">Persist artifacts<a class="headerlink" href="#persist-artifacts" title="Permanent link">&para;</a></h2>
 <p>Return artifacts explicitly from <code>run_offline</code>. Pass them to each runtime. Override
 <code>save_artifacts</code> and <code>load_artifacts</code> together when a custom storage format is needed.
+Returning <code>None</code> creates no artifact files, and the runtime receives <code>None</code> after loading.
 Persistence must not change the attack's configured inputs. See the
 <a href="../../reference/python-api/#avsectesterattackattack">Attack API</a> for the storage contract.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>

@@ -1194,6 +1194,8 @@
       
         
       
+        
+      
     
     
     
@@ -1319,6 +1321,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1887,10 +1917,15 @@ for calibration, updates and evaluation:</p>
 Use <a href="../attacks/#offline-phase">candidate rollouts</a> when the score depends on a planned trajectory or
 physical response.</p>
 <h2 id="optimize-a-world-objects-texture">Optimize a world object's texture<a class="headerlink" href="#optimize-a-world-objects-texture" title="Permanent link">&para;</a></h2>
-<p>A captured <code>SensorView.composition</code> retains the background and the composition plan used for
-that capture. Reuse its plan when optimizing colors. In geometry occlusion mode, a clean view
-can also build a plan through <code>composite_plan</code>. The <a href="../simulators/">Simulator guide</a> describes
-that capability.</p>
+<p>Capture a view with the object inserted and pass its camera, <code>cam_from_world</code> and
+<code>object_masks[object_id]</code> as <code>scene_visibility</code> to <code>plan_composite</code>. Composite candidate colors
+over a clean render of the same frame. This works for composite and scene insertion. With
+composite insertion, <code>SensorView.composition</code> also retains the background and plan of the
+capture. In geometry occlusion mode, a clean view can build a plan through <code>composite_plan</code>.
+The <a href="../simulators/#inserted-world-objects">Simulator guide</a> describes these views.</p>
+<p>Plans fix object geometry, so gradients reach surface colors only. <strong>Not yet implemented.</strong>
+Shape optimization. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#shape-optimization-of-inserted-objects">TODO</a>.</p>
 <p>Differentiable harmonizers use the same floating-point computation during optimization and
 deployment, followed by uint8 rounding for deployment. This example checks that equivalence and
 backpropagates through <code>ExposureHarmonizer</code>:</p>

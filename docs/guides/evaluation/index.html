@@ -1216,6 +1216,8 @@
       
         
       
+        
+      
     
     
     
@@ -1341,6 +1343,34 @@
     
   
     Object insertion attack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/vehicle-insertion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle insertion attack
   
 
     
@@ -1865,7 +1895,7 @@ measurements do not receive another difference operation.</p>
 <tbody>
 <tr>
 <td><code>DrivingMetrics</code></td>
-<td>Physical speed, executed actuator braking, stopping, actor distance and geometric collision</td>
+<td>Physical speed, executed actuator braking, stopping, bounding-box distance and geometric collision with actors and inserted objects</td>
 </tr>
 <tr>
 <td><code>TrajectoryDeviation</code></td>
@@ -1889,6 +1919,15 @@ measurements do not receive another difference operation.</p>
 </tr>
 </tbody>
 </table>
+<p>Built-in metrics treat recorded actors and inserted world objects alike. A treatment that
+inserts objects includes them in its measurements, so paired differences include their effect.
+To distinguish the two kinds, write a custom <code>Metric</code> that reads <code>WorldSnapshot.actors</code> and
+<code>WorldSnapshot.objects</code> separately.</p>
+<p>Ego-to-object distances are the minimum separation between the two top-down bounding boxes,
+using yaw and horizontal dimensions. Overlapping or touching boxes have zero distance and
+count as a geometric collision.
+<code>DrivingMetrics</code> marks distance and collision unavailable if ego or any other participating
+object lacks a pose or bounding-box extent, unless an overlap was recorded.</p>
 <p>The <a href="../../reference/python-api/#avsectesterevaluationmetric">metric API</a> defines constructor
 parameters and unavailable conditions. The default set and YAML validation are described in
 <a href="../../reference/configuration/#evaluation">evaluation configuration</a>.</p>
@@ -1896,15 +1935,17 @@ parameters and unavailable conditions. The default set and YAML validation are d
 provide that evidence. Collision is bird's-eye oriented-box overlap, not a native
 collision-sensor event. <code>TrajectoryDeviation</code> compares true ego positions at equal decision
 indices, without time or route alignment.</p>
-<p><code>DetectionMetrics</code> matches detections to true actors in the capture-time ego frame, using sensor
-mounting geometry independently of model localization. Its range filtering is horizontal.
-Category matching follows <code>category_map</code> when configured. The thresholded detections do not
-define TN or AP/mAP.</p>
+<p><code>DetectionMetrics</code> matches detection positions to ground-truth box centres in the capture-time
+ego frame, using sensor mounting geometry independently of model localization. It greedily
+pairs detections with the nearest centres within <code>match_distance</code>. Its range filtering is
+horizontal. Category matching follows <code>category_map</code> when configured. The thresholded detections
+do not define TN or AP/mAP.</p>
 <p><code>StopLineMetrics</code> uses <code>segment.user_data["stop_line_id"]</code> to identify a stop line in the
 saved map and assumes the run starts before it. It uses the initial physical state and each
-decision's physical result. Distances are horizontal and positive before the first crossing,
-then negative. Crossing speed is interpolated between adjacent samples. Three distances
-distinguish stopping and physical braking:</p>
+decision's physical result. Distances to the line are horizontal and positive before the first
+crossing, then negative. Crossing speed is interpolated between adjacent samples. The post-line
+<code>min_vehicle_distance_after_line</code> considers only objects with <code>category == "vehicle"</code>.
+Three distances distinguish stopping and physical braking:</p>
 <ul>
 <li><code>distance_to_line_at_stop</code> uses the first sample below <code>stop_speed</code>, also used by
   <code>time_to_stop</code>. It is unavailable if the ego never stops.</li>
@@ -1978,7 +2019,9 @@ description provided".</p>
                 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">runs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 </code></pre></div>
 <p>Configure the class with a path such as <code>my_project.metrics:DecisionCount</code>. A metric reads
-recorded evidence and does not require simulator startup, dataset access or model inference.</p>
+recorded evidence and does not require simulator startup, dataset access or model inference.
+Saved runs reach metrics without sensor payloads, as described in
+<a href="../../reference/configuration/#recording">recording configuration</a>.</p>
 <h2 id="visualize-saved-observations">Visualize saved observations<a class="headerlink" href="#visualize-saved-observations" title="Permanent link">&para;</a></h2>
 <p>Retain the needed sensor payloads before execution using
 <a href="../../reference/configuration/#recording">recording configuration</a>. <code>camera_view</code> and
