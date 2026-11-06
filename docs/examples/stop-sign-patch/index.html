@@ -2002,25 +2002,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2361,8 +2361,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 <a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.
 <code>RuleBasedAVStack</code> has no reasoning text, so its configuration omits <code>ReasoningPhraseRate</code>.</p>
 <p>The repository includes the white-box results of both modular configurations in
-<a href="https://github.com/AVSecProject/AVSecTester/tree/dcabbf803e8a791156b9771ad402cc4f04b965eb/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
-and <a href="https://github.com/AVSecProject/AVSecTester/tree/dcabbf803e8a791156b9771ad402cc4f04b965eb/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
+<a href="https://github.com/AVSecProject/AVSecTester/tree/a56009e5f4cb779dd90863777ac00da180140ceb/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
+and <a href="https://github.com/AVSecProject/AVSecTester/tree/a56009e5f4cb779dd90863777ac00da180140ceb/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
 They contain the reports and deployed textures. Run logs and saved maps are not included, so
 <code>evaluate</code> cannot recompute these results. To rerun the closed loop with these textures, copy a
 configuration, set <code>runs.output</code> to a new directory and run it with <code>--prepared</code>.</p>
@@ -2396,7 +2396,7 @@ among those where the replica is visible in <code>camera_id</code>, the camera t
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and

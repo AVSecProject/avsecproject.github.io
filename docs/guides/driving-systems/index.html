@@ -2047,6 +2047,10 @@ See <a href="../../reference/configuration/#driving-specification">Configuration
 <li><code>observation</code> hooks.</li>
 </ol>
 <p>The pipeline owns the localizer lifecycle and does not process output commands.
+When localization changes the planar ego pose, the pipeline re-expresses the route in the
+estimated ego frame and keeps its world positions. Navigation then follows the model-visible
+pose, as a real vehicle locates its route with its own localization. A route requires finite
+planar <code>x</code>, <code>y</code> and <code>yaw</code> before and after localization.
 <a href="../../reference/runtime/">Runtime</a> defines the complete per-decision order and record formats.</p>
 <h3 id="recorded-input-history">Recorded input history<a class="headerlink" href="#recorded-input-history" title="Permanent link">&para;</a></h3>
 <p>History acquisition and processing follow
@@ -2055,11 +2059,15 @@ required history and is read without constructing the model.</p>
 <h2 id="avstack-modular-pipeline-modularavstack">avstack modular pipeline (<code>ModularAVStack</code>)<a class="headerlink" href="#avstack-modular-pipeline-modularavstack" title="Permanent link">&para;</a></h2>
 <p>The <code>*_modular_*</code> stop-sign configurations use <code>RuleBasedAVStack</code>, described below.</p>
 <p><code>ModularAVStack</code> wraps avstack's perception, tracking, planning and control pipeline. Each run
-gets fresh component histories. Native models and component outputs remain avstack objects.</p>
+gets fresh component histories. Native models and component outputs remain avstack objects.
+Before each decision, the vehicle body frame that carries the sensors moves to the model-visible
+<code>vehicle_state</code>. Sensors are mounted on the vehicle, so localization moves perceived objects
+in the world together with the ego and leaves their position relative to the ego unchanged.
+Recorded model inputs keep the captured body pose.</p>
 <p><code>instrument</code> captures selected component outputs. <code>detections</code> converts supported perception
-boxes to the true capture-time ego frame without another inference call. Model-visible
-localization does not change that coordinate conversion. Unsupported perception output returns
-<code>None</code>, while an empty sequence means supported perception with no detections.</p>
+boxes to the capture-time ego frame without another inference call. These ego-frame boxes do
+not depend on localization. Unsupported perception output returns <code>None</code>, while an empty
+sequence means supported perception with no detections.</p>
 <p><code>NativeHook</code> wraps explicitly registered native hook implementations. Registration modules can
 be listed in the hook configuration. The framework's phantom action can instead modify the
 declared perception stage directly. See <a href="../../reference/configuration/#hooks">Hooks</a>.</p>

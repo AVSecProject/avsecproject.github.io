@@ -2245,9 +2245,9 @@ Only base colors are rendered, without material, reflection or lighting simulati
 Alpha values of at least 128 are opaque. Mesh triangles used to occlude sensor-inserted content
 are treated as opaque regardless of their color alpha.</p>
 <p><strong>Not yet implemented.</strong> Mesh composite insertion, including white-box texture optimization.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#mesh-composite-insertion">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#mesh-composite-insertion">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> CARLA mesh insertion. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#carla-mesh-insertion">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#carla-mesh-insertion">TODO</a>.</p>
 <p>Composite insertion projects each asset into captured camera images, resolves nearest surfaces
 and applies visibility. NuRec also supports scene insertion, where NRE renders assets with the
 reconstruction into camera images and LiDAR. Set <code>object_insertion</code> to <code>composite</code> (the default)
@@ -2303,7 +2303,7 @@ of world insertion.</p>
 <p>See <a href="../attacks/#insert-a-world-object">Writing attacks</a> for insertion actions and
 <a href="../../reference/runtime/#runlog">Runtime records</a> for saved evidence.</p>
 <p><strong>Not yet implemented.</strong> CARLA scene insertion and non-camera insertion in composite mode.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
 <h2 id="carla">CARLA<a class="headerlink" href="#carla" title="Permanent link">&para;</a></h2>
 <p>A <code>CarlaDataset</code> supplies recipes describing map, spawns, sensors and prescribed motion.
 <code>CarlaSimulator</code> supplies the connection and synchronous timing settings. Each reset requires a
@@ -2383,7 +2383,7 @@ receives the native capture before camera composition.</p>
 <p>Reconstructed objects remain in the scene and can hide an inserted object placed very close
 to them.</p>
 <p><strong>Not yet implemented.</strong> Removing real objects from reconstructed scenes. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#remove-real-objects-from-reconstructed-scenes">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#remove-real-objects-from-reconstructed-scenes">TODO</a>.</p>
 <p>Scene-inserted assets appear in LiDAR for 26.04 scenes. In 26.01 scenes, LiDAR can pass through
 inserted assets. This is a limitation of that scene release.</p>
 <p>LiDAR returns from scene-inserted assets can lie behind the asset surface. The offset is larger
@@ -2415,11 +2415,11 @@ cameras.</p>
 <p>Reconstructed-scene defects may produce a small number of below-ground points in a scan.</p>
 <p>Supplied scenes provide no intensity. Intensity and no-return-ray simulation are
 <strong>Not yet implemented.</strong> See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-lidar-simulation">NuRec LiDAR simulation</a>.
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-lidar-simulation">NuRec LiDAR simulation</a>.
 Inserted objects appear in LiDAR with <a href="#scene-insertion">scene insertion</a>. Composite insertion
 changes camera images only.</p>
 <p><strong>Not yet implemented.</strong> Offline renders of a dataset's first frame while LiDAR is enabled. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-offline-lidar-sampling">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-offline-lidar-sampling">TODO</a>.</p>
 <h3 id="recorded-past-observations">Recorded past observations<a class="headerlink" href="#recorded-past-observations" title="Permanent link">&para;</a></h3>
 <p>After reset, <code>observe_past(count)</code> returns actual recorded observations before the selected
 start, oldest first, with negative run-relative timestamps and frames. It rejects insufficient
@@ -2470,7 +2470,7 @@ explicit world velocity advances the actor at fixed orientation until reset or a
 <code>control_actor</code> is unsupported. Without traffic simulation, checkpoints preserve actor
 overrides. Restoring a checkpoint creates a new capture of the restored state.</p>
 <p><strong>Not yet implemented.</strong> Checkpoint restoration with active render hooks. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#nurec-checkpoint-restoration-with-active-render-hooks">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-checkpoint-restoration-with-active-render-hooks">TODO</a>.</p>
 <h3 id="reactive-traffic">Reactive traffic<a class="headerlink" href="#reactive-traffic" title="Permanent link">&para;</a></h3>
 <p>Enable <code>AlpaSimTraffic</code> through <code>simulator.options.traffic</code>. YAML, timing and history follow
 <a href="../../reference/configuration/#reactive-traffic">Reactive traffic configuration</a>.</p>
@@ -2481,7 +2481,7 @@ backfills constant-velocity history and subsequent requests resend its complete 
 <p>Trajectories are not smoothed. Offline candidate rollouts also require the service.</p>
 <p><strong>Not yet implemented.</strong> Fitting traffic actors to the selected ground mesh, checkpointing
 traffic sessions and controlling CATK sampling through the run seed. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/dcabbf803e8a791156b9771ad402cc4f04b965eb/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
 <h3 id="ego-dynamics">Ego dynamics<a class="headerlink" href="#ego-dynamics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
