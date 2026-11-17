@@ -1885,6 +1885,19 @@ value produces a reason, not a zero difference.</p>
 trajectory distance. <code>StopImpact</code> evaluates both A-to-B and B-to-A stopping effects. These pair
 measurements do not receive another difference operation.</p>
 <h2 id="built-in-metrics">Built-in metrics<a class="headerlink" href="#built-in-metrics" title="Permanent link">&para;</a></h2>
+<p>Independent sensor clocks can leave decision-boundary raw observations empty. Physical
+evidence uses each sensor's latest acquisition up to the decision, regardless of input hooks
+removing its data. This includes visibility, geometry and detection-matching truth.
+<code>StepRecord.physical_captures</code> identifies these acquisitions. <code>ReplicaVisibility</code> and the visible
+condition of <code>SignDetection</code> follow this rule.</p>
+<p>Model association uses the latest frame delivered to the driving system. A declared
+<code>detection_sensor</code> selects this source, and <code>StepRecord.detection_capture_id</code> retains its ID across
+decisions without new delivery. Decisions before its first delivery are excluded. A run where the
+sensor never delivers has unavailable detection evidence. An undeclared source uses decision-time
+truth. <code>DetectionMetrics</code> and <code>SignDetection</code> exclude decisions where force-GT skipped the driver.
+Driving metrics use physical decision states. <code>DrivingMetrics.brake_steps</code>, <code>StopImpact</code> and the
+supplied stop-sign black-box stop-command outcome exclude <code>force_gt</code> decisions.
+Commands absent because driving was skipped are not stop commands.</p>
 <table>
 <thead>
 <tr>
@@ -2022,6 +2035,8 @@ description provided".</p>
 recorded evidence and does not require simulator startup, dataset access or model inference.
 Saved runs reach metrics without sensor payloads, as described in
 <a href="../../reference/configuration/#recording">recording configuration</a>.</p>
+<p>See <a href="#built-in-metrics">Built-in metrics</a> for acquisition truth, model associations and
+force-GT exclusions, and <a href="../../reference/runtime/#runlog">Runtime</a> for stored records.</p>
 <h2 id="visualize-saved-observations">Visualize saved observations<a class="headerlink" href="#visualize-saved-observations" title="Permanent link">&para;</a></h2>
 <p>Retain the needed sensor payloads before execution using
 <a href="../../reference/configuration/#recording">recording configuration</a>. <code>camera_view</code> and
@@ -2064,6 +2079,10 @@ neither <code>Experiment</code> nor a dataset. Save the returned report when per
 <span class="k">assert</span> <span class="n">report</span><span class="o">.</span><span class="n">notes</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"Existing in-memory log"</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">format_summary</span><span class="p">())</span>
 </code></pre></div>
+<p>Decision previews prefer recorded model images and otherwise use recorded raw images.
+A decision without an image payload has no image tile. Previews do not reconstruct a driver's cache.
+For frame-by-frame playback, select images from <code>RunLog.captures</code> and pass them to <code>save_gif</code>.
+<code>plot_group</code> shades force-GT intervals and plots executed actuator braking only outside them.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../reference/runtime/#runlog">Runtime</a>,
 <a href="../../reference/python-api/#avsectesterevaluation">the evaluation API</a>

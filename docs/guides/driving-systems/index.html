@@ -2053,17 +2053,39 @@ pose, as a real vehicle locates its route with its own localization. A route req
 planar <code>x</code>, <code>y</code> and <code>yaw</code> before and after localization.
 <a href="../../reference/runtime/">Runtime</a> defines the complete per-decision order and record formats.</p>
 <h3 id="recorded-input-history">Recorded input history<a class="headerlink" href="#recorded-input-history" title="Permanent link">&para;</a></h3>
-<p>History acquisition and processing follow
-<a href="../simulators/#recorded-past-observations">Past observations</a>. <code>AVStack.past_steps</code> declares the
-required history and is read without constructing the model.</p>
+<p><code>AVStack.history</code> is a <code>HistoryRequirement(duration_us, samples)</code> for the first decision.
+<code>duration_us</code> requests recorded poses from the run origin backward on the decision and
+<code>pose_reporting_interval_us</code> clock. When the duration's lower boundary falls between pose
+timestamps, the nearest preceding one is included. The pose context also covers preceding frame
+ends. <code>samples</code> requests each sensor's recent frames, including the frame ending at the origin.
+The preceding <code>samples - 1</code> frames use that sensor's <code>frame_interval_us</code> and
+<code>shutter_duration_us</code>. Recorded context bypasses hooks, localization and sensor actions, but
+sensor environments apply.</p>
+<p><code>AVStack.required_history(options)</code> resolves needs before loading a model and defaults to the
+class's <code>history</code>. When the factory declares an <code>AVStack</code> subclass, <code>DrivingAdapter</code> uses that
+type's <code>required_history(factory.avstack_options)</code> and <code>decision_time_step</code>. Otherwise the
+adapter's own declarations apply. An instance whose history differs from its adapter raises
+an error. History requirements control selection and recorded reads.</p>
+<p>Read newly delivered frames, oldest first, through <code>observation.delivered(sensor_id)</code> and new
+pose estimates through <code>observation.estimated_states()</code>. Convert measurements with their
+frame's pose and use the decision state for planning. See
+<a href="../../reference/runtime/#delivery-and-coordinates">delivery and coordinates</a>.</p>
+<p><code>reset(observation)</code> receives the first input with its recorded context. Drivers cache the
+history they need. A sensor whose due frames were all dropped is missing for that decision.
+Supplied drivers do not fill a dropped input from their cache.</p>
+<p>The runner calls <code>__call__</code> once per decision, or <code>ingest(observation)</code> when
+<code>skip_driver_during_force_gt</code> skips inference. Stateful drivers can retain input in <code>ingest</code>
+without predicting. Do not ingest and call the same observation twice.</p>
 <h2 id="avstack-modular-pipeline-modularavstack">avstack modular pipeline (<code>ModularAVStack</code>)<a class="headerlink" href="#avstack-modular-pipeline-modularavstack" title="Permanent link">&para;</a></h2>
 <p>The <code>*_modular_*</code> stop-sign configurations use <code>RuleBasedAVStack</code>, described below.</p>
 <p><code>ModularAVStack</code> wraps avstack's perception, tracking, planning and control pipeline. Each run
 gets fresh component histories. Native models and component outputs remain avstack objects.
-Before each decision, the vehicle body frame that carries the sensors moves to the model-visible
-<code>vehicle_state</code>. Sensors are mounted on the vehicle, so localization moves perceived objects
-in the world together with the ego and leaves their position relative to the ego unchanged.
-Recorded model inputs keep the captured body pose.</p>
+Before inference, each native sensor body reference uses that sensor's capture-time
+model-visible pose. Native payload timestamps remain acquisition timestamps. The current
+decision state separately reaches planning and control. Localization therefore affects perception
+in the frame the driver believes without moving physical truth. Recorded inputs retain their
+capture poses. When no new perception frame arrives, the native pipeline uses its latest
+retained frame with its original timestamp, while planning and control use the decision state.</p>
 <p><code>instrument</code> captures selected component outputs. <code>detections</code> converts supported perception
 boxes to the capture-time ego frame without another inference call. These ego-frame boxes do
 not depend on localization. Unsupported perception output returns <code>None</code>, while an empty
@@ -2073,14 +2095,20 @@ be listed in the hook configuration. The framework's phantom action can instead 
 declared perception stage directly. See <a href="../../reference/configuration/#hooks">Hooks</a>.</p>
 <h2 id="camera-forward-collision-policy">Camera forward-collision policy<a class="headerlink" href="#camera-forward-collision-policy" title="Permanent link">&para;</a></h2>
 <p><code>CameraForwardCollisionAVStack</code> uses a 2D image detector and image-box area to choose braking or
-throttle. Its learned model loads lazily and can be shared with bound scorers.</p>
+throttle. It uses the latest delivered camera image and retains its acquisition metadata.
+A decision without a new image reuses its most recent detection result.
+Its learned model loads lazily and can be shared with bound scorers.</p>
 <p><code>CameraForwardCollisionAVStack</code> exposes its scorer through <code>modular_driving_adapter</code>.</p>
 <p>This policy exposes 2D component diagnostics, not canonical 3D detections. <code>DetectionMetrics</code>
 requires a driving system that provides 3D detections. See <a href="../evaluation/">Evaluation</a>.</p>
 <h2 id="nurec-rule-based-driving-system">NuRec rule-based driving system<a class="headerlink" href="#nurec-rule-based-driving-system" title="Permanent link">&para;</a></h2>
 <p><code>RuleBasedAVStack</code> composes a <code>YOLOXDetector</code>, <code>StopSignTracker</code> and <code>RuleBasedPlanner</code>.
 It requires the selected camera's <code>CameraCalibration</code> and a planar ego state. Detection runs
-once per decision. Stop-sign detections use known-size ranging and bearing EKF tracking.
+once per decision on the latest delivered camera. Stop-sign detections use known-size ranging
+and bearing EKF tracking. Tracking uses the camera sample's pose and acquisition time, while
+planning uses the decision pose and clock. A decision without a new camera frame retains tracks
+without updating perception or tracking, then replans with the current decision state. LiDAR
+frames are retained independently, so camera updates can use the latest earlier LiDAR scan.
 Supplying a <code>VehicleTracker</code> also enables vehicle following, which additionally requires the
 selected LiDAR's <code>PointCloud</code> and <code>LidarCalibration</code>. With <code>vehicle_tracker: null</code>, vehicle
 detections are ignored and the stop-sign driving behavior is preserved.</p>
@@ -2117,7 +2145,9 @@ The <a href="../../reference/python-api/">Python API</a> lists defaults, paramet
 </code></pre></div>
 <p>Keep the detector options from the supplied configuration. <code>vehicle_labels</code> defaults to
 <code>[car, truck, bus]</code> and can select other detector class names. <code>lidar_id</code> defaults to
-<code>lidar_gt_top_p128</code>. The calibrated sensor transform converts LiDAR points to rig coordinates.</p>
+<code>lidar_gt_top_p128</code>. The calibrated transform converts LiDAR points to its capture rig. When
+camera and LiDAR times differ, their capture-time model-visible poses move the points into the
+camera capture rig before projection.</p>
 <p>With following enabled, detection uses
 <code>min(detector.score_threshold, vehicle_tracker.low_score_threshold)</code> for that call.
 Stop signs still require <code>detector.score_threshold</code>. This remains the detector's configured
@@ -2327,12 +2357,20 @@ executed future path. See <a href="../simulators/#navigation">Navigation</a>. By
 cameras of AlpaSim's Alpamayo 1.5 driver: front wide, front tele and both cross cameras. The
 renderer must provide every listed camera.</p>
 <p>Component logs contain <code>policy</code>, <code>command</code>, <code>route_waypoints</code>, <code>navigation_command</code>,
-<code>navigation_note</code>, <code>history_pose_count</code> and <code>selected_image_times</code>. Without a route, the
-navigation command falls back to <code>STRAIGHT</code>.</p>
-<p>Camera images and pose history must match the declared decision timeline. History validation
-rejects missing or inconsistent observations. The stack transforms policy outputs into the
-common trajectory command format. Native policy output, including optional reasoning, remains
-available through component logging.</p>
+<code>navigation_note</code>, <code>history_pose_count</code>, <code>selected_image_times</code> and <code>selected_capture_ids</code>.
+Without a route, the navigation command falls back to <code>STRAIGHT</code>.</p>
+<p>Images and poses use acquisition timestamps. The stack requires 1.5 seconds of pose history
+and a frame cache of <code>(context_length - 1) * frame_subsample + 1</code> camera acquisitions. Defaults
+are <code>context_length=4</code> and <code>frame_subsample=1</code>. Starting from the newest frame, it selects
+<code>context_length</code> frames at a stride of <code>frame_subsample</code>, then supplies them oldest first.
+The planning origin is the newest image timestamp across the configured cameras.
+Retained poses span from 1.5 seconds before that image through the current decision, including a
+preceding pose when the boundary lies between estimates. The model resamples timestamped poses
+at its own required spacing. Acquisition intervals may vary. Missing context is rejected rather
+than fabricated.</p>
+<p>The returned trajectory preserves the model's generation-time rig frame and native waypoint
+timestamps. The controller handles reference-frame conversion. Native policy output, including
+optional reasoning, remains available through component logging.</p>
 <h3 id="loading-and-sharing-the-model">Loading and sharing the model<a class="headerlink" href="#loading-and-sharing-the-model" title="Permanent link">&para;</a></h3>
 <p>Local checkpoint loading happens lazily. Injecting a model allows the caller to supply an
 already-constructed policy. Closing releases a model loaded by the stack. An injected model is
@@ -2371,12 +2409,12 @@ from the configured <code>camera_id</code> or the stack default, and <code>decis
 </tr>
 <tr>
 <td><code>alpamayo_driving_adapter</code></td>
-<td>Policy prediction from current and preceding observations</td>
+<td>Policy prediction from one observation containing delivered context</td>
 </tr>
 </tbody>
 </table>
-<p>The Alpamayo binding declares 15 preceding decisions when a factory has no <code>AVStack</code>
-type metadata.</p>
+<p>The Alpamayo binding uses the stack's option-dependent acquisition-history declaration,
+including when the factory has no <code>AVStack</code> type metadata.</p>
 <p>Scorer callbacks have signature <code>(avstack, images, targets)</code> and return one score per input.
 Built-in descriptors name the input <code>images</code> and output <code>scores</code>. <code>output_shape=()</code> describes
 one input's scalar score. Differentiable scorers declare <code>"BCHW float tensor [0,1]"</code> and
@@ -2428,7 +2466,7 @@ experiment needs them.</p>
 </tr>
 <tr>
 <td>COCO YOLOX-m</td>
-<td>General COCO detection and its bound scorer. The rule-based stack selects stop signs</td>
+<td>COCO detection and its bound scorer. The rule-based stack selects stop signs and optional vehicles</td>
 </tr>
 <tr>
 <td>Alpamayo-1.5-10B</td>

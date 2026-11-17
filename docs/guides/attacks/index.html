@@ -1910,7 +1910,7 @@ Constructor signatures, constraints and errors are in the
 <span class="w">      </span><span class="nt">reported_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
 </code></pre></div>
 <p>A supplied attack uses the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
 constructor parameters as attributes with the same names, or override
 <code>configuration_parameters()</code> to describe the configured inputs. Filesystem options follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">Path resolution</a>.</p>
@@ -2022,6 +2022,8 @@ the objective depends on a driving response. Each candidate has its own run stat
 request records and capability checks are defined in the
 <a href="../../reference/python-api/">Python API</a>.</p>
 <h2 id="online-phase">Online phase<a class="headerlink" href="#online-phase" title="Permanent link">&para;</a></h2>
+<p>An online attack's <code>step</code> receives the raw frames ending exactly at the decision timestamp.
+Sensor-action timing and duration follow <a href="../../reference/runtime/#attack-actions">Runtime</a>.</p>
 <p>The deployment tick budget is the maximum of
 <code>hooks.setup_ticks + attack.deployment_ticks(segment)</code> across all configured attacks, segments,
 seeds and treatments. Every treatment uses that budget. Larger budgets can make early starts

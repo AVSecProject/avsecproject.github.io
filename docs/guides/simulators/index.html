@@ -1151,6 +1151,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#recorded-motion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recorded motion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#camera-resolution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2052,6 +2063,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#recorded-motion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recorded motion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#camera-resolution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2191,10 +2213,15 @@
 creates a <code>SimulatorRuntime</code> whose creator closes its world and connections, including after
 failures. Import interfaces from <code>avsectester.closed_loop.simulators</code> and concrete
 implementations from <code>simulators.carla</code>, <code>simulators.nurec</code> or <code>simulators.recorded</code>.</p>
-<p><code>reset</code> initializes a selected <code>ScenarioStart</code> and captures its first observation. <code>step</code>
-advances one decision and captures again. <code>observe</code> copies the current capture without
-rendering, advancing time or invoking hooks. <code>state</code> copies physical ego, actors and
-inserted objects.</p>
+<p><code>reset</code> initializes a selected <code>ScenarioStart</code> and captures its first observation.
+<code>advance_interval</code> propagates one decision interval and reports intermediate physical states.
+<code>capture_at</code> publishes the interpolated physical state and acquires selected sensors at an integer
+frame-end timestamp. <code>step</code> is a convenience for one interval and its endpoint capture. The runner
+always uses the separate operations. <code>observe</code> copies the latest acquisition batch without
+advancing or invoking hooks. <code>sensor_view</code> reads a sensor's latest captured viewpoint.
+<code>frame_range_us(sensor, end_time_us)</code> returns its half-open shutter or native scan interval.
+<code>state</code> copies physical ego, actors and inserted objects. See
+<a href="../../reference/runtime/#one-decision">Runtime</a> for event order and clock meanings.</p>
 <p>Only world settings reach reset. Sensor corruptions apply after capture. See
 <a href="../environments/">Environments</a> for environment composition and
 <a href="../../reference/python-api/">Python API</a> for signatures and errors.</p>
@@ -2202,9 +2229,10 @@ inserted objects.</p>
 <p>The dataset supplies <a href="../datasets/#dataset-interface">ScenarioStart</a>. Attack selection metadata
 is not a simulator input.</p>
 <h3 id="read-prescribed-motion">Read prescribed motion<a class="headerlink" href="#read-prescribed-motion" title="Permanent link">&para;</a></h3>
-<p><code>start_replay</code> initializes and captures a recorded or recipe boundary with prescribed ego
-motion. <code>advance_replay</code> advances that motion and captures without stage hooks. Replay rejects
-bound hooks. Advancement also requires an initialized runtime and replay capability.</p>
+<p><code>start_replay</code> initializes and captures a recorded or recipe boundary with prescribed ego motion.
+<code>advance_replay</code> advances that motion and captures without stage hooks. Replay rejects bound hooks.
+Advancement also requires an initialized runtime and replay capability. Publish any pending decision
+interval endpoint before advancing replay.</p>
 <table>
 <thead>
 <tr>
@@ -2217,7 +2245,7 @@ bound hooks. Advancement also requires an initialized runtime and replay capabil
 <tr>
 <td>CARLA</td>
 <td>Supported</td>
-<td>Unsupported</td>
+<td>Supported</td>
 </tr>
 <tr>
 <td>Recorded playback</td>
@@ -2239,15 +2267,17 @@ motion at each requested frame.</p>
 change at the next capture. Inserted objects stay separate from native actors, have zero
 velocity and do not participate in native physics or collisions. Built-in metrics still count
 overlap with them as a collision. See <a href="../evaluation/#built-in-metrics">Built-in metrics</a>.</p>
+<p><strong>Not yet implemented.</strong> Moving inserted objects during a run. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#moving-inserted-objects">Moving inserted objects</a>.</p>
 <p><code>ObjectAsset</code> contains textured planes. <code>MeshAsset</code> contains colored triangle meshes and requires
 NuRec scene insertion. Both use forward-left-up axes and a bottom-center bounding box.
 Only base colors are rendered, without material, reflection or lighting simulation.
 Alpha values of at least 128 are opaque. Mesh triangles used to occlude sensor-inserted content
 are treated as opaque regardless of their color alpha.</p>
 <p><strong>Not yet implemented.</strong> Mesh composite insertion, including white-box texture optimization.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#mesh-composite-insertion">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#mesh-composite-insertion">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> CARLA mesh insertion. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#carla-mesh-insertion">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#carla-mesh-insertion">TODO</a>.</p>
 <p>Composite insertion projects each asset into captured camera images, resolves nearest surfaces
 and applies visibility. NuRec also supports scene insertion, where NRE renders assets with the
 reconstruction into camera images and LiDAR. Set <code>object_insertion</code> to <code>composite</code> (the default)
@@ -2303,18 +2333,29 @@ of world insertion.</p>
 <p>See <a href="../attacks/#insert-a-world-object">Writing attacks</a> for insertion actions and
 <a href="../../reference/runtime/#runlog">Runtime records</a> for saved evidence.</p>
 <p><strong>Not yet implemented.</strong> CARLA scene insertion and non-camera insertion in composite mode.
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">TODO</a>.</p>
 <h2 id="carla">CARLA<a class="headerlink" href="#carla" title="Permanent link">&para;</a></h2>
 <p>A <code>CarlaDataset</code> supplies recipes describing map, spawns, sensors and prescribed motion.
 <code>CarlaSimulator</code> supplies the connection and synchronous timing settings. Each reset requires a
 recipe-bearing <code>ScenarioStart</code> and uses a dedicated server.</p>
 <p>Traffic-light states are recorded under OpenDRIVE control IDs.</p>
+<p>Native sensors use <code>sensor_tick=0</code> and produce packets on every physics tick. The scheduler retains
+only planned acquisitions, discarding packets from other ticks. A recipe sensor with a nonzero
+<code>sensor_tick</code> is rejected. Set acquisition rates with <code>runs.timing.sensors</code>. A spinning LiDAR packet
+covers one native physics interval. Reducing its acquisition frequency does not concatenate
+packets into a longer scan. Observations list sensors in the recipe's order, independently of
+packet arrival.</p>
+<p>Runtime methods accept a sensor's logical name or its native source ID.
+Unknown names and off-tick requests raise <code>ValueError</code> before changing state. Timing support is
+listed in <a href="../../reference/configuration/#scheduling">Scheduling</a>. See
+<a href="../../reference/configuration/#simulator">Simulator configuration</a> for <code>client.rate</code> constraints
+and <a href="../../reference/runtime/#one-decision">Runtime</a> for timestamps.</p>
 <h3 id="selected-origin-initialization">Selected-origin initialization<a class="headerlink" href="#selected-origin-initialization" title="Permanent link">&para;</a></h3>
-<p>The runtime creates actors and sensors, replays prescribed motion to the deployment window,
-applies setup actions and runs the deployment tick budget before capturing the selected
-boundary. At position zero, actors are held during setup ticks. Before decision zero, ego is
-released from recipe motion for driving-system control. See the
-<a href="../attacks/#online-phase">deployment tick budget</a>.</p>
+<p>The runtime creates actors and sensors, replays prescribed motion to the deployment window, applies
+setup actions and runs the deployment tick budget before capturing the selected boundary. At
+position zero, actors are held during setup ticks. Ego leaves recipe motion before decision zero
+with default timing. With <code>force_gt_duration_us</code>, it leaves at the handoff decision.
+See the <a href="../attacks/#online-phase">deployment tick budget</a>.</p>
 <p>A positive selected boundary needs materialized frame data. Recorded initialization evidence
 preserves the selected actor identities and sensor timing. See <a href="../experiments/">Experiments</a> for
 preparation and <a href="../../reference/runtime/">Runtime</a> for decision order.</p>
@@ -2326,6 +2367,12 @@ wrapper's <code>flipy</code> setting. See <a href="../../reference/runtime/#carl
 timeline and actors, then advances ego with the selected dynamics. Camera names remain native
 unless <code>camera_aliases</code> maps them to observation names. Aliases also apply to views
 and calibration.</p>
+<p>Camera frames end on their independent <code>frame_interval_us</code> clocks. A positive
+<code>shutter_duration_us</code> renders <code>[frame_end_us - shutter_duration_us, frame_end_us)</code> using
+interpolated ego and actor poses at both endpoints. Instantaneous frames use a one-microsecond
+render request. <code>pose_reporting_interval_us</code> controls the physical trajectory used for
+interpolation and is independent of camera frequency. Objects, coverage copies and
+reconstruction-visibility probes use the same frame interval and endpoint poses.</p>
 <p>NuRec provides no traffic-light states.</p>
 <p>Constructing mesh-depth or ground-contact support requires the <code>nurec</code> extra.
 Reset checks required archive meshes before connecting to NRE. Missing resources fail preflight.
@@ -2383,7 +2430,7 @@ receives the native capture before camera composition.</p>
 <p>Reconstructed objects remain in the scene and can hide an inserted object placed very close
 to them.</p>
 <p><strong>Not yet implemented.</strong> Removing real objects from reconstructed scenes. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#remove-real-objects-from-reconstructed-scenes">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#remove-real-objects-from-reconstructed-scenes">TODO</a>.</p>
 <p>Scene-inserted assets appear in LiDAR for 26.04 scenes. In 26.01 scenes, LiDAR can pass through
 inserted assets. This is a limitation of that scene release.</p>
 <p>LiDAR returns from scene-inserted assets can lie behind the asset surface. The offset is larger
@@ -2392,21 +2439,19 @@ along each LiDAR ray in an approximate order, so large road Gaussians can add ra
 road behind the asset. This is a limitation of NRE's LiDAR rendering and applies to plane and
 mesh assets.</p>
 <h3 id="lidar">LiDAR<a class="headerlink" href="#lidar" title="Permanent link">&para;</a></h3>
-<p>Set <code>NuRecRenderer.lidar</code> to a scene's logical sensor name, such as <code>lidar_gt_top_p128</code>, to
-collect LiDAR alongside the cameras. The default <code>None</code> disables LiDAR. The selected scene must
-contain exactly one LiDAR with a <code>row-offset-spinning</code> model. The sensor-to-rig transform comes
-from calibration. The scan period is the median duration of recorded LiDAR frames. See
+<p>Set <code>NuRecRenderer.lidar</code> to a scene's logical sensor name, such as <code>lidar_gt_top_p128</code>, to collect
+LiDAR alongside the cameras. The default <code>None</code> disables LiDAR. The selected scene must contain
+exactly one LiDAR with a <code>row-offset-spinning</code> model. The sensor-to-rig transform comes from
+calibration. The calibrated spin period is the median duration of recorded LiDAR frames. See
 <a href="../../reference/runtime/#lidar-data">LiDAR records</a> for the payload format.</p>
-<p>The decision interval must match the scan period within 1% of the decision interval. This is
-checked after scene loading and before the first render. Each scan covers the previous decision
-timestamp through the current decision timestamp. Its start pose is the previous decision pose.
-For decision zero, that pose comes from the recorded trajectory at the scan's start time.
-Recorded past observations also include LiDAR, using recorded ego and actor poses at both scan
-endpoints.</p>
-<p>With LiDAR enabled, one additional recorded step is needed before the earliest observation.
-Segment selection therefore reserves at least one more step than the driving-system history
-alone requires. A past-observation request whose scans begin before the recording raises
-<code>ValueError</code>.</p>
+<p>Each LiDAR scan covers <code>[frame_end_us - frame_interval_us, frame_end_us)</code>. Adjacent scans meet
+without gaps or overlap. The calibrated spin period is used only to validate <code>frame_interval_us</code> and
+must differ from it by at most 1%. It does not set the scan window. LiDAR does not accept
+<code>shutter_duration_us</code>.</p>
+<p>Scan endpoints use their physical ego poses and actor states. The runtime retains motion history for
+interpolation. Pre-origin endpoints come from the recording. Insufficient source support raises
+<code>ValueError</code> when the requested scan cannot be formed. Selection reserves enough preceding
+dataset steps to cover the configured LiDAR <code>frame_interval_us</code>.</p>
 <p>Cameras precede LiDAR in <code>Observation.sensor_data</code>. Current LiDAR captures pass through
 <code>render.post</code> with the LiDAR sensor name. They do not pass through <code>render.pre</code>, whose
 <code>CameraPoseRequest</code> is specific to cameras. A LiDAR <code>SensorView</code> has no camera geometry and uses
@@ -2415,25 +2460,25 @@ cameras.</p>
 <p>Reconstructed-scene defects may produce a small number of below-ground points in a scan.</p>
 <p>Supplied scenes provide no intensity. Intensity and no-return-ray simulation are
 <strong>Not yet implemented.</strong> See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-lidar-simulation">NuRec LiDAR simulation</a>.
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#nurec-lidar-simulation">NuRec LiDAR simulation</a>.
 Inserted objects appear in LiDAR with <a href="#scene-insertion">scene insertion</a>. Composite insertion
 changes camera images only.</p>
 <p><strong>Not yet implemented.</strong> Offline renders of a dataset's first frame while LiDAR is enabled. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-offline-lidar-sampling">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#nurec-offline-lidar-sampling">TODO</a>.</p>
 <h3 id="recorded-past-observations">Recorded past observations<a class="headerlink" href="#recorded-past-observations" title="Permanent link">&para;</a></h3>
-<p>After reset, <code>observe_past(count)</code> returns actual recorded observations before the selected
-start, oldest first, with negative run-relative timestamps and frames. It rejects insufficient
-history and preserves the current world, clock and capture. Start eligibility uses the larger
-of the simulator's own history and the <code>DrivingAdapter</code> history plus the simulator's observation
-lead steps.</p>
-<p>Past captures use recorded ego poses and actors, including the same short-track filtering as
-current captures. Objects installed during reset or setup use those recorded poses with the
-configured insertion mode. Later insertions and actor overrides are excluded. Past captures
-bypass stage hooks and sensor attack actions. The runner applies sensor corruptions at each
-absolute dataset position, then passes history directly to <code>AVStack.reset</code>. It bypasses
-localization and the observation pipeline. See
-<a href="../../reference/runtime/#initialization">initialization records</a> and
-<a href="../environments/#randomness">environment randomness</a>.</p>
+<p>After reset, <code>observe_recorded_at(time_us, sensor_ids)</code> reads a negative integer offset from the
+run origin. Pass <code>()</code> to read only the recorded pose without loading or rendering sensors.
+NuRec interpolates recorded ego and actor poses between dataset grid points. CARLA reads the
+requested captures and poses from its prescribed pre-roll. Reads return independent values
+without changing the live world, clock or capture, and reject insufficient source data.
+See the <a href="../../reference/python-api/#avsectesterclosed_loopsimulatorsbase">recorded acquisition contract</a>
+for returned fields.</p>
+<p>The <a href="../driving-systems/#recorded-input-history">recorded-input requirement</a> controls selection
+and reads, including simulator observation lead time.</p>
+<p>Past captures use recorded ego poses and actors, with the same short-track filtering as current
+captures. Objects installed during reset or setup use recorded poses and the configured
+insertion mode. Later insertions and actor overrides are excluded. Recorded context processing
+follows <a href="../driving-systems/#recorded-input-history">driving history</a>.</p>
 <h3 id="navigation">Navigation<a class="headerlink" href="#navigation" title="Permanent link">&para;</a></h3>
 <p>Map navigation matches the recorded ego path to driving lanes and extends the route through
 successors. Every capture projects the current physical ego origin onto that route and provides
@@ -2451,10 +2496,18 @@ dynamics prediction.</p>
 <p>The full scene mesh may include roadside objects. A ground-only mesh avoids using those surfaces
 for ego contact where that asset is available. Ground contact is an approximate fit rather than
 a penetration solver. It does not correct traffic actors.</p>
+<h3 id="recorded-motion">Recorded motion<a class="headerlink" href="#recorded-motion" title="Permanent link">&para;</a></h3>
+<p>With <code>force_gt_duration_us</code>, the controller follows a recorded reference trajectory. Dynamics
+align to the recording during recorded motion and at handoff. With physics enabled, reference
+poses blend from recorded poses toward ground-corrected poses over that duration. Zero-weight
+poses and runs without physics use recorded poses directly.</p>
+<p>Frame and scan endpoints interpolate the ego's control/report poses and the actors' control
+poses. See <a href="../../reference/runtime/#planner-delay-and-recorded-motion">recorded-motion execution</a>
+for command and decision semantics.</p>
 <h3 id="camera-resolution">Camera resolution<a class="headerlink" href="#camera-resolution" title="Permanent link">&para;</a></h3>
 <p>Cameras render at their native resolution. A returned image whose dimensions differ from the
 camera's native model raises <code>ValueError</code>.</p>
-<p>Captures render a single instant.</p>
+<p>Camera exposure uses <code>shutter_duration_us</code>. Zero selects an instantaneous frame.</p>
 <p>The lens includes its f-theta model and recorded windshield distortion. Camera projection,
 mesh depth and object placement share the resulting geometry. Camera coordinate conventions
 and models are specified in the <a href="../../reference/python-api/">Python API</a>.</p>
@@ -2470,7 +2523,7 @@ explicit world velocity advances the actor at fixed orientation until reset or a
 <code>control_actor</code> is unsupported. Without traffic simulation, checkpoints preserve actor
 overrides. Restoring a checkpoint creates a new capture of the restored state.</p>
 <p><strong>Not yet implemented.</strong> Checkpoint restoration with active render hooks. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#nurec-checkpoint-restoration-with-active-render-hooks">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#nurec-checkpoint-restoration-with-active-render-hooks">TODO</a>.</p>
 <h3 id="reactive-traffic">Reactive traffic<a class="headerlink" href="#reactive-traffic" title="Permanent link">&para;</a></h3>
 <p>Enable <code>AlpaSimTraffic</code> through <code>simulator.options.traffic</code>. YAML, timing and history follow
 <a href="../../reference/configuration/#reactive-traffic">Reactive traffic configuration</a>.</p>
@@ -2478,10 +2531,11 @@ overrides. Restoring a checkpoint creates a new capture of the restored state.</
 poses, then explicit overrides. Parked tracks stay at recorded poses within recorded support.
 Sessions include duration-qualified tracks with nonempty clipped history. A first override
 backfills constant-velocity history and subsequent requests resend its complete history.</p>
-<p>Trajectories are not smoothed. Offline candidate rollouts also require the service.</p>
+<p>Traffic hands over at the run origin plus <code>force_gt_duration_us</code> plus the decision period.
+Trajectories are not smoothed. Offline candidate rollouts also require the service.</p>
 <p><strong>Not yet implemented.</strong> Fitting traffic actors to the selected ground mesh, checkpointing
 traffic sessions and controlling CATK sampling through the run seed. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#reactive-traffic">Reactive traffic</a>.</p>
 <h3 id="ego-dynamics">Ego dynamics<a class="headerlink" href="#ego-dynamics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2513,16 +2567,21 @@ traffic sessions and controlling CATK sampling through the run seed. See
 trajectory before resetting dynamics. The three-dimensional ego geometry still comes from
 the dataset.</p>
 <p><code>AlpaSimController</code> uses AlpaSim Ford Fusion vehicle parameters.</p>
-<p>Trajectory commands use rig-frame poses and increasing timestamps, beginning at the current
-origin. The controller tracks the full forecast. It need not execute its first planned
-acceleration exactly. There is no automatic command conversion.</p>
-<p>A custom dynamics component supplies <code>step</code> and may supply <code>reset</code> and <code>command_modes</code>. Each
-runtime receives its own copy. Constructor defaults and trajectory constraints are listed in the
-<a href="../../reference/python-api/">dynamics API</a>.</p>
+<p>Trajectory commands use rig-frame poses and increasing absolute timestamps. <code>planner_delay_us</code>
+selects an earlier command without changing its waypoints or timestamps. The controller anchors the
+original rig-frame reference using its physical pose history. <code>AlpaSimController</code> performs this
+conversion inside the native controller. <code>TrajectoryFollower</code> uses its own bounded pose history.
+The controller tracks the full forecast and need not execute its first planned acceleration exactly.</p>
+<p>A custom dynamics component supplies <code>step</code>, with optional initialization, reports and
+recorded-motion alignment described in the
+<a href="../../reference/python-api/#avsectesterclosed_loopsimulatorsego_dynamics">dynamics API</a>.
+Each runtime receives its own dynamics copy. Intermediate reports follow
+<code>pose_reporting_interval_us</code> independently of sensor clocks, and changing that interval can
+change ego motion.</p>
 <h3 id="mesh-depth">Mesh depth<a class="headerlink" href="#mesh-depth" title="Permanent link">&para;</a></h3>
-<p>Mesh depth combines archived static surfaces and current actor cuboids. Calibrated camera rays
-keep the nearest hit, expressed as optical-axis depth. Missing hits are infinite. Actor extents
-must be known. Depth is computed lazily per camera and cached for the capture.</p>
+<p>Mesh depth combines archived static surfaces and current actor cuboids. Calibrated camera rays keep
+the nearest hit, expressed as optical-axis depth. Missing hits are infinite. Actor extents must be
+known. Depth is computed on demand for the captured viewpoint.</p>
 <p>Mesh content is not classified or erased when an actor moves. Archived vehicle geometry can
 therefore continue to occlude its recorded location. Cuboid silhouettes can differ from rendered
 vehicles. Rendered probes instead measure the reconstruction's visibility directly.</p>
@@ -2537,25 +2596,17 @@ new reconstruction probes from a detached view. Geometry mode can build plans fr
 depth and actors.</p>
 <h2 id="recorded-playback">Recorded playback<a class="headerlink" href="#recorded-playback" title="Permanent link">&para;</a></h2>
 <p><code>RecordedReplaySimulator</code> captures supported dataset frames while ego and other actors follow
-their recorded motion. Commands do not change that trajectory. It supports camera aliases and
-shared world-object composition. It provides no traffic-light states.
-Environment support follows <a href="../../reference/configuration/#environment">Configuration</a>.</p>
+their recorded motion. Commands do not change that trajectory. nuScenes uses a nominal scheduler
+period of 500000 microseconds. Timestamp representation follows
+<a href="../../reference/runtime/#one-decision">Runtime</a>, and timing support is listed in
+<a href="../../reference/configuration/#scheduling">Scheduling</a>. It supports camera aliases and shared
+world-object composition. It provides no traffic-light states. Environment support follows
+<a href="../../reference/configuration/#environment">Configuration</a>.</p>
 <h2 id="write-a-custom-simulator">Write a custom simulator<a class="headerlink" href="#write-a-custom-simulator" title="Permanent link">&para;</a></h2>
-<p>See the <a href="../../reference/python-api/#avsectesterclosed_loopsimulatorsbase">simulator base module</a>
-for its Extension contract.
-<a href="../../concepts/architecture/#world-ownership">Architecture</a> describes the world-claim and
-operation-isolation rules.</p>
 <p>Subclass <code>Simulator</code> for configuration and <code>SimulatorRuntime</code> for native world operations.
-Declare dataset kinds, timing, command modes, stages, world settings, capture capabilities and
-identity.</p>
-<p>Declare the simulator's own recorded-history requirement in <code>past_steps</code>. If a sensor needs
-recorded data before the earliest observation, declare it in <code>observation_lead_steps</code>, which
-adds to the driving system's history.</p>
-<p>Declare every view-capable sensor in <code>sensors</code> and cameras in <code>camera_sensors</code>. Native views
-supply capture data and sensor geometry. The shared runtime owns object-capture integration. A
-lightweight <code>sensor_geometry</code> implementation avoids image/depth work for projection-only
-requests. Past-capable implementations supply recorded observations and recorded camera views
-for start-object composition.</p>
+Declare supported datasets, commands and timing capabilities, then implement the native lifecycle
+hooks in the <a href="../../reference/python-api/#avsectesterclosed_loopsimulatorsbase">simulator API contract</a>.
+<a href="../../concepts/architecture/#world-ownership">Architecture</a> defines world ownership and isolation.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Configure timing and rendering in <a href="../../reference/configuration/#simulator">Configuration</a>.</li>

@@ -1524,6 +1524,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheduling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#simulator" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1979,6 +1990,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheduling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#simulator" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2201,7 +2223,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>attacks.&lt;name&gt;.type</code></td>
-<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
+<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
 </tr>
 <tr>
 <td><code>environment.sensors[].type</code></td>
@@ -2305,7 +2327,7 @@ model weights. Supplied simulator configurations use the same structure. See the
 <span class="w">  </span><span class="nt">recording</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">sensor_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">front</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">representations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">model_input</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">every_n_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">every_n_captures</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">results/memory</span>
 </code></pre></div>
 <h2 id="device">Device<a class="headerlink" href="#device" title="Permanent link">&para;</a></h2>
@@ -2399,13 +2421,120 @@ Training and test may therefore contain the same captured scene.</p>
 validation segments, each in selection order. <code>PreparedExperiment.metadata</code> keeps all selections
 and <code>units</code> records the part and selecting attacks. <code>split.execute</code> affects execution, not
 preparation compatibility.</p>
+<h2 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h2>
+<p><code>runs.timing</code> uses integer microseconds and AlpaSim parameter names and timing semantics.
+Defaults use one frame per sensor per decision, instantaneous camera exposure, no intermediate
+pose reports, no planning delay and no recorded-motion period.</p>
+<p><code>TimingConfiguration.sensors</code> copies the caller's mapping in insertion order and is read-only.
+Read values by key, <code>.get()</code> or <code>.items()</code>. Modification raises <code>TypeError</code>. Construct a new
+configuration to change timing.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>decision_period_us</code></td>
+<td>Simulator period</td>
+<td>Decision interval, equal to the dataset grid</td>
+</tr>
+<tr>
+<td><code>sensors.&lt;id&gt;.frame_interval_us</code></td>
+<td>Decision period</td>
+<td>Sensor frame interval</td>
+</tr>
+<tr>
+<td><code>sensors.&lt;id&gt;.shutter_duration_us</code></td>
+<td><code>0</code></td>
+<td>Camera exposure duration</td>
+</tr>
+<tr>
+<td><code>pose_reporting_interval_us</code></td>
+<td><code>0</code></td>
+<td>Intermediate controller pose interval</td>
+</tr>
+<tr>
+<td><code>planner_delay_us</code></td>
+<td><code>0</code></td>
+<td>Command-buffer delay</td>
+</tr>
+<tr>
+<td><code>force_gt_duration_us</code></td>
+<td><code>0</code></td>
+<td>Initial recorded-motion duration</td>
+</tr>
+<tr>
+<td><code>skip_driver_during_force_gt</code></td>
+<td><code>false</code></td>
+<td>Skip driving inference during recorded motion</td>
+</tr>
+</tbody>
+</table>
+<p>Frame intervals must be positive. Durations and delays must be nonnegative. The decision
+period must equal the dataset grid, so a segment's decision count equals its stop position
+minus its start position. See <a href="../runtime/#one-decision">Runtime</a> for frame, pose and decision
+ordering, and <a href="../../guides/simulators/">Simulators</a> for capture behavior.</p>
+<table>
+<thead>
+<tr>
+<th>Simulator</th>
+<th>Timing capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NuRec</td>
+<td>Independent frame intervals, camera exposure and pose reports. LiDAR accepts no exposure setting</td>
+</tr>
+<tr>
+<td>CARLA</td>
+<td>Frame/report intervals, planner delay and force-GT duration must align with physical ticks. Exposure is zero</td>
+</tr>
+<tr>
+<td>Recorded replay</td>
+<td>Default timing on nominal keyframes only. An explicit decision period must equal the nominal interval</td>
+</tr>
+</tbody>
+</table>
+<p>Unsupported settings fail during configuration. <code>force_gt_duration_us</code> must be a whole number
+of decision periods and requires a recording covering that interval. When the duration is
+positive, simulators without <code>trajectory</code> in their declared <code>command_modes</code> reject
+<code>skip_driver_during_force_gt: true</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">runs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">timing</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">decision_period_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">    </span><span class="nt">pose_reporting_interval_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">    </span><span class="nt">planner_delay_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">    </span><span class="nt">force_gt_duration_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500000</span>
+<span class="w">    </span><span class="nt">skip_driver_during_force_gt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">sensors</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">camera_front_wide_120fov</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">frame_interval_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">33000</span>
+<span class="w">        </span><span class="nt">shutter_duration_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17000</span>
+<span class="w">      </span><span class="nt">lidar_gt_top_p128</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">frame_interval_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+</code></pre></div>
+<p>This fragment keeps the decision grid at 100 ms and configures independent camera and LiDAR
+clocks. Camera phase from the recording is <strong>Not yet implemented.</strong> See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
 <h2 id="simulator">Simulator<a class="headerlink" href="#simulator" title="Permanent link">&para;</a></h2>
 <p>CARLA scene and prescribed motion settings belong to <code>CarlaRecipe</code>. <code>CarlaSimulator</code> receives
 the runtime client settings. For recorded sources, choose a simulator compatible with the
 dataset. <a href="../../guides/simulators/">Simulators</a> describes their behavior.</p>
 <p>A simulator's top-level <code>time_step</code> parameter inherits <code>dataset.time_step</code> when omitted and when
 the dataset provides it. This injection does not recurse into nested constructors. Explicit
-values are retained, but <code>ExperimentConfiguration</code> rejects a dataset/simulator mismatch.</p>
+values are retained, but <code>ExperimentConfiguration</code> rejects a dataset/simulator mismatch.
+The loader also injects <code>decision_period_us</code> from that grid into the simulator's top-level
+constructor when it declares that parameter. Explicit options take precedence.
+<code>client.rate</code> sets the native physics base tick, not the driving decision frequency. It must
+produce an integer number of microseconds per tick. The decision period must be an integer
+number of base ticks. <code>runs.timing.sensors</code> selects acquisition ticks.
+See <a href="../../guides/simulators/#carla">CARLA capture timing</a> for native sensor settings and LiDAR
+scans.</p>
 <h3 id="nurec-closed-loop-settings">NuRec closed-loop settings<a class="headerlink" href="#nurec-closed-loop-settings" title="Permanent link">&para;</a></h3>
 <p><code>NuRecSimulator</code> requires a renderer and a non-null <code>time_step</code>. The loader supplies the latter
 from <code>NuRecDataset</code>. Reset requires <code>ScenarioStart</code>. Constructor defaults are:</p>
@@ -2515,8 +2644,9 @@ whose asset mount has a different path. See
 <span class="w">    </span><span class="nt">history_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
 <span class="w">    </span><span class="nt">rpc_timeout_s</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
 </code></pre></div>
-<p>Traffic defaults to <code>null</code>. Enabling it requires 0.1 s decisions and <code>history_steps - 1</code> preceding
-recorded decisions. Traffic configuration affects preparation identity. <code>metadata.load</code> can
+<p>Traffic defaults to <code>null</code>. Its fixed traffic step is 0.1 s. Decision periods must be whole
+multiples of that step. Selection requires <code>history_steps - 1</code> preceding recorded decisions.
+Traffic configuration affects preparation identity. <code>metadata.load</code> can
 share segments between modes. Services are managed by <a href="../cli/#automatic-local-services">run</a>.</p>
 <h2 id="mesh-assets">Mesh assets<a class="headerlink" href="#mesh-assets" title="Permanent link">&para;</a></h2>
 <p>An attack option can construct a <code>MeshAsset</code> with <code>load_mesh_asset</code>. This example assumes a
@@ -2585,9 +2715,9 @@ The loader does not infer axes. With <code>origin: file</code>, the transformed 
 including a model's ground clearance, and vertices below z = 0 are rejected.
 Supplying <code>color</code> for an already colored file is an error.</p>
 <p><strong>Not yet implemented.</strong> FBX and USD loading. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> 3DGS Gaussian PLY assets. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
 <h2 id="driving-specification">Driving specification<a class="headerlink" href="#driving-specification" title="Permanent link">&para;</a></h2>
 <p><code>avstack.type</code> selects an <code>AVStack</code> class or factory. Its options are passed to each fresh
 instance. A constructor declaring <code>seed</code> receives the run seed. Explicitly writing that reserved
@@ -2622,12 +2752,10 @@ option is an error. The top-level device follows the <a href="#device">device ru
 </tr>
 </tbody>
 </table>
-<p><code>AVStack.decision_time_step</code> optionally declares a fixed cadence. <code>DrivingAdapter</code> reads it from
-<code>factory.avstack_type</code>, or uses its explicit fallback without constructing the stack.
-<code>ClosedLoopServices</code> rejects a driving-system step that differs from the simulator step.
-<code>AlpamayoAVStack</code> requires 0.1 s decisions. Its supplied configurations use
-<code>frame_subsample: 1</code> to select camera frames from history without changing decision timing. See
-<a href="../../guides/simulators/#recorded-past-observations">Past observations</a>.</p>
+<p>History requirements, adapter precedence and instance consistency are defined in
+<a href="../../guides/driving-systems/#recorded-input-history">Recorded input history</a>.
+<code>ClosedLoopServices</code> rejects a driving-system period that differs from the simulator period.
+Alpamayo context selection is described in <a href="../../guides/driving-systems/#alpamayo">Driving systems</a>.</p>
 <p>A binding has signature <code>function(avstack_factory, **options) -&gt; DrivingAdapter</code>. The factory
 exposes <code>avstack_type</code> and an independent read-only <code>avstack_options</code> mapping. Bindings declare
 components and scorers without constructing the stack.
@@ -2721,6 +2849,11 @@ no detections.</p>
 <td><code>false</code></td>
 <td>Stop on the first execution or selection error</td>
 </tr>
+<tr>
+<td><code>timing</code></td>
+<td>default clocks</td>
+<td><a href="#scheduling">Scheduling</a> rates and delays</td>
+</tr>
 </tbody>
 </table>
 <p>Attack and treatment names must be nonempty, contain no path separators and differ from
@@ -2729,14 +2862,19 @@ must be unique. A treatment without <code>attack_name</code> has no enabled atta
 must reference a configured attack. Group membership is defined
 in <a href="../../guides/evaluation/#comparison-groups">Evaluation</a>.</p>
 <h3 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h3>
+<p><code>TreatmentConfiguration</code>, <code>RunsConfiguration</code>, <code>RunRequest</code>, <code>CandidateRequest</code>, <code>SensorRequest</code>
+and <code>RenderRequest</code> copy their environment mappings during construction. Treat the resulting
+mappings as read-only and construct a new object to change them. The framework does not enforce
+this convention. Direct Python construction of <code>OfflineContext</code> retains its supplied mapping,
+and assigning <code>Attack.environment</code> retains that mapping. Do not modify either after use. YAML
+attack environments are copied when loaded.</p>
 <p>CARLA world settings accept <code>weather</code> as a preset name or parameter mapping, <code>lighting</code>,
 <code>map_layers</code> and <code>road_friction</code>. NuRec and recorded playback reject every nonempty
 world setting.</p>
 <p>Environment YAML has <code>world</code> and <code>sensors</code> keys. The base is <code>runs.environment</code>, with optional
 attack and treatment overrides. <a href="../../guides/environments/">Environments</a> describes merge and
 validation behavior. Sensor entries use <code>type</code>, <code>options</code> and an optional <code>camera</code>. Omitting
-camera applies the corruption only to the first <code>sensor_data</code> entry, which must be a readable
-RGB image.</p>
+camera binds to the first initial <code>sensor_data</code> entry, which must be a readable RGB camera.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">runs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">world</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">weather</span><span class="p">:</span><span class="w"> </span><span class="nv">SoftRainNoon</span><span class="p p-Indicator">}</span>
@@ -2748,6 +2886,7 @@ Severity is in [0, 1] and defaults to 0.5. <code>ColorTemp</code> also accepts
 <code>warm</code>, which defaults to <code>true</code>. <code>AlbumentationsCorruption</code> requires <code>transform</code>. The
 <a href="../python-api/">Python API</a> lists the available corruption classes.</p>
 <h3 id="recording">Recording<a class="headerlink" href="#recording" title="Permanent link">&para;</a></h3>
+<p>Python <code>RecordingPolicy</code> values are immutable and hashable.</p>
 <table>
 <thead>
 <tr>
@@ -2768,9 +2907,9 @@ Severity is in [0, 1] and defaults to 0.5. <code>ColorTemp</code> also accepts
 <td>Subset of <code>raw</code> and <code>model_input</code></td>
 </tr>
 <tr>
-<td><code>every_n_steps</code></td>
-<td>1</td>
-<td>Positive decision interval for retained sensor payloads</td>
+<td><code>every_n_captures</code></td>
+<td><code>1</code></td>
+<td>Save every Nth acquisition of each selected sensor</td>
 </tr>
 </tbody>
 </table>
@@ -2782,7 +2921,7 @@ experiment results then have empty observation <code>sensor_data</code>, and <co
 <span class="w">  </span><span class="nt">recording</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">sensor_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">front</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">representations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">raw</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">model_input</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">every_n_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">every_n_captures</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
 <h2 id="constructor-filesystem-parameters">Constructor filesystem parameters<a class="headerlink" href="#constructor-filesystem-parameters" title="Permanent link">&para;</a></h2>
 <p>Filesystem options follow constructor annotations for dataset, simulator, <code>AVStack</code>, attack,
@@ -2797,7 +2936,7 @@ names available at runtime. Other unresolved annotations are ignored.</p>
 <h2 id="saved-preparation-compatibility">Saved preparation compatibility<a class="headerlink" href="#saved-preparation-compatibility" title="Permanent link">&para;</a></h2>
 <p>The saved identity includes dataset type/scenario IDs, simulator identity and each attack's
 type, parameters and environment. Its preparation record includes the first run seed, split
-counts/seed and merged offline environments.</p>
+counts/seed, merged offline environments, <code>runs.timing</code> and the driving history requirement.</p>
 <p>Loading a preparation checks these values and recomputes saved units under the configured split.
 A current metadata file must have the saved raw-byte hash, but its path may differ. A mismatch
 raises <code>ConfigurationMismatchError</code>. Saved preparations require an offline report for every
@@ -2805,8 +2944,11 @@ completed attack, including attacks whose offline phase is a no-op.</p>
 <p>Additional <code>seeds</code>, <code>treatments</code>, <code>recording</code>, <code>output</code>, <code>strict</code>, decision limits, <code>split.execute</code>
 and evaluation settings may change. The first seed, partition and offline environments must match.
 <code>run --prepared</code> writes the loaded preparation record, units, deployment budget and metadata
-source unchanged into the new output. <code>AVStack</code> and hook configurations are not part of
-saved-preparation compatibility. <code>Attack</code> constructor options are compared as written,
+source unchanged into the new output. Driving-system options that change its history affect
+compatibility through that declaration. Other <code>AVStack</code> and hook settings are not compared.
+Preparations without timing/history declarations require default timing. Each saved segment
+is rechecked with <code>can_start_at</code> under the current driving history before execution or resume.
+<code>Attack</code> constructor options are compared as written,
 including an explicitly written default versus an omitted option. Lists and tuples with
 identical contents compare equally. Booleans, integers and floating-point numbers remain
 distinct, so <code>true</code>, <code>1</code> and <code>1.0</code> are incompatible.

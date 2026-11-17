@@ -2193,7 +2193,7 @@ phase moves its partial report to <code>incomplete_offline_reports/</code> befor
 Artifact filenames above describe the default trusted-pickle format. Attacks may override
 artifact persistence, and their files stay inside <code>artifacts/</code>. Segment numbers are global unit
 indexes. Each run directory contains
-<code>manifest.json</code>, published Parquet step/event parts and payload shards belonging to its
+<code>manifest.json</code>, published Parquet decision, event and acquisition parts, and payload shards in its
 <a href="../runtime/#runlog">RunLog</a>. Offline report content is described in
 <a href="../../guides/optimization/">Optimization</a>, and evaluation content
 in <a href="../../guides/evaluation/">Evaluation</a>.</p>

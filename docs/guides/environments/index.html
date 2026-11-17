@@ -1946,11 +1946,15 @@ Filesystem constructor parameters follow
 than as static environment settings. Native simulator behavior is described
 in <a href="../simulators/">Simulators</a>.</p>
 <h2 id="randomness">Randomness<a class="headerlink" href="#randomness" title="Permanent link">&para;</a></h2>
-<p>Sensor corruptions use a fresh NumPy generator keyed by
-<code>(run_seed, absolute_dataset_position, corruption_index)</code>. Past and current captures at the same
-dataset position therefore use the same corruption randomness. Hooks share a run-scoped NumPy
-generator initialized from the hook seed. Registration and execution order determine its
-consumption. Shared callback handlers retain their declared lifecycle.</p>
+<p>Sensor corruptions use a fresh NumPy generator. Frames ending at decision timestamps use
+<code>(run_seed, grid_position, corruption_index)</code>. Other frames use
+<code>(run_seed, grid_position, corruption_index, interval_capture_index)</code>, where the last value is
+that camera's frame ordinal within the decision interval, starting at one. Pre-origin frames
+use the containing interval's grid position with floor rounding and the same camera-specific
+index. Corruptions run only when their sensor is due.</p>
+<p>Hooks share a run-scoped NumPy generator initialized from the hook seed. Registration and
+execution order determine its consumption. Shared callback handlers retain their declared
+lifecycle.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../experiments/#environment-only-robustness-experiments">Experiments</a>,
 <a href="../simulators/">Simulators</a> and <a href="../../reference/runtime/">Runtime</a>.</p>

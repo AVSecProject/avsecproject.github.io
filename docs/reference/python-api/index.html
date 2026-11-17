@@ -2219,6 +2219,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#avsectesterclosed_looptiming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        avsectester.closed_loop.timing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#avsectesterattack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3667,6 +3678,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#avsectesterclosed_looptiming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        avsectester.closed_loop.timing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#avsectesterattack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4565,6 +4587,10 @@
 <td><a href="#avsectesterclosed_loopsimulatorsrecorded"><code>avsectester.closed_loop.simulators.recorded</code></a></td>
 </tr>
 <tr>
+<td>L2</td>
+<td><a href="#avsectesterclosed_looptiming"><code>avsectester.closed_loop.timing</code></a></td>
+</tr>
+<tr>
 <td>L3</td>
 <td><a href="#avsectesterattack"><code>avsectester.attack</code></a></td>
 </tr>
@@ -5031,7 +5057,7 @@ correction (<code>c - d * e == 0</code>) is not rejected and yields non-finite r
 <tbody>
 <tr>
 <td><code>LidarCalibration(rig_from_lidar: np.ndarray, spin_period_s: float)</code></td>
-<td>A LiDAR-to-rig rigid transform and one full scan period in seconds.</td>
+<td>A LiDAR-to-rig rigid transform and calibrated spin period in seconds.</td>
 </tr>
 </tbody>
 </table>
@@ -5255,6 +5281,10 @@ attributes raise Python's <code>ImportError</code> and <code>AttributeError</cod
 </thead>
 <tbody>
 <tr>
+<td><code>timestamp_to_microseconds(seconds: float) -&gt; int</code></td>
+<td>Round a finite native dataset timestamp to the nearest integer microsecond.</td>
+</tr>
+<tr>
 <td><code>require_nonnegative_integer(value: int, name: str) -&gt; None</code></td>
 <td>Require an integer greater than or equal to zero, excluding booleans.</td>
 </tr>
@@ -5312,8 +5342,24 @@ attributes raise Python's <code>ImportError</code> and <code>AttributeError</cod
 <td>The driving system's output — a vehicle control <em>command</em> (the decision).</td>
 </tr>
 <tr>
-<td><code>Observation(t: float, frame: int, sensor_data: dict[str, Any] = dict(), calibration: dict[str, Any] = dict(), vehicle_state: Any = None, ego_speed: float = 0.0, route: np.ndarray | None = None)</code></td>
-<td>What the simulator sends the driving system each frame — and the only thing it sends.</td>
+<td><code>DeliveredAcquisition(time_us: int, t: float, frame: int, data: Any, calibration: Any, state: TimedStateEstimate, capture_id: int | None = None, frame_start_us: int | None = None)</code></td>
+<td>One newly delivered frame and its estimated pose at frame end.</td>
+</tr>
+<tr>
+<td><code>TimedStateEstimate(time_us: int, t: float, vehicle_state: Any, ego_speed: float)</code></td>
+<td>One localization result at its scheduler time and native observation time.</td>
+</tr>
+<tr>
+<td><code>Observation(t: float, frame: int, sensor_data: dict[str, Any] = dict(), calibration: dict[str, Any] = dict(), vehicle_state: Any = None, ego_speed: float = 0.0, route: np.ndarray | None = None, deliveries: dict[str, tuple[DeliveredAcquisition, ...]] = dict(), state_estimates: tuple[TimedStateEstimate, ...] = ())</code></td>
+<td>One driving decision's model-visible inputs and newly delivered frames.</td>
+</tr>
+<tr>
+<td><code>Observation.estimated_states() -&gt; tuple[TimedStateEstimate, ...]</code></td>
+<td>New localization results, with current observation edits on the decision state.</td>
+</tr>
+<tr>
+<td><code>Observation.delivered(sensor_id: str) -&gt; tuple[DeliveredAcquisition, ...]</code></td>
+<td>Read this decision's incremental acquisitions with current owner-field edits.</td>
 </tr>
 <tr>
 <td><code>Observation.set_calibration(sensor_id: str, calibration: Any) -&gt; None</code></td>
@@ -6369,8 +6415,20 @@ two RGB integer triples in [0, 255].</p>
 <td>Process driving-system inputs without changing output commands.</td>
 </tr>
 <tr>
+<td><code>ObservationPipeline.capture(observation: Observation, dispatcher: HookDispatcher) -&gt; Observation</code></td>
+<td>Process one frame batch through sensors.post without running localization.</td>
+</tr>
+<tr>
+<td><code>ObservationPipeline.localize(observation: Observation, dispatcher: HookDispatcher) -&gt; Observation</code></td>
+<td>Localize one pose timestamp, including timestamps without sensor frames.</td>
+</tr>
+<tr>
+<td><code>ObservationPipeline.decision(observation: Observation, dispatcher: HookDispatcher) -&gt; Observation</code></td>
+<td>Apply decision input hooks after selecting delivered captures and history.</td>
+</tr>
+<tr>
 <td><code>ObservationPipeline.process(observation: Observation, dispatcher: HookDispatcher) -&gt; Observation</code></td>
-<td>Apply localization and plugins, emitting their supported hook stages.</td>
+<td>Process a capture followed immediately by one driving decision.</td>
 </tr>
 <tr>
 <td><code>AVStack()</code></td>
@@ -6381,20 +6439,28 @@ two RGB integer triples in [0, 255].</p>
 <td>Whether decisions expose detections compatible with detection metrics.</td>
 </tr>
 <tr>
-<td><code>AVStack.past_steps: ClassVar[int] = 0</code></td>
-<td>Recorded decision steps required before the selected start.</td>
+<td><code>AVStack.history: HistoryRequirement = HistoryRequirement()</code></td>
+<td>Recorded input needed at the first decision, expressed as pose duration and sample count.</td>
 </tr>
 <tr>
 <td><code>AVStack.decision_time_step: ClassVar[float | None] = None</code></td>
 <td>Decision interval in seconds. None leaves the interval unrestricted.</td>
 </tr>
 <tr>
+<td><code>AVStack.required_history(options: Mapping[str, Any]) -&gt; HistoryRequirement</code></td>
+<td>Recorded input needed at the first decision, resolved before model loading.</td>
+</tr>
+<tr>
 <td><code>AVStack.observation_pipeline: ObservationPipeline</code></td>
 <td>Driving-system input processing, including its localizer lifecycle.</td>
 </tr>
 <tr>
-<td><code>AVStack.reset(observation: Observation, past: Sequence[Observation] = ()) -&gt; None</code></td>
-<td>Initialize from the first observation and recorded past, ordered oldest to newest.</td>
+<td><code>AVStack.reset(observation: Observation) -&gt; None</code></td>
+<td>Initialize from the first decision observation, including its recorded deliveries.</td>
+</tr>
+<tr>
+<td><code>AVStack.ingest(observation: Observation) -&gt; None</code></td>
+<td>Accept incremental input without inference when a force_gt decision skips driving.</td>
 </tr>
 <tr>
 <td><code>AVStack.command_modes: frozenset[str] | None</code></td>
@@ -6411,6 +6477,10 @@ two RGB integer triples in [0, 255].</p>
 <tr>
 <td><code>AVStack.detections() -&gt; Sequence[Detection] | None</code></td>
 <td>Current decision's ego-frame detections. None means no detection output.</td>
+</tr>
+<tr>
+<td><code>AVStack.detection_sensor: str | None</code></td>
+<td>Sensor whose latest delivered frame is associated with the model's detections.</td>
 </tr>
 <tr>
 <td><code>AVStack.close() -&gt; None</code></td>
@@ -6453,8 +6523,12 @@ command mode is not accepted by the simulator runtime. A <code>command</code> ho
 <h4 id="extension-contract_1">Extension contract<a class="headerlink" href="#extension-contract_1" title="Permanent link">&para;</a></h4>
 <p>Implement <code>AVStack.__call__(observation) -&gt; Control</code> and return a declared command mode.
 Keep per-run history in this instance. Do not modify or advance the simulator. Declare
-<code>past_steps</code> and <code>decision_time_step</code> as class values so they are read without constructing a
-model. Trajectories use the current rig frame and integer-microsecond timestamps. <code>detections</code>
+recorded-input requirements as described in
+<a href="../../guides/driving-systems/#recorded-input-history">Driving systems</a>.
+<code>decision_time_step</code> can restrict the decision interval. Validate required sensor inputs when
+called. Read new acquisitions through <code>delivered(sensor_id)</code> and new localization
+results through <code>estimated_states()</code>. Each acquisition carries its capture-time state.
+Trajectories retain their generation-time rig frame and integer-microsecond timestamps. <code>detections</code>
 returns <code>None</code> when unsupported and an empty sequence for zero detections.</p>
 <h4 id="see-also_20">See also<a class="headerlink" href="#see-also_20" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/driving-systems/">Driving systems</a>.</p>
@@ -6478,11 +6552,11 @@ returns <code>None</code> when unsupported and an empty sequence for zero detect
 <td>Subclass of <code>ComponentDescriptor</code>. Describe a batch scorer returning one score per input. The output_shape is the per-input shape.</td>
 </tr>
 <tr>
-<td><code>DrivingAdapter(factory: Callable[[int], AVStack], *, components: Sequence[tuple[ComponentDescriptor, Callable[..., Any]]] = (), scorers: Sequence[tuple[ScorerDescriptor, Callable[..., Any]]] = (), past_steps: int = 0, decision_time_step: float | None = None)</code></td>
+<td><code>DrivingAdapter(factory: Callable[[int], AVStack], *, components: Sequence[tuple[ComponentDescriptor, Callable[..., Any]]] = (), scorers: Sequence[tuple[ScorerDescriptor, Callable[..., Any]]] = (), history: HistoryRequirement | None = None, decision_time_step: float | None = None)</code></td>
 <td>Bind component callbacks <code>(avstack, inputs)</code> and scorer callbacks <code>(avstack, images, targets)</code> to a fresh AVStack factory.</td>
 </tr>
 <tr>
-<td><code>DrivingAdapter.past_steps: int</code></td>
+<td><code>DrivingAdapter.history: HistoryRequirement</code></td>
 <td>Required recorded history, declared by the AVStack type or this adapter.</td>
 </tr>
 <tr>
@@ -6494,11 +6568,12 @@ returns <code>None</code> when unsupported and an empty sequence for zero detect
 <!-- api:end -->
 
 <h4 id="constraints-and-errors_22">Constraints and errors<a class="headerlink" href="#constraints-and-errors_22" title="Permanent link">&para;</a></h4>
-<p>A factory's <code>avstack_type</code>, when it is an <code>AVStack</code> subclass, takes precedence for
-<code>past_steps</code> and <code>decision_time_step</code>. <code>DrivingAdapter</code> raises <code>ValueError</code> for an empty or
-duplicate binding ID, a non-callable callback, a descriptor without inputs, outputs or codecs,
-differentiable inputs absent from its inputs, a negative <code>past_steps</code> or a nonpositive
-<code>decision_time_step</code>. <code>ScorerDescriptor</code> raises <code>ValueError</code> for a <code>direction</code> other than
+<p>History semantics, adapter precedence and instance consistency are defined in
+<a href="../../guides/driving-systems/#recorded-input-history">Recorded input history</a>.</p>
+<p><code>DrivingAdapter</code> rejects a non-<code>HistoryRequirement</code> history, an
+empty or duplicate binding ID, a non-callable callback, incomplete component schemas,
+unknown differentiable inputs or a nonpositive <code>decision_time_step</code>. <code>ScorerDescriptor</code> raises
+<code>ValueError</code> for a <code>direction</code> other than
 <code>minimize</code> or <code>maximize</code>, an empty <code>sensor_id</code>, or a <code>decision_threshold</code> outside [0, 1].</p>
 <h4 id="extension-contract_2">Extension contract<a class="headerlink" href="#extension-contract_2" title="Permanent link">&para;</a></h4>
 <p>The factory is called as <code>factory(seed)</code> and must return a new <code>AVStack</code>. Another type raises
@@ -6519,7 +6594,7 @@ differentiable inputs or the returned value does not require gradients.</p>
 <p><a href="../../guides/driving-systems/">Driving systems</a>.</p>
 <h3 id="avsectesterclosed_loopavstacksimplementedalpamayo">avsectester.closed_loop.avstacks.implemented.alpamayo<a class="headerlink" href="#avsectesterclosed_loopavstacksimplementedalpamayo" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.closed_loop.avstacks.implemented.alpamayo -->
-<p>Alpamayo end-to-end camera policy as an <code>avsectester.closed_loop.avstacks.base.AVStack</code>.</p>
+<p>Alpamayo camera policy behind the common driving-system interface.</p>
 <table>
 <thead>
 <tr>
@@ -6530,23 +6605,23 @@ differentiable inputs or the returned value does not require gradients.</p>
 <tbody>
 <tr>
 <td><code>alpamayo_driving_adapter(factory)</code></td>
-<td>Bind one <code>policy</code> component (observation + past → Control) and no scorers.</td>
+<td>Bind one <code>policy</code> component (observation → Control) and no scorers.</td>
 </tr>
 <tr>
 <td><code>AlpamayoAVStack(checkpoint_path: str | Path | None = None, camera_ids: list[str] | None = None, device: str = "cuda:0", context_length: int = 4, frame_subsample: int = 1, output_frequency_hz: int = 10, model: Any | None = None, seed: int | None = None)</code></td>
-<td>Subclass of <code>AVStack</code>. A policy using real 10 Hz observations, image context and model-visible navigation.</td>
+<td>Subclass of <code>AVStack</code>. Camera policy with timestamped acquisition history and model-visible navigation.</td>
 </tr>
 <tr>
 <td><code>AlpamayoAVStack.provides_detections = False</code></td>
 <td>Whether decisions expose detections compatible with detection metrics.</td>
 </tr>
 <tr>
-<td><code>AlpamayoAVStack.past_steps: ClassVar[int] = 15</code></td>
-<td>Recorded decision steps required before the selected start.</td>
-</tr>
-<tr>
 <td><code>AlpamayoAVStack.decision_time_step: ClassVar[float | None] = 0.1</code></td>
 <td>Decision interval in seconds. None leaves the interval unrestricted.</td>
+</tr>
+<tr>
+<td><code>AlpamayoAVStack.required_history(options: Mapping[str, Any]) -&gt; HistoryRequirement</code></td>
+<td>Recorded pose duration and camera samples needed by the configured context.</td>
 </tr>
 <tr>
 <td><code>AlpamayoAVStack.supported_stages: frozenset[str]</code></td>
@@ -6557,8 +6632,8 @@ differentiable inputs or the returned value does not require gradients.</p>
 <td>The loaded policy model. Empty until reset or the first inference loads it.</td>
 </tr>
 <tr>
-<td><code>AlpamayoAVStack.reset(observation: Observation, past: Sequence[Observation] = ()) -&gt; None</code></td>
-<td>Initialize policy context from recorded observations before the selected origin.</td>
+<td><code>AlpamayoAVStack.reset(observation: Observation) -&gt; None</code></td>
+<td>Clear context and validate recorded inputs in the first decision's deliveries.</td>
 </tr>
 <tr>
 <td><code>AlpamayoAVStack.close() -&gt; None</code></td>
@@ -6569,8 +6644,12 @@ differentiable inputs or the returned value does not require gradients.</p>
 <td>Timestamp offset in microseconds used by the trajectory interface.</td>
 </tr>
 <tr>
+<td><code>AlpamayoAVStack.ingest(observation: Observation) -&gt; None</code></td>
+<td>Retain force_gt input deliveries and poses without running policy inference.</td>
+</tr>
+<tr>
 <td><code>AlpamayoAVStack.__call__(observation: Observation) -&gt; Control</code></td>
-<td>Append the current capture and infer a rig-frame trajectory from camera and ego history.</td>
+<td>Ingest deliveries and infer a rig-frame trajectory from cached cameras and ego poses.</td>
 </tr>
 <tr>
 <td><code>AlpamayoAVStack.component_log() -&gt; dict[str, Any] | None</code></td>
@@ -6582,14 +6661,17 @@ differentiable inputs or the returned value does not require gradients.</p>
 
 <h4 id="constraints-and-errors_23">Constraints and errors<a class="headerlink" href="#constraints-and-errors_23" title="Permanent link">&para;</a></h4>
 <p><code>AlpamayoAVStack</code> raises <code>ValueError</code> for a nonpositive <code>context_length</code>, <code>frame_subsample</code> or
-<code>output_frequency_hz</code>, a negative seed, or <code>(context_length - 1) * frame_subsample</code> above 15.
-Reset and decisions raise <code>ValueError</code> for a decision interval other than 0.1 s, fewer than 15
-recorded past observations, a missing camera, non-finite times or poses, a <code>vehicle_state</code>
-without finite x, y and yaw, insufficient image or pose history, or a route that is not a
-finite (N, 3) array. Loading without a checkpoint path raises <code>ValueError</code>. Resetting or calling
-a closed stack, or calling before reset, raises <code>RuntimeError</code>.</p>
+<code>output_frequency_hz</code> or a negative seed. Reset and decisions raise <code>ValueError</code> for
+insufficient initial camera deliveries or pose history, non-increasing initial pose timestamps,
+a missing camera payload, non-finite pose times, a <code>vehicle_state</code> without finite x, y and yaw,
+insufficient cached image or pose history, or a route that is not a finite (N, 3) array.
+Each decision adds only its newly delivered acquisitions and state estimates to the driver
+caches. Initial history and cache coverage follow
+<a href="../../guides/driving-systems/#recorded-input-history">driving history</a>. Loading without a
+checkpoint path raises <code>ValueError</code>. Resetting or calling a closed stack, or calling
+before reset, raises <code>RuntimeError</code>.</p>
 <p>The <code>policy</code> component raises <code>TypeError</code> unless its inputs are a mapping with exactly
-<code>observation</code> and <code>past</code>.</p>
+<code>observation</code>.</p>
 <h4 id="see-also_23">See also<a class="headerlink" href="#see-also_23" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/driving-systems/">Driving systems</a>.</p>
 <h3 id="avsectesterclosed_loopavstacksimplementedcamera_forward_collision">avsectester.closed_loop.avstacks.implemented.camera_forward_collision<a class="headerlink" href="#avsectesterclosed_loopavstacksimplementedcamera_forward_collision" title="Permanent link">&para;</a></h3>
@@ -6622,6 +6704,10 @@ a closed stack, or calling before reset, raises <code>RuntimeError</code>.</p>
 <tr>
 <td><code>CameraForwardCollisionAVStack.detect(rgb: Any) -&gt; list</code></td>
 <td>Return current image detections as <code>(xyxy, score, vehicle)</code> tuples.</td>
+</tr>
+<tr>
+<td><code>CameraForwardCollisionAVStack.ingest(observation: Observation) -&gt; None</code></td>
+<td>Retain delivered camera data without running the detector.</td>
 </tr>
 <tr>
 <td><code>CameraForwardCollisionAVStack.__call__(observation: Observation) -&gt; Control</code></td>
@@ -6665,8 +6751,16 @@ a closed stack, or calling before reset, raises <code>RuntimeError</code>.</p>
 <td>Whether decisions expose detections compatible with detection metrics.</td>
 </tr>
 <tr>
-<td><code>ModularAVStack.reset(observation: Observation, past: Sequence[Observation] = ()) -&gt; None</code></td>
+<td><code>ModularAVStack.reset(observation: Observation) -&gt; None</code></td>
 <td>Clear telemetry. Use a fresh AVStack for independent pipeline histories.</td>
+</tr>
+<tr>
+<td><code>ModularAVStack.ingest(observation: Observation) -&gt; None</code></td>
+<td>Retain native sensor deliveries without running the pipeline.</td>
+</tr>
+<tr>
+<td><code>ModularAVStack.close() -&gt; None</code></td>
+<td>Release retained input references for this pipeline instance.</td>
 </tr>
 <tr>
 <td><code>ModularAVStack.native: Mapping[str, Any]</code></td>
@@ -6691,6 +6785,10 @@ a closed stack, or calling before reset, raises <code>RuntimeError</code>.</p>
 <tr>
 <td><code>ModularAVStack.detections() -&gt; Sequence[Detection] | None</code></td>
 <td>Boxes from the current decision in observation-time ego coordinates.</td>
+</tr>
+<tr>
+<td><code>ModularAVStack.detection_sensor: str | None</code></td>
+<td>Declared perception sensor, or the source inferred from the latest single-sensor input.</td>
 </tr>
 <tr>
 <td><code>ModularAVStack.__call__(observation: Observation) -&gt; Control</code></td>
@@ -7008,8 +7106,12 @@ rules are described in <a href="../../guides/driving-systems/#optional-vehicle-f
 <td>Whether decisions expose detections compatible with detection metrics.</td>
 </tr>
 <tr>
-<td><code>RuleBasedAVStack.reset(observation: Observation, past: Sequence[Observation] = ()) -&gt; None</code></td>
+<td><code>RuleBasedAVStack.reset(observation: Observation) -&gt; None</code></td>
 <td>Clear sign and vehicle tracks and reset planning for a fresh run.</td>
+</tr>
+<tr>
+<td><code>RuleBasedAVStack.ingest(observation: Observation) -&gt; None</code></td>
+<td>Retain the latest camera and LiDAR deliveries without perception or tracking.</td>
 </tr>
 <tr>
 <td><code>RuleBasedAVStack.__call__(observation: Observation) -&gt; Control</code></td>
@@ -7035,10 +7137,10 @@ rules are described in <a href="../../guides/driving-systems/#optional-vehicle-f
 <p>Invalid detector, sign tracker, vehicle tracker or planner types raise <code>TypeError</code>. Omitted
 sign tracker and planner construct their defaults. <code>vehicle_tracker=None</code> disables vehicle
 following. <code>vehicle_labels</code> must be a sequence of nonempty class names. Invalid labels, an
-empty <code>camera_id</code> or <code>lidar_id</code>, or a nonpositive <code>sign_height_m</code> raise <code>ValueError</code>. Decisions raise
-<code>ValueError</code> when the selected camera has no <code>CameraCalibration</code> or RGB image, and <code>RuntimeError</code>
-after <code>close</code>. With vehicle following enabled, both reset and decisions require the selected
-LiDAR's <code>LidarCalibration</code>, and decisions require a <code>PointCloud</code>. Missing inputs raise
+empty <code>camera_id</code> or <code>lidar_id</code>, or a nonpositive <code>sign_height_m</code> raise <code>ValueError</code>. Decisions
+raise <code>ValueError</code> when the selected camera has no <code>CameraCalibration</code> or RGB image, and
+<code>RuntimeError</code> after <code>close</code>. With vehicle following enabled, reset and decisions require the
+selected LiDAR's <code>LidarCalibration</code>, and decisions require a <code>PointCloud</code>. Missing inputs raise
 <code>ValueError</code> naming the LiDAR. Invalid LiDAR transforms or point arrays also raise <code>ValueError</code>.
 Vehicle detections without enough selected LiDAR points are skipped and counted.
 <code>rule_based_driving_adapter</code> raises <code>ValueError</code> when the factory has no <code>avstack_options</code> with
@@ -7187,11 +7289,15 @@ center lies inside it.</p>
 </tr>
 <tr>
 <td><code>SensorEnvironment(environment: Mapping[str, Any], seed: int = 0)</code></td>
-<td>One run's corruption instances, with randomness indexed by seed and absolute dataset frame position.</td>
+<td>One run's corruptions, seeded by sensor stream and integer acquisition time.</td>
 </tr>
 <tr>
-<td><code>SensorEnvironment.apply(observation: Observation, position: int) -&gt; Observation</code></td>
-<td>Apply configured corruptions to eligible sensors using the decision random generator.</td>
+<td><code>SensorEnvironment.bind(observation: Observation) -&gt; None</code></td>
+<td>Resolve omitted camera names from the initial full capture without corrupting it.</td>
+</tr>
+<tr>
+<td><code>SensorEnvironment.apply(observation: Observation, position: int, *, interval_capture_index: Mapping[str, int] | None = None, available_sensors: frozenset[str] | None = None) -&gt; Observation</code></td>
+<td>Apply corruptions with stable sensor and acquisition-time randomness.</td>
 </tr>
 </tbody>
 </table>
@@ -7205,8 +7311,10 @@ malformed custom type, unknown built-in options, an unsupported Albumentations t
 severity outside [0, 1]. <code>validate_environment</code> also passes the world mapping to the simulator,
 which raises for unsupported world settings.</p>
 <p><code>SensorEnvironment</code> raises <code>TypeError</code> for a corruption without a callable <code>apply(rgb, rng)</code>.
-<code>SensorEnvironment.apply</code> raises <code>ValueError</code> for a configured camera absent from the capture,
-a capture without readable RGB, or a corruption result that is not uint8 RGB of the same shape.</p>
+<code>SensorEnvironment.apply</code> skips an absent camera when it is listed in <code>available_sensors</code>,
+the configured streams that may not all be due in this frame batch. Other absent cameras,
+a capture without readable RGB, or a corruption result that is not uint8 RGB of the same shape
+raise <code>ValueError</code>. Omitting <code>available_sensors</code> keeps the missing-camera error.</p>
 <h4 id="see-also_33">See also<a class="headerlink" href="#see-also_33" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/environments/">Experiment environments</a>.</p>
 <h3 id="avsectesterclosed_loophooks">avsectester.closed_loop.hooks<a class="headerlink" href="#avsectesterclosed_loophooks" title="Permanent link">&para;</a></h3>
@@ -7551,12 +7659,20 @@ that budget.</p>
 <td><a href="#avsectesterclosed_loopsimulatorsbase">ClockSnapshot</a></td>
 </tr>
 <tr>
+<td><code>DecisionInterval</code></td>
+<td><a href="#avsectesterclosed_loopsimulatorsbase">DecisionInterval</a></td>
+</tr>
+<tr>
 <td><code>DeploymentPlan</code></td>
 <td><a href="#avsectesterclosed_loopsimulatorsbase">DeploymentPlan</a></td>
 </tr>
 <tr>
 <td><code>Initialization</code></td>
 <td><a href="#avsectesterclosed_loopsimulatorsbase">Initialization</a></td>
+</tr>
+<tr>
+<td><code>RecordedAcquisition</code></td>
+<td><a href="#avsectesterclosed_loopsimulatorsbase">RecordedAcquisition</a></td>
 </tr>
 <tr>
 <td><code>FrameDataSequence</code></td>
@@ -7584,12 +7700,20 @@ that budget.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>DecisionInterval(start_us: int, end_us: int, report_times_us: tuple[int, ...], force_gt: bool, coerce_dynamic_state: bool, start_state: WorldSnapshot)</code></td>
+<td>One native propagation, available to extension hooks until its endpoint is published.</td>
+</tr>
+<tr>
 <td><code>DeploymentPlan(ticks: int = 0)</code></td>
 <td>Shared tick budget for all treatments, including frame data generation.</td>
 </tr>
 <tr>
-<td><code>ClockSnapshot(t: float, frame: int)</code></td>
+<td><code>ClockSnapshot(t: float, frame: int, scheduled_time_us: int | None = None)</code></td>
 <td>Physical simulator time and frame, never a model-visible timestamp.</td>
+</tr>
+<tr>
+<td><code>ClockSnapshot.time_us: int</code></td>
+<td>Integer event time, retaining the native floating timestamp separately.</td>
 </tr>
 <tr>
 <td><code>SensorGeometry(sensor: str, camera: Camera, cam_from_world: np.ndarray)</code></td>
@@ -7602,6 +7726,10 @@ that budget.</p>
 <tr>
 <td><code>SensorView.composite_plan(objects: Sequence[PlacedObject]) -&gt; CompositePlan</code></td>
 <td>Plan composing <code>objects</code> into this camera view exactly as simulator captures do.</td>
+</tr>
+<tr>
+<td><code>RecordedAcquisition(observation: Observation, physical_state: WorldSnapshot, sensor_geometry: Mapping[str, SensorGeometry] = dict(), object_visibility: Mapping[str, Mapping[str, ObjectVisibility]] = dict())</code></td>
+<td>One recorded-history read with its observation and physical evidence.</td>
 </tr>
 <tr>
 <td><code>Initialization(expected: FrameData, resolved_scenario: Mapping[str, Any] = dict(), provenance: Mapping[str, Any] = dict())</code></td>
@@ -7676,6 +7804,10 @@ that budget.</p>
 <td>Decision interval in seconds. None leaves the interval unrestricted.</td>
 </tr>
 <tr>
+<td><code>Simulator.timing_capabilities: TimingCapabilities</code></td>
+<td>Declare native timing limits without opening a world.</td>
+</tr>
+<tr>
 <td><code>Simulator.command_modes: frozenset[str] | None</code></td>
 <td>Command representations consumed by this simulator, or None if undeclared.</td>
 </tr>
@@ -7694,6 +7826,26 @@ that budget.</p>
 <tr>
 <td><code>Simulator.validate_start(start: ScenarioStart | None) -&gt; None</code></td>
 <td>Reject a scenario start this simulator cannot reset to, before any world exists.</td>
+</tr>
+<tr>
+<td><code>Simulator.validate_start_timing(start: ScenarioStart | None, timing: TimingConfiguration) -&gt; None</code></td>
+<td>Check a recorded start under the selected frame clocks without opening a world.</td>
+</tr>
+<tr>
+<td><code>Simulator.decision_ticks: int</code></td>
+<td>Number of native ticks in one decision, or one without a native base tick.</td>
+</tr>
+<tr>
+<td><code>Simulator.observation_lead_steps_for(timing: TimingConfiguration) -&gt; int</code></td>
+<td>Recorded decision steps preceding a capture under the selected frame clocks.</td>
+</tr>
+<tr>
+<td><code>Simulator.validate_timing(timing: TimingConfiguration) -&gt; None</code></td>
+<td>Reject unsupported clocks or startup motion without opening a simulator world.</td>
+</tr>
+<tr>
+<td><code>Simulator.validate_startup(start: ScenarioStart | None, duration_us: int) -&gt; None</code></td>
+<td>Check recorded-motion support and coverage for force_gt_duration_us.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime(simulator: Simulator)</code></td>
@@ -7760,6 +7912,10 @@ that budget.</p>
 <td>Detach the complete mutable data graph before model-visible processing.</td>
 </tr>
 <tr>
+<td><code>SimulatorRuntime.interpolate_vehicle_state(left: Any, right: Any, fraction: float, time_us: int) -&gt; Any</code></td>
+<td>Interpolate model-visible actor, rigid-matrix or planar dataclass state.</td>
+</tr>
+<tr>
 <td><code>SimulatorRuntime.close() -&gt; None</code></td>
 <td>Release the world and native connections. Optional.</td>
 </tr>
@@ -7780,8 +7936,24 @@ that budget.</p>
 <td>Return the current <code>ClockSnapshot</code> containing simulator time and native frame.</td>
 </tr>
 <tr>
+<td><code>SimulatorRuntime.invalidate_state() -&gt; None</code></td>
+<td>Discard cached physical truth after explicitly changing the live world.</td>
+</tr>
+<tr>
 <td><code>SimulatorRuntime.state() -&gt; WorldSnapshot</code></td>
 <td>Read detached physical state without a capture, callback or simulator tick.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.timing_capabilities: TimingCapabilities</code></td>
+<td>Static timing limits declared by this runtime's configured simulator.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.timing: TimingConfiguration</code></td>
+<td>Timing configuration selected by <code>configure_timing</code> for this runtime.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.history_requirement: HistoryRequirement</code></td>
+<td>Recorded context selected by <code>configure_timing</code> for this runtime.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.sensors: frozenset[str]</code></td>
@@ -7793,11 +7965,19 @@ that budget.</p>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.sensor_geometry(sensor: str) -&gt; SensorGeometry</code></td>
-<td>Read optical-camera geometry. Override for a lightweight, image-free path.</td>
+<td>Read geometry of the sensor's latest acquisition, or native geometry before capture.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.sensor_view(sensor: str) -&gt; SensorView</code></td>
-<td>Return the view of the current capture of <code>sensor</code>. It never advances time.</td>
+<td>Return a detached view of the sensor's latest capture without acquiring again.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.canonical_sensor_id(sensor: str) -&gt; str</code></td>
+<td>Resolve a native sensor name or configured alias to its observation ID.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.frame_range_us(sensor: str, end_time_us: int) -&gt; range</code></td>
+<td>Read a frame's shutter or native scan interval at its integer end timestamp.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.insert_object(object_id: str, asset: ObjectAsset | MeshAsset, world_from_object: np.ndarray, *, harmonizer: Harmonizer | None = None) -&gt; None</code></td>
@@ -7829,15 +8009,35 @@ that budget.</p>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.step(control: Control) -&gt; None</code></td>
-<td>Apply <code>control</code>, advance the world one decision and capture. Read it with <code>observe</code>.</td>
+<td>Advance one decision and capture through the scheduled simulator operations.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.decision_period_us: int</code></td>
+<td>Declared decision interval in integer microseconds.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.configure_timing(timing: TimingConfiguration, *, history: HistoryRequirement = HistoryRequirement()) -&gt; None</code></td>
+<td>Set acquisition clocks before resetting a run. Never advance a live world.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.advance_interval(time_us: int, control: Control | None, *, report_times_us: Sequence[int] = (), force_gt: bool = False, coerce_dynamic_state: bool = False) -&gt; None</code></td>
+<td>Propagate one complete decision interval, retaining reports for on-demand reads.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.recorded_reference(time_us: int, end_us: int) -&gt; Control</code></td>
+<td>Recorded reference in the rig frame at its production time, for force-GT control.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.capture_at(time_us: int, sensor_ids: Sequence[str] | None = None) -&gt; Observation</code></td>
+<td>Acquire sensors at the current integer time without advancing the world.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.observe() -&gt; Observation</code></td>
 <td>Return an independent copy of the current capture. Never advance or recapture.</td>
 </tr>
 <tr>
-<td><code>SimulatorRuntime.observe_past(count: int) -&gt; tuple[Observation, ...]</code></td>
-<td>Read recorded observations before the selected start, from oldest to newest.</td>
+<td><code>SimulatorRuntime.observe_recorded_at(time_us: int, sensor_ids: Sequence[str] | None = None) -&gt; RecordedAcquisition</code></td>
+<td>Read an acquisition before the origin without advancing the live world.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.start_replay(start: ScenarioStart, initialization: Initialization | None = None, *, world: Mapping[str, Any] | None = None, deployment: DeploymentPlan | None = None) -&gt; None</code></td>
@@ -7870,11 +8070,20 @@ when a supported configuration lacks the recorded support for a particular start
 <h4 id="extension-contract_4">Extension contract<a class="headerlink" href="#extension-contract_4" title="Permanent link">&para;</a></h4>
 <p>Implement <code>Simulator.create_runtime(seed)</code> and declare <code>dataset_kinds</code>, capabilities,
 <code>supported_stages</code>, <code>decision_time_step</code>, <code>command_modes</code>, <code>supported_world_settings</code>,
-<code>capture_ticks</code>, <code>past_steps</code> and <code>occlusion_tolerance_m</code> on the configuration class.</p>
+<code>capture_ticks</code>, <code>past_steps</code>, <code>identity</code> and <code>occlusion_tolerance_m</code> on the configuration class.
+<code>timing_capabilities</code> declares native tick size, intermediate acquisitions, motion reports,
+camera exposure and recorded ego motion. Intermediate acquisitions require motion reports.
+<code>decision_ticks</code> gives native ticks per decision, or one without a base tick. Reject unsupported
+timing in <code>validate_timing</code> before opening a world. Configuration limits are listed in
+<a href="../configuration/#scheduling">Scheduling</a>.</p>
 <p>Runtime subclasses implement <code>_initialize_world(start, initialization, environment)</code>,
 <code>_advance_native(control)</code>, <code>_observe()</code> and <code>_state()</code>. Optional native lifecycle methods are
-<code>_sensor_view</code>, <code>_replay_tick</code>, <code>_observe_recorded</code>, <code>_recorded_sensor_geometry</code>,
-<code>_recorded_sensor_view</code>, <code>_capture_frame_data</code>, <code>_hold_tick</code>, <code>_replay_position</code>,
+<code>_sensor_view</code>, <code>_sensor_geometry</code>, <code>_capture_view_builder</code>, <code>_capture_render_request</code>,
+<code>_observe_sensors</code>, <code>_reported_state_at</code>,
+<code>_activate_reported_state</code>, <code>_completed_interval</code>, <code>_replay_tick</code>, <code>_observe_recorded</code>,
+<code>_advance_recorded_native</code>, <code>_recorded_state</code>, <code>_recorded_pose_state</code>, <code>_recorded_read_complete</code>,
+<code>_recorded_sensor_geometry</code>, <code>_recorded_sensor_view</code>, <code>_capture_frame_data</code>, <code>_hold_tick</code>,
+<code>_replay_position</code>,
 <code>_check_initialization</code>, <code>_before_selected_capture</code>, <code>_replayed_scenario</code>,
 <code>_frame_data_provenance</code>, <code>_composite_plan</code>, <code>_compose_objects</code> and <code>_supports_asset</code>.
 <code>_supports_asset(asset)</code> accepts <code>ObjectAsset</code> by default. Override it to declare additional
@@ -7884,8 +8093,73 @@ world-asset types supported by the runtime. Unsupported assets raise <code>TypeE
 <code>_composite_plan</code> to the capture and records its background.
 The default <code>_hold_tick</code> raises <code>ValueError</code>, so
 a runtime without it cannot hold an origin for deployment ticks. Defining <code>reset</code>, <code>step</code>,
-<code>sensor_view</code>, <code>start_replay</code>, <code>advance_replay</code> or <code>observe_past</code> in a subclass raises
+<code>advance_interval</code>, <code>capture_at</code>, <code>sensor_view</code>, <code>sensor_geometry</code>, <code>start_replay</code>,
+<code>advance_replay</code> or <code>observe_recorded_at</code> in a subclass raises
 <code>TypeError</code>.</p>
+<p><code>_native_clock()</code> may return a lightweight <code>ClockSnapshot</code> without advancing the world. Preserve
+native timestamp semantics. Validate native tick alignment before state or capture access.
+After a native change to world state, call <code>invalidate_state()</code> before exposing the new truth.</p>
+<p><code>timing</code> and <code>history_requirement</code> are read-only runtime properties set by <code>configure_timing</code>.
+Read these properties when preparing source history or choosing native sensor ticks.
+The protected <code>_resetting</code> and <code>_advancing</code> flags indicate native reset and propagation phases.
+Subclasses may read these flags but must not assign them.</p>
+<p>Inside <code>_advance_native(control)</code>, <code>_advance_force_gt_native(control)</code> and
+<code>_advance_recorded_native()</code>, <code>_interval</code> is the immutable <code>DecisionInterval</code> for that operation.
+It supplies <code>start_us</code>, <code>end_us</code>, intermediate <code>report_times_us</code>, <code>force_gt</code>,
+<code>coerce_dynamic_state</code> and <code>start_state</code>. The start state includes changes from
+<code>simulator.step.pre</code>. The interval remains available until its endpoint is published.
+Do not modify or replace it from a subclass. <code>_completed_interval(end_state)</code> receives detached
+endpoint truth after propagation. Retain native report states there if later acquisitions need
+them. <code>_reported_state_at(time_us)</code> must support the endpoint as well as intermediate times.
+<code>_activate_reported_state(time_us, state)</code> selects that truth without running the controller again.</p>
+<p>Simulators that pre-run a source recording use <code>initial_history_times</code> with the configured
+sensor clocks, <code>history_requirement</code>, decision period and reporting interval to reserve context.
+Native-tick simulators use <code>SensorTiming.resolved_frame_interval_us(decision_period_us)</code> to
+resolve the optional interval. <code>frame_end_us</code>, <code>shutter_range_us</code>, <code>latest_frame_index</code> and
+<code>frame_index_at</code> use offsets from the run origin, including negative recorded-history offsets.
+Use these tools to select the due sensors on each native tick.
+Implement <code>_observe_recorded</code> for those retained ticks, and avoid sensor work for pose-only reads.</p>
+<p>For checkpoints, restore native state and call <code>_restore_clock(time_us)</code> before acquiring again.
+It resets the current interval, published state and sensor acquisition state to that clock.
+<code>_latest_render_request(sensor)</code> returns a detached native request for the latest acquisition
+without constructing a view. It raises <code>KeyError</code> when that sensor has no acquisition.</p>
+<p><code>interpolate_vehicle_state(left, right, fraction, time_us)</code> handles actor states, rigid matrices
+and planar dataclasses by default. Override it for a simulator's native model-visible state.
+The acquisition pipeline calls this operation between localization reports and uses the original
+estimate at an exact report timestamp.</p>
+<p><code>_capture_view_builder(sensor, observation, truth)</code> freezes acquisition-time inputs and returns
+a zero-argument <code>SensorView</code> builder. The builder must not read later world state. Its default
+implementation calls <code>_sensor_view(sensor)</code> immediately and retains that view. Override it to
+defer expensive view and depth construction. <code>_capture_render_request(sensor)</code> optionally
+freezes native render-request metadata separately from the complete view. Lightweight
+<code>_sensor_geometry(sensor)</code> lets object composition reject off-image objects before building
+views or depth. Declare all configured sensors in <code>sensors</code> and only cameras with geometry in
+<code>camera_sensors</code>. A camera without a geometric model may render but cannot supply viewpoints or
+object composition.</p>
+<p><code>force_gt_duration_us</code> requires <code>TimingCapabilities.recorded_ego_motion</code>. Implement
+<code>_advance_force_gt_native(control)</code> to apply recorded motion and any native dynamics alignment.
+Its default delegates to <code>_advance_recorded_native()</code>. Trajectory simulators also supply
+<code>recorded_reference(time_us, end_us)</code> for the delay buffer. <code>Simulator.validate_startup</code> checks
+coverage before reset. Override <code>_recorded_end_time_us(start)</code> when the source is not
+<code>ScenarioStart.recorded_ego</code> on the dataset grid. Timing restrictions are listed in
+<a href="../configuration/#scheduling">Scheduling</a>.</p>
+<p>Declare simulator-owned recorded history in <code>past_steps</code>. Override
+<code>observation_lead_steps_for(timing)</code> when capture needs source data before an observation, such as
+a LiDAR scan start. Its default uses <code>observation_lead_steps</code>. Selection and start validation
+reserve this lead before sensor access.</p>
+<p>Past-capable runtimes implement <code>_observe_recorded(time_us, sensors)</code>, where <code>time_us</code> is an
+integer offset from the run origin. Only the selected sensors may be read or rendered. With
+<code>sensors=()</code>, the base calls <code>_recorded_pose_state(time_us)</code> without sensor work.
+<code>_recorded_state</code> supplies physical truth. <code>_recorded_sensor_geometry</code> and <code>_recorded_sensor_view</code>
+supply camera evidence for start-object composition. Return independent values and preserve the
+live world and clock. The public <code>observe_recorded_at</code> returns one <code>RecordedAcquisition</code> with
+<code>observation</code>, <code>physical_state</code>, <code>sensor_geometry</code> and <code>object_visibility</code>. Geometry covers
+selected due cameras. Pose-only reads have empty geometry and visibility.
+<code>_recorded_read_complete</code> can release acquisition-only resources after that read. Recorded-input
+requirements are defined in <a href="../../guides/driving-systems/#recorded-input-history">Driving systems</a>.</p>
+<p><code>frame_range_us(sensor, end_time_us)</code> returns the actual shutter or scan interval. Override it
+for native scan windows that differ from a camera shutter. The runner uses the same interval
+for delivered acquisitions and capture records.</p>
 <p>The default <code>SimulatorRuntime.world_key</code> is <code>("simulator", id(self))</code>. For optical camera views,
 <code>sensor_from_world = BODY_FROM_OPTICAL @ cam_from_world</code>. <code>setup_tick</code> raises <code>RuntimeError</code>
 outside <code>simulator.setup</code> or after the deployment tick budget is exhausted.</p>
@@ -7982,7 +8256,7 @@ outside <code>simulator.setup</code> or after the deployment tick budget is exha
 </thead>
 <tbody>
 <tr>
-<td><code>CarlaSimulator(client: dict, settle_iters: int = 100, *, simulator_version="0.9.16", depth_camera: str | None = None, occlusion_tolerance_m: float = 0.1)</code></td>
+<td><code>CarlaSimulator(client: dict, settle_iters: int = 100, *, simulator_version="0.9.16", depth_camera: str | None = None, occlusion_tolerance_m: float = 0.1, decision_period_us: int | None = None)</code></td>
 <td>Subclass of <code>Simulator</code>. CARLA runtime settings, with scene content supplied by a dataset recipe.</td>
 </tr>
 <tr>
@@ -8006,6 +8280,10 @@ outside <code>simulator.setup</code> or after the deployment tick budget is exha
 <td>Whether world objects can be inserted into sensor rendering.</td>
 </tr>
 <tr>
+<td><code>CarlaSimulator.can_observe_past = True</code></td>
+<td>Whether observations before a selected start can be reconstructed.</td>
+</tr>
+<tr>
 <td><code>CarlaSimulator.supported_world_settings = CARLA_WORLD_SETTINGS</code></td>
 <td>World-setting keys accepted by the simulator.</td>
 </tr>
@@ -8023,11 +8301,19 @@ outside <code>simulator.setup</code> or after the deployment tick budget is exha
 </tr>
 <tr>
 <td><code>CarlaSimulatorRuntime.native: dict[str, Any]</code></td>
-<td>Expose live simulator resources for explicit world-level interventions.</td>
+<td>Borrow native world resources, invalidating cached truth before possible edits.</td>
 </tr>
 <tr>
 <td><code>CarlaSimulatorRuntime.copy_observation(observation: Observation) -&gt; Observation</code></td>
 <td>Detach mutable payloads, calibration and reference graphs in one copy operation.</td>
+</tr>
+<tr>
+<td><code>CarlaSimulatorRuntime.interpolate_vehicle_state(left: Any, right: Any, fraction: float, time_us: int) -&gt; Any</code></td>
+<td>Interpolate native avstack physical vectors and attitude.</td>
+</tr>
+<tr>
+<td><code>CarlaSimulatorRuntime.canonical_sensor_id(sensor: str) -&gt; str</code></td>
+<td>Resolve an ego sensor's logical name or source ID to its observation ID.</td>
 </tr>
 </tbody>
 </table>
@@ -8052,6 +8338,14 @@ lens-distortion attributes.</p>
 <tr>
 <td><code>PlanarEgoState(x: float = 0.0, y: float = 0.0, yaw: float = 0.0, speed: float = 0.0, t: float = 0.0, lateral_speed: float = 0.0, yaw_rate: float = 0.0, acceleration: float = 0.0)</code></td>
 <td>Planar physical ego state in meters, radians and seconds.</td>
+</tr>
+<tr>
+<td><code>EgoMotion(states: tuple[PlanarEgoState, ...])</code></td>
+<td>A completed motion interval with detached states at controller reporting times.</td>
+</tr>
+<tr>
+<td><code>EgoMotion.at(time_us: int) -&gt; PlanarEgoState</code></td>
+<td>Read a state at an integer time within this interval, as an independent copy.</td>
 </tr>
 <tr>
 <td><code>EgoDynamics</code></td>
@@ -8091,7 +8385,11 @@ lens-distortion attributes.</p>
 </tr>
 <tr>
 <td><code>TrajectoryFollower.reset(state: PlanarEgoState) -&gt; None</code></td>
-<td>No warmup is needed: the provided state anchors each planned trajectory.</td>
+<td>Start the physical pose history used to anchor delayed trajectory references.</td>
+</tr>
+<tr>
+<td><code>TrajectoryFollower.advance(pose: PlanarEgoState, control: Control, duration_us: int, report_times_us: Sequence[int] = ()) -&gt; EgoMotion</code></td>
+<td>Report one interval and retain physical poses for subsequent delayed references.</td>
 </tr>
 <tr>
 <td><code>TrajectoryFollower.step(pose: PlanarEgoState, control: Control, dt: float) -&gt; PlanarEgoState</code></td>
@@ -8114,8 +8412,16 @@ lens-distortion attributes.</p>
 <td>Create a fresh controller at the supplied recorded physical state.</td>
 </tr>
 <tr>
+<td><code>AlpaSimController.coerce_dynamic_state(state: PlanarEgoState) -&gt; None</code></td>
+<td>Force the next native request's dynamics without discarding trajectory history.</td>
+</tr>
+<tr>
 <td><code>AlpaSimController.step(pose: PlanarEgoState, control: Control, dt: float) -&gt; PlanarEgoState</code></td>
-<td>Track the t0-led rig-frame plan and return the controller's final physical state.</td>
+<td>Track the original rig-frame plan using the native controller's physical history.</td>
+</tr>
+<tr>
+<td><code>AlpaSimController.advance(pose: PlanarEgoState, control: Control, duration_us: int, report_times_us: Sequence[int] = ()) -&gt; EgoMotion</code></td>
+<td>Run one controller interval and report poses without adding MPC solve times.</td>
 </tr>
 </tbody>
 </table>
@@ -8125,12 +8431,23 @@ lens-distortion attributes.</p>
 <p><code>AlpaSimController</code> raises <code>ValueError</code> for a nonpositive <code>n_horizon</code> or <code>dt_mpc</code> or an empty
 <code>mpc_implementation</code>, and <code>TypeError</code> for non-mapping <code>gains</code>. Unknown gain names raise
 <code>TypeError</code> at reset. Stepping before reset raises <code>RuntimeError</code>. A step raises <code>ValueError</code>
-when the state time differs from the latest propagated time, the trajectory does not start at
-t0 with zero position and unit rotation, has no future waypoint or has timestamps that do not
-strictly increase, or <code>dt</code> advances less than one microsecond.</p>
+when the state time differs from the latest propagated time, the trajectory is empty, its
+timestamps do not strictly increase, or <code>dt</code> advances less than one microsecond.
+Trajectories retain their generation-time rig frame and earlier
+waypoint timestamps. The native controller anchors that reference through its physical pose
+history. The adapter does not clip or spatially re-anchor it.</p>
 <p><code>PlanarEgoState.x</code>, <code>y</code> and <code>yaw</code> locate the ego origin in world coordinates. <code>speed</code> and
 <code>lateral_speed</code> are ego-axis velocities, <code>yaw_rate</code> is radians per second and <code>acceleration</code> is
 longitudinal meters per second squared.</p>
+<h4 id="extension-contract_5">Extension contract<a class="headerlink" href="#extension-contract_5" title="Permanent link">&para;</a></h4>
+<p>Custom dynamics implement <code>step(pose, control, dt)</code> and may declare <code>command_modes</code> and
+<code>reset(state)</code>. Without native reports, each intermediate state evaluates the pure <code>step</code> from
+the interval start. Optional <code>advance(pose, control, duration_us, report_times_us)</code> returns
+<code>EgoMotion</code> for one complete decision interval.</p>
+<p>Optional <code>coerce_dynamic_state(state)</code> aligns internal dynamics with the supplied physical state
+without clearing reference history.
+Simulators call it before each force-GT interval and at the handoff to driver control.
+It is not required by <code>EgoDynamics</code>.</p>
 <h4 id="see-also_42">See also<a class="headerlink" href="#see-also_42" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/simulators/">Simulators</a>.</p>
 <h3 id="avsectesterclosed_loopsimulatorsground_contact">avsectester.closed_loop.simulators.ground_contact<a class="headerlink" href="#avsectesterclosed_loopsimulatorsground_contact" title="Permanent link">&para;</a></h3>
@@ -8282,15 +8599,15 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Load a reconstruction once. Renderers without a service may leave this empty.</td>
 </tr>
 <tr>
-<td><code>Renderer.render(world_from_rig: np.ndarray, timestamp_us: int, camera: str, dynamic_objects=()) -&gt; Any</code></td>
-<td>Abstract. Render one camera at the explicit three-dimensional rig pose and scene timestamp.</td>
+<td><code>Renderer.render(world_from_rig: np.ndarray, timestamp_us: int, camera: str, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start: np.ndarray | None = None, dynamic_objects_start=None) -&gt; Any</code></td>
+<td>Abstract. Render a frame ending at <code>timestamp_us</code>, with optional exposure-start poses.</td>
 </tr>
 <tr>
 <td><code>Renderer.render_lidar(world_from_rig_start: np.ndarray, world_from_rig_end: np.ndarray, start_us: int, end_us: int, dynamic_objects_start: Sequence[tuple[str, np.ndarray]] = (), dynamic_objects_end: Sequence[tuple[str, np.ndarray]] = ()) -&gt; PointCloud</code></td>
 <td>Render one scan of <code>lidar</code> in the sensor frame at its ending pose and timestamp.</td>
 </tr>
 <tr>
-<td><code>Renderer.render_scene_visibility(world_from_rig: np.ndarray, timestamp_us: int, camera: str, objects: Sequence[PlacedObject], dynamic_objects=(), *, occlusion_tolerance_m: float = 0.) -&gt; np.ndarray</code></td>
+<td><code>Renderer.render_scene_visibility(world_from_rig: np.ndarray, timestamp_us: int, camera: str, objects: Sequence[PlacedObject], dynamic_objects=(), *, occlusion_tolerance_m: float = 0., frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
 <td>Pixels where the reconstructed scene does not hide <code>objects</code> in this capture.</td>
 </tr>
 <tr>
@@ -8298,7 +8615,7 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Register scene-rendered assets and return their track IDs and world poses.</td>
 </tr>
 <tr>
-<td><code>Renderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=()) -&gt; np.ndarray</code></td>
+<td><code>Renderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
 <td>Visible image coverage of one object, with values between zero and one.</td>
 </tr>
 <tr>
@@ -8315,7 +8632,7 @@ waypoints lie more than 10 meters from the derived map route.</p>
 </tr>
 <tr>
 <td><code>NuRecRenderer(endpoint: str = "127.0.0.1:50051", scene_id: str | None = None, cameras: list[str] = ["camera_front_wide_120fov"], lidar: str | None = None, image_quality: float = 95.0, asset_directory: str | Path | None = None, server_asset_directory: str | None = None, track_padding_m: tuple[float, float, float] = (1.0, 1.0, 0.25))</code></td>
-<td>Subclass of <code>Renderer</code>. Real NuRec renderer: one stateless <code>SensorsimService</code> render call per capture to an nre server.</td>
+<td>Subclass of <code>Renderer</code>. NuRec client for one stateless <code>SensorsimService</code> render call per acquisition.</td>
 </tr>
 <tr>
 <td><code>NuRecRenderer.copy() -&gt; NuRecRenderer</code></td>
@@ -8346,8 +8663,8 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>World-to-optical-camera transform at the explicit three-dimensional rig pose.</td>
 </tr>
 <tr>
-<td><code>NuRecRenderer.render(world_from_rig: np.ndarray, timestamp_us: int, camera: str, dynamic_objects=())</code></td>
-<td>Render one RGB frame at an explicit three-dimensional rig pose and scene timestamp.</td>
+<td><code>NuRecRenderer.render(world_from_rig: np.ndarray, timestamp_us: int, camera: str, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start: np.ndarray | None = None, dynamic_objects_start=None)</code></td>
+<td>Render an instantaneous frame or an explicit shutter interval ending at timestamp_us.</td>
 </tr>
 <tr>
 <td><code>NuRecRenderer.render_at(world_from_rig, timestamp_us: int, camera: str, dynamic_objects=())</code></td>
@@ -8358,7 +8675,7 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Render a scan in the LiDAR frame at its ending pose and timestamp.</td>
 </tr>
 <tr>
-<td><code>NuRecRenderer.render_scene_visibility(world_from_rig: np.ndarray, timestamp_us: int, camera: str, objects: Sequence[PlacedObject], dynamic_objects=(), *, occlusion_tolerance_m: float = 0.) -&gt; np.ndarray</code></td>
+<td><code>NuRecRenderer.render_scene_visibility(world_from_rig: np.ndarray, timestamp_us: int, camera: str, objects: Sequence[PlacedObject], dynamic_objects=(), *, occlusion_tolerance_m: float = 0., frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
 <td>Pixels where the reconstructed scene does not hide <code>objects</code> in an NRE render.</td>
 </tr>
 <tr>
@@ -8366,7 +8683,7 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Register textured scene assets and return their requested world-pose track entries.</td>
 </tr>
 <tr>
-<td><code>NuRecRenderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=()) -&gt; np.ndarray</code></td>
+<td><code>NuRecRenderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
 <td>Return visible object coverage from pure-white and pure-black scene copies.</td>
 </tr>
 </tbody>
@@ -8448,8 +8765,16 @@ added as notes to a propagating exception. They never raise.</p>
 <td>Whether world objects can be inserted into sensor rendering.</td>
 </tr>
 <tr>
+<td><code>NuRecSimulator.validate_start_timing(start: ScenarioStart | None, timing: TimingConfiguration) -&gt; None</code></td>
+<td>Reject starts without enough source history for the selected LiDAR frame clock.</td>
+</tr>
+<tr>
 <td><code>NuRecSimulator.create_runtime(seed: int | None = None) -&gt; NuRecSimulatorRuntime</code></td>
 <td>A new world. The optional traffic session receives seed for its log.</td>
+</tr>
+<tr>
+<td><code>NuRecSimulator.timing_capabilities: TimingCapabilities</code></td>
+<td>NuRec can report intermediate motion using the configured ego dynamics.</td>
 </tr>
 <tr>
 <td><code>NuRecSimulator.past_steps: int</code></td>
@@ -8495,7 +8820,8 @@ added as notes to a propagating exception. They never raise.</p>
 <p>Construction raises <code>ValueError</code> without <code>time_step</code>, for an unsupported <code>depth</code>,
 <code>physics_update_mode</code>, <code>ground_mesh</code>, <code>object_occlusion</code>, <code>object_insertion</code> or
 <code>route_generator</code>, for scene insertion without <code>asset_directory</code>, or for traffic with a
-decision step other than 0.1 s. It raises <code>TypeError</code> without a renderer or for traffic that is
+decision period that is not a whole multiple of the fixed 0.1 s traffic step.
+It raises <code>TypeError</code> without a renderer or for traffic that is
 not <code>AlpaSimTraffic</code>. <code>validate_start</code> raises <code>ValueError</code> without <code>ScenarioStart</code> and
 <code>UnsupportedStartError</code> when traffic lacks past decisions or the navigation route cannot be
 built.</p>
@@ -8540,7 +8866,7 @@ as <code>scene_visibility</code>.</p>
 <td>Query scene support. Unavailable endpoints and deadline expiry return None.</td>
 </tr>
 <tr>
-<td><code>AlpaSimTraffic.open_session(*, scene_id: str, random_seed: int, start_us: int, end_us: int, ego_extent: tuple[float, float, float], ego_trajectory: Sequence[tuple[int, np.ndarray]], tracks: Sequence[TrafficTrack]) -&gt; TrafficSession</code></td>
+<td><code>AlpaSimTraffic.open_session(*, scene_id: str, random_seed: int, start_us: int, end_us: int, ego_extent: tuple[float, float, float], ego_trajectory: Sequence[tuple[int, np.ndarray]], tracks: Sequence[TrafficTrack], handover_us: int | None = None) -&gt; TrafficSession</code></td>
 <td>Validate support and open a session with EGO first and clipped native tracks.</td>
 </tr>
 <tr>
@@ -8609,8 +8935,16 @@ status code and details. Any simulation failure closes the session before propag
 <td>A new replay. Recorded frames are fixed, so <code>seed</code> is unused.</td>
 </tr>
 <tr>
+<td><code>RecordedReplaySimulator.validate_timing(timing: TimingConfiguration) -&gt; None</code></td>
+<td>Require the nominal keyframe decision grid before allocating a replay.</td>
+</tr>
+<tr>
 <td><code>RecordedReplaySimulatorRuntime(simulator: RecordedReplaySimulator)</code></td>
 <td>Subclass of <code>SimulatorRuntime</code>. One replay of recorded frames.</td>
+</tr>
+<tr>
+<td><code>RecordedReplaySimulatorRuntime.decision_period_us: int</code></td>
+<td>Nominal nuScenes keyframe interval, independent of recorded timestamp jitter.</td>
 </tr>
 </tbody>
 </table>
@@ -8624,6 +8958,69 @@ absent RGB captures and steps beyond terminal support raise <code>ValueError</co
 access before reset raises <code>RuntimeError</code>.</p>
 <h4 id="see-also_50">See also<a class="headerlink" href="#see-also_50" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/simulators/">Simulators</a>.</p>
+<h3 id="avsectesterclosed_looptiming">avsectester.closed_loop.timing<a class="headerlink" href="#avsectesterclosed_looptiming" title="Permanent link">&para;</a></h3>
+<!-- api:begin module=avsectester.closed_loop.timing -->
+<p>Integer-microsecond clocks and command selection matching AlpaSim runtime.</p>
+<table>
+<thead>
+<tr>
+<th>Name and signature</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seconds_to_microseconds(seconds: float) -&gt; int</code></td>
+<td>Convert a configured duration, rejecting precision below one microsecond.</td>
+</tr>
+<tr>
+<td><code>SensorTiming(frame_interval_us: int | None = None, shutter_duration_us: int = 0)</code></td>
+<td>Independent frame interval and shutter duration, with the first frame ending at zero.</td>
+</tr>
+<tr>
+<td><code>SensorTiming.resolved_frame_interval_us(decision_period_us: int) -&gt; int</code></td>
+<td>Resolve an unspecified frame interval to the decision period.</td>
+</tr>
+<tr>
+<td><code>SensorTiming.frame_end_us(index: int, decision_period_us: int) -&gt; int</code></td>
+<td>Frame end relative to the run origin, including negative recorded context indices.</td>
+</tr>
+<tr>
+<td><code>SensorTiming.shutter_range_us(index: int, decision_period_us: int) -&gt; range</code></td>
+<td>Half-open shutter interval ending at the frame's scheduled end time.</td>
+</tr>
+<tr>
+<td><code>SensorTiming.latest_frame_index(time_us: int, decision_period_us: int) -&gt; int</code></td>
+<td>Latest frame index whose end is not after the requested offset.</td>
+</tr>
+<tr>
+<td><code>SensorTiming.frame_index_at(time_us: int, decision_period_us: int) -&gt; int</code></td>
+<td>Index of an exact frame end, rejecting times off this sensor's clock.</td>
+</tr>
+<tr>
+<td><code>TimingCapabilities(captures_between_decisions: bool = False, motion_reports: bool = False, recorded_ego_motion: bool = False, camera_exposure: bool = False, base_tick_us: int | None = None)</code></td>
+<td>Static simulator support for exposure, intermediate poses and recorded motion.</td>
+</tr>
+<tr>
+<td><code>HistoryRequirement(duration_us: int = 0, samples: int = 1)</code></td>
+<td>Recorded context supplied at decision zero, using the closed-loop pose reporting clock.</td>
+</tr>
+<tr>
+<td><code>TimingConfiguration(decision_period_us: int | None = None, sensors: Mapping[str, SensorTiming] = dict(), pose_reporting_interval_us: int = 0, planner_delay_us: int = 0, force_gt_duration_us: int = 0, skip_driver_during_force_gt: bool = False)</code></td>
+<td>Scheduling parameters with decision-rate frames and zero delays by default.</td>
+</tr>
+<tr>
+<td><code>InitialHistory(payload_times_us: Mapping[str, tuple[int, ...]], pose_times_us: tuple[int, ...], source_start_us: int)</code></td>
+<td>Recorded payload and pose offsets, with the earliest source needed for exposure.</td>
+</tr>
+<tr>
+<td><code>initial_history_times(sensor_timings: Mapping[str, SensorTiming], history: HistoryRequirement, decision_period_us: int, *, pose_reporting_interval_us: int = 0) -&gt; InitialHistory</code></td>
+<td>Recorded frame ends and pose-clock offsets needed before the run origin.</td>
+</tr>
+</tbody>
+</table>
+<!-- api:end -->
+
 <h3 id="avsectesterattack">avsectester.attack<a class="headerlink" href="#avsectesterattack" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.attack -->
 <p>Attack contracts, runtime actions and structured offline reports.</p>
@@ -8872,7 +9269,7 @@ exclusive stop follows the start, and <code>TypeError</code> for non-mapping <co
 <td>Subclass of <code>WorldAttackAction</code>. Insert a world-object asset through the simulator's supported sensors.</td>
 </tr>
 <tr>
-<td><code>InsertionAttackAction(sensor: str, insertion: Insertion, compositor: PatchCompositor | None = None)</code></td>
+<td><code>InsertionAttackAction(sensor: str, insertion: Insertion, compositor: PatchCompositor | None = None, active_for_us: int | None = 0)</code></td>
 <td>Subclass of <code>SensorAttackAction</code>. Render explicit planes with aligned depth when present, otherwise actor cuboids.</td>
 </tr>
 <tr>
@@ -9487,7 +9884,7 @@ the smoothness term.</p>
 <td>Declare a closed-loop result read by an attack runtime.</td>
 </tr>
 <tr>
-<td><code>OnlineContext(step: int, stage: str, sim_time: float, frame: int, observation: Observation | None = None, physical_state: WorldSnapshot | None = None)</code></td>
+<td><code>OnlineContext(step: int, stage: str, sim_time: float, frame: int, observation: Observation | None = None, physical_state: WorldSnapshot | None = None, decision_time_us: int | None = None, decision_period_us: int | None = None, force_gt: bool = False)</code></td>
 <td>Independent snapshots of subscribed results, with a read-only physical clock.</td>
 </tr>
 <tr>
@@ -9516,11 +9913,15 @@ the smoothness term.</p>
 </tr>
 <tr>
 <td><code>SensorAttackAction()</code></td>
-<td>Subclass of <code>AttackAction</code>. Change one captured sensor's data before ObservationPipeline, in the current decision.</td>
+<td>Subclass of <code>AttackAction</code>. Change captured sensor data before ObservationPipeline for the declared duration.</td>
 </tr>
 <tr>
 <td><code>SensorAttackAction.sensor: str</code></td>
 <td>Name of the sensor whose captured data this action modifies.</td>
+</tr>
+<tr>
+<td><code>SensorAttackAction.active_for_us: int | None = 0</code></td>
+<td>Zero applies once. Positive durations cover [issue, issue + duration). None lasts until stop.</td>
 </tr>
 <tr>
 <td><code>SensorAttackAction.apply(data: Any, view: SensorView) -&gt; Any</code></td>
@@ -9559,12 +9960,19 @@ the smoothness term.</p>
 <!-- api:end -->
 
 <h4 id="constraints-and-errors_54">Constraints and errors<a class="headerlink" href="#constraints-and-errors_54" title="Permanent link">&para;</a></h4>
+<p><code>SensorAttackAction</code> is an ordinary abstract base class. Subclasses may be ordinary classes or
+dataclasses, including frozen dataclasses. Declare <code>active_for_us</code> as a class attribute or a
+subclass field. <code>InsertionAttackAction</code> exposes it as a constructor field.</p>
 <p>During execution, <code>setup</code> must return a sequence of <code>WorldAttackAction</code> and <code>step</code> a sequence
 of <code>AttackAction</code>. Another return value or action type raises <code>TypeError</code>. An action the
 selected simulator and driving system cannot apply raises <code>UnsupportedStageError</code>: a
 <code>WorldAttackAction</code> without world-action support, or an <code>AVStackAttackAction</code> targeting
 <code>sensors.post</code> or an unsupported stage. An <code>AVStackAttackAction</code> whose stage is skipped in that
-decision raises <code>RuntimeError</code>.</p>
+decision raises <code>RuntimeError</code>, unless some sensor had no frame due in that decision or the driver
+was skipped during force-GT. It then receives a <code>not_applied</code> receipt. An unknown sensor target
+raises <code>ValueError</code>. A one-shot sensor action without a frame ending at its issuing decision
+receives a <code>not_applied</code> receipt with reason <code>sensor_not_acquired_at_issue_time</code>. It never
+modifies a cached or later frame.</p>
 <h4 id="see-also_67">See also<a class="headerlink" href="#see-also_67" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/attacks/">Implement an attack</a>.</p>
 <h3 id="avsectesterattacksegments">avsectester.attack.segments<a class="headerlink" href="#avsectesterattacksegments" title="Permanent link">&para;</a></h3>
@@ -9599,6 +10007,10 @@ decision raises <code>RuntimeError</code>.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>CaptureRecord</code></td>
+<td><a href="#avsectesterrunloglog">CaptureRecord</a></td>
+</tr>
 <tr>
 <td><code>EventRecord</code></td>
 <td><a href="#avsectesterrunloglog">EventRecord</a></td>
@@ -9637,15 +10049,19 @@ decision raises <code>RuntimeError</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>StepRecord(step: int, raw_observation: Any = None, model_observation: Any = None, physical_pre: Any = None, physical_post: Any = None, produced_command: Any = None, executed_command: Any = None, components: dict[str, Any] = dict(), detections: Sequence[Detection] | None = None, sensor_geometry: Mapping[str, SensorGeometry] = dict(), object_visibility: Mapping[str, Mapping[str, ObjectVisibility]] = dict(), actions: list[Any] = list(), outputs: list[Any] = list(), telemetry: dict[str, Any] = dict())</code></td>
+<td><code>StepRecord(step: int, raw_observation: Any = None, model_observation: Any = None, physical_pre: Any = None, physical_post: Any = None, produced_command: Any = None, executed_command: Any = None, components: dict[str, Any] = dict(), detections: Sequence[Detection] | None = None, sensor_geometry: Mapping[str, SensorGeometry] = dict(), object_visibility: Mapping[str, Mapping[str, ObjectVisibility]] = dict(), actions: list[Any] = list(), outputs: list[Any] = list(), telemetry: dict[str, Any] = dict(), executed_command_issue_time_us: int | None = None, delivered_captures: Mapping[str, tuple[int, ...]] = dict(), physical_captures: Mapping[str, int] = dict(), detection_capture_id: int | None = None, detection_sensor: str | None = None, force_gt: bool = False)</code></td>
 <td>One decision, with independently captured physical and model-visible data.</td>
+</tr>
+<tr>
+<td><code>CaptureRecord(capture_id: int, time_us: int, sensor_ids: tuple[str, ...], raw_observation: Any = None, model_observation: Any = None, physical_state: Any = None, sensor_geometry: Mapping[str, Any] = dict(), object_visibility: Mapping[str, Any] = dict(), frame_ranges_us: Mapping[str, tuple[int, int]] = dict())</code></td>
+<td>One acquisition timestamp and its due sensors.</td>
 </tr>
 <tr>
 <td><code>EventRecord(kind: str, step: int | None = None, data: dict[str, Any] = dict())</code></td>
 <td>An initialization, termination or other non-step event.</td>
 </tr>
 <tr>
-<td><code>RunLog(metadata: dict[str, Any] = dict(), steps: list[StepRecord] = list(), events: list[EventRecord] = list(), status: str = "incomplete", path: Path | None = None)</code></td>
+<td><code>RunLog(metadata: dict[str, Any] = dict(), steps: list[StepRecord] = list(), events: list[EventRecord] = list(), status: str = "incomplete", path: Path | None = None, captures: list[CaptureRecord] = list(), format_version: int = 2)</code></td>
 <td>Captured records, optionally backed by an incrementally written directory.</td>
 </tr>
 <tr>
@@ -9658,7 +10074,7 @@ decision raises <code>RuntimeError</code>.</p>
 </tr>
 <tr>
 <td><code>Recorder.snapshot(value: Any) -&gt; Any</code></td>
-<td>Copy mutable data now. Tensors are detached without importing torch.</td>
+<td>Take an independent snapshot, preserving native wrappers and mutable array semantics.</td>
 </tr>
 <tr>
 <td><code>Recorder.record_step(record: StepRecord) -&gt; StepRecord</code></td>
@@ -9667,6 +10083,10 @@ decision raises <code>RuntimeError</code>.</p>
 <tr>
 <td><code>Recorder.record_event(kind: str, *, step: int | None = None, **data: Any) -&gt; EventRecord</code></td>
 <td>Append a timestamped runtime event to the recording.</td>
+</tr>
+<tr>
+<td><code>Recorder.record_capture(record: CaptureRecord) -&gt; CaptureRecord</code></td>
+<td>Snapshot acquisition metadata and retain sensor payloads by reference.</td>
 </tr>
 <tr>
 <td><code>Recorder.flush() -&gt; None</code></td>
@@ -9743,15 +10163,15 @@ decision raises <code>RuntimeError</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>RecordingPolicy(sensor_ids: tuple[str, ...] = (), representations: tuple[str, ...] = ("model_input",), every_n_steps: int = 1)</code></td>
+<td><code>RecordingPolicy(sensor_ids: tuple[str, ...] = (), representations: tuple[str, ...] = ("model_input",), every_n_captures: int = 1)</code></td>
 <td>Choose sensor payloads without sampling commands or physical state.</td>
 </tr>
 <tr>
-<td><code>RecordingPolicy.observation(value: Observation, step: int, representation: str) -&gt; Observation</code></td>
-<td>Apply the sensor recording policy while preserving observation metadata.</td>
+<td><code>RecordingPolicy.observation(value: Observation, record_index: int, representation: str) -&gt; Observation</code></td>
+<td>Retain the selected representation's payloads at the requested recording index.</td>
 </tr>
 <tr>
-<td><code>RunRequest(decision_steps: int, hooks: HookSet | None = None, attacks: Sequence[Any] = (), recording: RecordingPolicy = RecordingPolicy(), output_path: str | Path | None = None, retain_steps: bool = True, retain_sensor_data: bool = True, metadata: Mapping[str, Any] = dict(), start: Any = None, initialization: Any = None, deployment: Any = None, environment: Mapping[str, Any] = dict(), terminate_when: Callable[[StepRecord], bool] | None = None)</code></td>
+<td><code>RunRequest(decision_steps: int, hooks: HookSet | None = None, attacks: Sequence[Any] = (), recording: RecordingPolicy = RecordingPolicy(), output_path: str | Path | None = None, retain_steps: bool = True, retain_sensor_data: bool = True, metadata: Mapping[str, Any] = dict(), start: Any = None, initialization: Any = None, deployment: Any = None, environment: Mapping[str, Any] = dict(), terminate_when: Callable[[StepRecord], bool] | None = None, timing: TimingConfiguration = TimingConfiguration())</code></td>
 <td>One caller-owned simulator/driving-system run, independent of experiment orchestration.</td>
 </tr>
 <tr>
@@ -9812,7 +10232,7 @@ decision raises <code>RuntimeError</code>.</p>
 <td>Capabilities exposed by the dataset, simulator and driving adapter combination.</td>
 </tr>
 <tr>
-<td><code>ClosedLoopServices(dataset: Dataset, simulator: Simulator, driving_adapter: driving_adapter.DrivingAdapter | None = None, frame_data_cache: FrameDataCache | None = None, *, deployment: DeploymentPlan = DeploymentPlan())</code></td>
+<td><code>ClosedLoopServices(dataset: Dataset, simulator: Simulator, driving_adapter: driving_adapter.DrivingAdapter | None = None, frame_data_cache: FrameDataCache | None = None, *, deployment: DeploymentPlan = DeploymentPlan(), timing: TimingConfiguration = TimingConfiguration())</code></td>
 <td>Context manager. Factory for isolated scenario and closed-loop sessions using shared frame-data caching.</td>
 </tr>
 <tr>
@@ -10096,7 +10516,7 @@ that context.</p>
 </tr>
 <tr>
 <td><code>Metric()</code></td>
-<td>Evaluate recorded data. Return scalars or UnavailableMetricValue values carrying their reasons.</td>
+<td>Evaluate recorded data, returning scalars or UnavailableMetricValue values with reasons.</td>
 </tr>
 <tr>
 <td><code>Metric.describe() -&gt; MetricDescription</code></td>
@@ -10151,7 +10571,7 @@ that context.</p>
 run is assumed to start before its selected line.</p>
 <p>The first crossing is <code>None</code> or <code>(sample_index, fraction)</code>. Non-finite or non-N×3 positions,
 fewer than two finite 3D line points or no nonzero horizontal line segment raise <code>ValueError</code>.</p>
-<h4 id="extension-contract_5">Extension contract<a class="headerlink" href="#extension-contract_5" title="Permanent link">&para;</a></h4>
+<h4 id="extension-contract_6">Extension contract<a class="headerlink" href="#extension-contract_6" title="Permanent link">&para;</a></h4>
 <p>Implement run-level <code>Metric.evaluate(group)</code> to return a field mapping for each treatment name
 in the <code>ComparisonGroup</code>. Read only saved evidence and return missing values with reasons.
 Do not run inference or modify recorded runs. An overriding <code>describe</code> returns
@@ -10230,8 +10650,8 @@ JSON/CSV retain full precision.</p>
 <td>Read canonical pixels or a logged native camera payload without importing its SDK.</td>
 </tr>
 <tr>
-<td><code>camera_view(record: StepRecord | Observation, camera: str | None = None) -&gt; np.ndarray | None</code></td>
-<td>Read a recorded model-visible camera image (or an explicit Observation).</td>
+<td><code>camera_view(record: StepRecord | CaptureRecord | Observation, camera: str | None = None) -&gt; np.ndarray | None</code></td>
+<td>Read a recorded model-visible camera image, or raw input for a record without model input.</td>
 </tr>
 <tr>
 <td><code>lidar_bev(record: StepRecord | Observation, size: int = 800, meters: float = 60.0) -&gt; np.ndarray | None</code></td>
@@ -10250,15 +10670,15 @@ JSON/CSV retain full precision.</p>
 <td>Project ActorState cuboids through a SensorView, without SceneGT.</td>
 </tr>
 <tr>
-<td><code>sensor_view(record: StepRecord, camera: str | None = None) -&gt; SensorView | None</code></td>
+<td><code>sensor_view(record: StepRecord | CaptureRecord, camera: str | None = None, *, log: RunLog | None = None) -&gt; SensorView | None</code></td>
 <td>Rebuild projection geometry from recorded canonical sensor-view metadata/calibration.</td>
 </tr>
 <tr>
-<td><code>labels_view(record: StepRecord, camera: str | None = None, *, target: str | None = None, max_distance: float | None = None) -&gt; np.ndarray | None</code></td>
-<td>Overlay the saved physical_pre actors, using its real ego pose and recorded camera.</td>
+<td><code>labels_view(record: StepRecord | CaptureRecord, camera: str | None = None, *, target: str | None = None, max_distance: float | None = None, log: RunLog | None = None) -&gt; np.ndarray | None</code></td>
+<td>Overlay actors at the selected camera acquisition using its physical pose.</td>
 </tr>
 <tr>
-<td><code>detections_view(record: StepRecord, camera: str | None = None, *, threshold: float = 0.3) -&gt; np.ndarray | None</code></td>
+<td><code>detections_view(record: StepRecord, camera: str | None = None, *, threshold: float = 0.3, log: RunLog | None = None) -&gt; np.ndarray | None</code></td>
 <td>Overlay StepRecord.detections. This never runs a detector or reads components.</td>
 </tr>
 <tr>
@@ -10883,7 +11303,7 @@ eligibility rules and query budget. Neither path uses <code>validation_metadata<
 <td>Random segment-unit partition sizes and independently selectable execution parts.</td>
 </tr>
 <tr>
-<td><code>RunsConfiguration(treatments: tuple[TreatmentConfiguration, ...] = (), seeds: tuple[int, ...] = (0,), decision_steps: int | None = None, environment: Mapping[str, Any] = dict(), recording: RecordingPolicy = RecordingPolicy(), output: Path | None = None, strict: bool = False)</code></td>
+<td><code>RunsConfiguration(treatments: tuple[TreatmentConfiguration, ...] = (), seeds: tuple[int, ...] = (0,), decision_steps: int | None = None, environment: Mapping[str, Any] = dict(), recording: RecordingPolicy = RecordingPolicy(), output: Path | None = None, strict: bool = False, timing: TimingConfiguration = TimingConfiguration())</code></td>
 <td>What to run on the configured components, and how to record and handle those runs.</td>
 </tr>
 <tr>

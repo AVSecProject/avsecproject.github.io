@@ -1875,9 +1875,12 @@ retains the configured asset. Attack authoring responsibilities are in
 <p>Each runtime composites the asset into the selected captured image. This does not create a
 collidable actor. <a href="../../guides/simulators/">Simulators</a> describes insertion and occlusion
 behavior. nuScenes uses recorded playback rather than a reactive driving world.</p>
+<p>Supplied image insertion attacks set <code>active_for_us</code> to <code>OnlineContext.decision_period_us</code>, so
+the insertion covers every due frame in the issuing decision's interval. See
+<a href="../../reference/runtime/#attack-actions">action timing</a>.</p>
 <p>This attack modifies only the selected camera image.
 <strong>Not yet implemented.</strong> Insertion into LiDAR or other non-camera sensors. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/a56009e5f4cb779dd90863777ac00da180140ceb/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">Non-camera insertion</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#inserted-objects-in-non-camera-sensors">Non-camera insertion</a>.</p>
 <h2 id="harmonization-and-custom-assets">Harmonization and custom assets<a class="headerlink" href="#harmonization-and-custom-assets" title="Permanent link">&para;</a></h2>
 <p>Use <code>ExposureHarmonizer</code> for differentiable exposure matching. <code>Harmonizer</code> formulas, nominal
 textures, shared deployment/optimization calculations and custom interfaces are in the
