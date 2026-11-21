@@ -1945,7 +1945,8 @@ object lacks a pose or bounding-box extent, unless an overlap was recorded.</p>
 parameters and unavailable conditions. The default set and YAML validation are described in
 <a href="../../reference/configuration/#evaluation">evaluation configuration</a>.</p>
 <p><code>DrivingMetrics</code> uses executed actuator commands for <code>brake_steps</code>. Trajectory commands do not
-provide that evidence. Collision is bird's-eye oriented-box overlap, not a native
+provide that evidence. External control records no executed command, so command-dependent
+measurements are unavailable. Collision is bird's-eye oriented-box overlap, not a native
 collision-sensor event. <code>TrajectoryDeviation</code> compares true ego positions at equal decision
 indices, without time or route alignment.</p>
 <p><code>DetectionMetrics</code> matches detection positions to ground-truth box centres in the capture-time

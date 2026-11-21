@@ -1836,11 +1836,19 @@ Python texture object can provide RGBA pixels directly:</p>
 texture becomes the artifact. An optimization option prepares a texture using the selected
 training segments and configured scorer. See <a href="../../guides/optimization/">Optimization</a>.</p>
 <h2 id="online-phase">Online phase<a class="headerlink" href="#online-phase" title="Permanent link">&para;</a></h2>
-<p>The runtime receives the explicit texture artifact. CARLA uses a native physical prop. NuRec
-composites into the selected camera capture. Their geometry and occlusion behavior are described
-in <a href="../../guides/simulators/">Simulators</a>.</p>
+<p>The runtime receives the explicit texture artifact. CARLA defaults to <code>static.prop.mesh</code> with
+the packaged IronPlank asset specified by <code>DEFAULT_PROP_MESH_PATH</code> in the
+<a href="../../reference/python-api/#avsectesterimplemented_attackspatch_attackonline">panel API</a>.
+Set <code>PatchAttack.prop_mesh_path</code> to select another mesh. Other prop blueprints require
+<code>prop_mesh_path=None</code>. The installation orientation is calibrated for the default mesh and is
+not guaranteed for other meshes or props. The default mesh's native UV mapping crops the right
+edge of the texture.
+NuRec composites into the selected camera capture. Their geometry and occlusion behavior are
+described in <a href="../../guides/simulators/">Simulators</a>.
+The CARLA mesh requires the mounted AdditionalMaps pack on both maps, including <code>Town10HD_Opt</code>.
+See <a href="../../getting-started/installation/#carla-map-packs">CARLA map packs</a>.</p>
 <p>Scaling a CARLA prop mesh to arbitrary requested panel dimensions is <strong>Not yet implemented.</strong>
-See <a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#carla-physical-patches">CARLA physical patches</a>.</p>
+See <a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#carla-physical-patches">CARLA physical patches</a>.</p>
 <h2 id="evidence">Evidence<a class="headerlink" href="#evidence" title="Permanent link">&para;</a></h2>
 <p>Use the recorded camera input, deployment receipts and driving metrics described in
 <a href="../../guides/evaluation/">Evaluation</a>. The <a href="../">example overview</a> explains the

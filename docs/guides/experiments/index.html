@@ -1988,13 +1988,18 @@ boundaries, applies the common deployment tick budget and builds shared segment 
 supplied metadata file replaces selection. <code>Attack.validate_segment</code> checks selected and
 loaded segments.</p>
 <p>After <code>build_metadata</code> returns, preparation drops segments that fail <code>can_start_at</code> or whose
-<code>validate_start</code> raises <code>UnsupportedStartError</code>. The experiment-wide budget recheck drops
+<code>validate_start_timing</code> or <code>validate_startup</code> raises <code>UnsupportedStartError</code>. The
+experiment-wide budget recheck drops
 segments that then fail <code>can_start_at</code>. Each drop records its reason. See
 <a href="../attacks/#online-phase">deployment tick budgets</a>.</p>
 <p>Preparation uses the first configured run seed and reuses its metadata for all execution seeds.
 Its environment rules are defined in <a href="../environments/">Environments</a>: an offline phase receives
 the merged experiment and attack environment, while selection requests an
 environment explicitly.</p>
+<p>For <a href="../simulators/#native-ros-2-control">native ROS 2 runs</a>, preparation also saves a clean
+origin reference for each selected scenario and execution seed. Execution reads these
+references without replaying the recipe. Resume preparation with the external controller stopped
+to refresh references after changing a recipe or adding execution seeds.</p>
 <p><code>PreparedExperiment</code> retains all units, including those excluded from execution. Unit identity,
 the split schema and deterministic allocation are defined in
 <a href="../../reference/configuration/#data-split">Data split</a>.</p>

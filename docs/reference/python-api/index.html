@@ -1933,6 +1933,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#avsectesterclosed_loopavstacksimplementedexternal_control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        avsectester.closed_loop.avstacks.implemented.external_control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#avsectesterclosed_loopavstacksimplementedmodular" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3392,6 +3403,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#avsectesterclosed_loopavstacksimplementedexternal_control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        avsectester.closed_loop.avstacks.implemented.external_control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#avsectesterclosed_loopavstacksimplementedmodular" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4484,6 +4506,10 @@
 </tr>
 <tr>
 <td>L2</td>
+<td><a href="#avsectesterclosed_loopavstacksimplementedexternal_control"><code>avsectester.closed_loop.avstacks.implemented.external_control</code></a></td>
+</tr>
+<tr>
+<td>L2</td>
 <td><a href="#avsectesterclosed_loopavstacksimplementedmodular"><code>avsectester.closed_loop.avstacks.implemented.modular</code></a></td>
 </tr>
 <tr>
@@ -5118,7 +5144,7 @@ unavailable.</p>
 </tr>
 <tr>
 <td><code>validated_vector(value: ArrayLike, name: str) -&gt; np.ndarray</code></td>
-<td>Return a finite three-dimensional vector, rejecting invalid shapes or values.</td>
+<td>Return a finite three-dimensional vector. Any other value raises <code>ValueError</code>.</td>
 </tr>
 <tr>
 <td><code>validated_transform(value: ArrayLike) -&gt; np.ndarray</code></td>
@@ -5380,6 +5406,10 @@ attributes raise Python's <code>ImportError</code> and <code>AttributeError</cod
 <tr>
 <td><code>Detection(position: tuple[float, float, float], extent: tuple[float, float, float], yaw: float, category: str | None = None, score: float | None = None)</code></td>
 <td>One 3D detection in the capture-time true ego frame (x forward, y left, z up).</td>
+</tr>
+<tr>
+<td><code>is_external_control(modes: frozenset[str] | None) -&gt; bool</code></td>
+<td>Return whether explicitly empty command modes declare external control.</td>
 </tr>
 <tr>
 <td><code>validate_command_modes(command: Control, modes: frozenset[str] | None) -&gt; None</code></td>
@@ -6401,7 +6431,7 @@ two RGB integer triples in [0, 255].</p>
 <p><a href="../../guides/driving-systems/">Driving systems</a>.</p>
 <h3 id="avsectesterclosed_loopavstacksbase">avsectester.closed_loop.avstacks.base<a class="headerlink" href="#avsectesterclosed_loopavstacksbase" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.closed_loop.avstacks.base -->
-<p>The driving-system interface: an Observation in, a Control out.</p>
+<p>The driving-system interface: an Observation in, an optional Control out.</p>
 <table>
 <thead>
 <tr>
@@ -6432,7 +6462,7 @@ two RGB integer triples in [0, 255].</p>
 </tr>
 <tr>
 <td><code>AVStack()</code></td>
-<td>The driving system: an Observation in, a Control out.</td>
+<td>The driving system: an Observation in, an optional Control out.</td>
 </tr>
 <tr>
 <td><code>AVStack.provides_detections: bool | None = None</code></td>
@@ -6464,7 +6494,7 @@ two RGB integer triples in [0, 255].</p>
 </tr>
 <tr>
 <td><code>AVStack.command_modes: frozenset[str] | None</code></td>
-<td>Possible output command representations, or None for an undeclared driving system.</td>
+<td>Possible command representations, empty for external control, or None if undeclared.</td>
 </tr>
 <tr>
 <td><code>AVStack.models: Mapping[str, Any]</code></td>
@@ -6487,7 +6517,7 @@ two RGB integer triples in [0, 255].</p>
 <td>Release driving-system resources. The default implementation owns none.</td>
 </tr>
 <tr>
-<td><code>AVStack.__call__(observation: Observation) -&gt; Control</code></td>
+<td><code>AVStack.__call__(observation: Observation) -&gt; Control | None</code></td>
 <td>Abstract. Advance driving inference once and return a command in <code>command_modes</code>.</td>
 </tr>
 <tr>
@@ -6519,9 +6549,12 @@ two RGB integer triples in [0, 255].</p>
 <code>transform(value, context)</code>. Assigning another type to <code>observation_pipeline</code> raises <code>TypeError</code>.
 <code>bind_hooks</code> raises <code>RuntimeError</code> while another dispatcher is bound.
 <code>validate_command_compatibility</code> raises <code>CommandCompatibilityError</code> when a declared AVStack
-command mode is not accepted by the simulator runtime. A <code>command</code> hook skips the check.</p>
+command mode is not accepted by the simulator runtime. A <code>command</code> hook can convert between
+command representations, but cannot convert an external-control mode.</p>
 <h4 id="extension-contract_1">Extension contract<a class="headerlink" href="#extension-contract_1" title="Permanent link">&para;</a></h4>
-<p>Implement <code>AVStack.__call__(observation) -&gt; Control</code> and return a declared command mode.
+<p>Implement <code>AVStack.__call__(observation) -&gt; Control | None</code> and return a declared command mode.
+External control declares empty <code>command_modes</code> on both the simulator and driving system and
+returns <code>None</code>.
 Keep per-run history in this instance. Do not modify or advance the simulator. Declare
 recorded-input requirements as described in
 <a href="../../guides/driving-systems/#recorded-input-history">Driving systems</a>.
@@ -6695,7 +6728,7 @@ before reset, raises <code>RuntimeError</code>.</p>
 </tr>
 <tr>
 <td><code>CameraForwardCollisionAVStack.command_modes = frozenset({"actuator"})</code></td>
-<td>Possible output command representations, or None for an undeclared driving system.</td>
+<td>Possible command representations, empty for external control, or None if undeclared.</td>
 </tr>
 <tr>
 <td><code>CameraForwardCollisionAVStack.supported_stages = frozenset({"perception.pre", "perception.post"})</code></td>
@@ -6719,6 +6752,37 @@ before reset, raises <code>RuntimeError</code>.</p>
 
 <h4 id="see-also_24">See also<a class="headerlink" href="#see-also_24" title="Permanent link">&para;</a></h4>
 <p><a href="../../guides/driving-systems/">Driving systems</a>.</p>
+<h3 id="avsectesterclosed_loopavstacksimplementedexternal_control">avsectester.closed_loop.avstacks.implemented.external_control<a class="headerlink" href="#avsectesterclosed_loopavstacksimplementedexternal_control" title="Permanent link">&para;</a></h3>
+<!-- api:begin module=avsectester.closed_loop.avstacks.implemented.external_control -->
+<p>A driving-system placeholder for a simulator controlled by an external process.</p>
+<table>
+<thead>
+<tr>
+<th>Name and signature</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ExternalAVStack()</code></td>
+<td>Subclass of <code>AVStack</code>. Represent a driving system that controls ego through the simulator from outside the framework.</td>
+</tr>
+<tr>
+<td><code>ExternalAVStack.provides_detections = False</code></td>
+<td>Whether decisions expose detections compatible with detection metrics.</td>
+</tr>
+<tr>
+<td><code>ExternalAVStack.command_modes = frozenset()</code></td>
+<td>Possible command representations, empty for external control, or None if undeclared.</td>
+</tr>
+<tr>
+<td><code>ExternalAVStack.__call__(observation: Observation) -&gt; None</code></td>
+<td>Accept the decision input without producing a driving command.</td>
+</tr>
+</tbody>
+</table>
+<!-- api:end -->
+
 <h3 id="avsectesterclosed_loopavstacksimplementedmodular">avsectester.closed_loop.avstacks.implemented.modular<a class="headerlink" href="#avsectesterclosed_loopavstacksimplementedmodular" title="Permanent link">&para;</a></h3>
 <!-- api:begin module=avsectester.closed_loop.avstacks.implemented.modular -->
 <p>ModularAVStack — an AVStack backed by an avstack <code>ModularDrivingPipeline</code>.</p>
@@ -7099,7 +7163,7 @@ rules are described in <a href="../../guides/driving-systems/#optional-vehicle-f
 </tr>
 <tr>
 <td><code>RuleBasedAVStack.command_modes = frozenset({"trajectory"})</code></td>
-<td>Possible output command representations, or None for an undeclared driving system.</td>
+<td>Possible command representations, empty for external control, or None if undeclared.</td>
 </tr>
 <tr>
 <td><code>RuleBasedAVStack.provides_detections = False</code></td>
@@ -7768,6 +7832,10 @@ that budget.</p>
 <td>Whether observations before a selected start can be reconstructed.</td>
 </tr>
 <tr>
+<td><code>Simulator.can_start_runs_after_origin: bool = True</code></td>
+<td>Whether closed-loop runs can start after the scenario origin. Rendering and preparation are unaffected.</td>
+</tr>
+<tr>
 <td><code>Simulator.can_insert_objects: bool = False</code></td>
 <td>Whether world objects can be inserted into sensor rendering.</td>
 </tr>
@@ -7845,7 +7913,7 @@ that budget.</p>
 </tr>
 <tr>
 <td><code>Simulator.validate_startup(start: ScenarioStart | None, duration_us: int) -&gt; None</code></td>
-<td>Check recorded-motion support and coverage for force_gt_duration_us.</td>
+<td>Check the closed-loop start and recorded-motion coverage for force_gt_duration_us.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime(simulator: Simulator)</code></td>
@@ -7870,6 +7938,10 @@ that budget.</p>
 <tr>
 <td><code>SimulatorRuntime.can_insert_objects: bool</code></td>
 <td>Whether world objects can be inserted into sensor rendering.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.closed_loop_run: bool</code></td>
+<td>Whether the current reset is for a closed-loop run, until reset or close.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.supported_world_settings: frozenset[str]</code></td>
@@ -7898,6 +7970,10 @@ that budget.</p>
 <tr>
 <td><code>SimulatorRuntime.termination_details: Mapping[str, Any]</code></td>
 <td>Simulator diagnostics saved with the run's termination event.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.decision_telemetry() -&gt; Mapping[str, Any]</code></td>
+<td>Native evidence recorded at each decision without issuing a driving command.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.validate_start(start: ScenarioStart | None) -&gt; None</code></td>
@@ -7980,8 +8056,12 @@ that budget.</p>
 <td>Read a frame's shutter or native scan interval at its integer end timestamp.</td>
 </tr>
 <tr>
-<td><code>SimulatorRuntime.insert_object(object_id: str, asset: ObjectAsset | MeshAsset, world_from_object: np.ndarray, *, harmonizer: Harmonizer | None = None) -&gt; None</code></td>
+<td><code>SimulatorRuntime.insert_object(object_id: str, asset: ObjectAsset | MeshAsset, world_from_object: np.ndarray, *, harmonizer: Harmonizer | None = None, velocity: Sequence[float] | np.ndarray = (0., 0., 0.)) -&gt; None</code></td>
 <td>Register a physical world object, visible from the next sensor capture.</td>
+</tr>
+<tr>
+<td><code>SimulatorRuntime.move_object(object_id: str, world_from_object: np.ndarray) -&gt; None</code></td>
+<td>Set an inserted object's end pose once during <code>simulator.step.pre</code>.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.remove_object(object_id: str) -&gt; None</code></td>
@@ -8000,15 +8080,15 @@ that budget.</p>
 <td>Move another actor to a canonical world state. It is visible from the next capture.</td>
 </tr>
 <tr>
-<td><code>SimulatorRuntime.reset(start: ScenarioStart | None = None, initialization: Any = None, *, deployment: DeploymentPlan | None = None, world: Mapping[str, Any] | None = None) -&gt; None</code></td>
-<td>Start a run at <code>start</code> or the configured origin and capture the first frame.</td>
+<td><code>SimulatorRuntime.reset(start: ScenarioStart | None = None, initialization: Any = None, *, deployment: DeploymentPlan | None = None, world: Mapping[str, Any] | None = None, closed_loop_run: bool = False) -&gt; None</code></td>
+<td>Initialize the world at <code>start</code> or the configured origin and capture the first frame.</td>
 </tr>
 <tr>
 <td><code>SimulatorRuntime.setup_tick() -&gt; None</code></td>
 <td>Advance one setup tick without requesting a driving decision.</td>
 </tr>
 <tr>
-<td><code>SimulatorRuntime.step(control: Control) -&gt; None</code></td>
+<td><code>SimulatorRuntime.step(control: Control | None) -&gt; None</code></td>
 <td>Advance one decision and capture through the scheduled simulator operations.</td>
 </tr>
 <tr>
@@ -8112,6 +8192,8 @@ Do not modify or replace it from a subclass. <code>_completed_interval(end_state
 endpoint truth after propagation. Retain native report states there if later acquisitions need
 them. <code>_reported_state_at(time_us)</code> must support the endpoint as well as intermediate times.
 <code>_activate_reported_state(time_us, state)</code> selects that truth without running the controller again.</p>
+<p>An external-control runtime declares empty <code>command_modes</code> and receives <code>control=None</code> in
+<code>_advance_native</code>. It can supply native decision evidence through <code>decision_telemetry()</code>.</p>
 <p>Simulators that pre-run a source recording use <code>initial_history_times</code> with the configured
 sensor clocks, <code>history_requirement</code>, decision period and reporting interval to reserve context.
 Native-tick simulators use <code>SensorTiming.resolved_frame_interval_us(decision_period_us)</code> to
@@ -8256,7 +8338,7 @@ outside <code>simulator.setup</code> or after the deployment tick budget is exha
 </thead>
 <tbody>
 <tr>
-<td><code>CarlaSimulator(client: dict, settle_iters: int = 100, *, simulator_version="0.9.16", depth_camera: str | None = None, occlusion_tolerance_m: float = 0.1, decision_period_us: int | None = None)</code></td>
+<td><code>CarlaSimulator(client: dict, settle_iters: int = 100, *, simulator_version="1.0", depth_camera: str | None = None, occlusion_tolerance_m: float = 0.1, decision_period_us: int | None = None, camera_warmup_s: float = 4.0, ground_settle_s: float = 2.0, ego_control: str = "framework", realtime_factor: float | None = None, external_startup_s: float = 0.0)</code></td>
 <td>Subclass of <code>Simulator</code>. CARLA runtime settings, with scene content supplied by a dataset recipe.</td>
 </tr>
 <tr>
@@ -8296,12 +8378,28 @@ outside <code>simulator.setup</code> or after the deployment tick budget is exha
 <td>A new live world. An explicit run seed overrides the configured client seed.</td>
 </tr>
 <tr>
+<td><code>CarlaSimulator.validate_timing(timing: TimingConfiguration) -&gt; None</code></td>
+<td>Validate native tick alignment and exclusive external ego ownership.</td>
+</tr>
+<tr>
+<td><code>CarlaSimulator.can_start_runs_after_origin: bool</code></td>
+<td>Allow a closed-loop start after the scene origin only under framework control.</td>
+</tr>
+<tr>
 <td><code>CarlaSimulatorRuntime(simulator: CarlaSimulator, seed: int | None = None)</code></td>
 <td>Subclass of <code>SimulatorRuntime</code>. One live CARLA world of a <code>CarlaSimulator</code>.</td>
 </tr>
 <tr>
+<td><code>CarlaSimulatorRuntime.can_insert_objects: bool</code></td>
+<td>Allow framework-composited objects outside native external-control runs.</td>
+</tr>
+<tr>
+<td><code>CarlaSimulatorRuntime.termination_details: Mapping[str, Any]</code></td>
+<td>Record final tick pacing statistics when the run is paced.</td>
+</tr>
+<tr>
 <td><code>CarlaSimulatorRuntime.native: dict[str, Any]</code></td>
-<td>Borrow native world resources, invalidating cached truth before possible edits.</td>
+<td>Borrow native resources, invalidating cached truth before possible edits.</td>
 </tr>
 <tr>
 <td><code>CarlaSimulatorRuntime.copy_observation(observation: Observation) -&gt; Observation</code></td>
@@ -8615,8 +8713,8 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Register scene-rendered assets and return their track IDs and world poses.</td>
 </tr>
 <tr>
-<td><code>Renderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
-<td>Visible image coverage of one object, with values between zero and one.</td>
+<td><code>Renderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None, placed_start: PlacedObject | None = None) -&gt; np.ndarray</code></td>
+<td>Visible coverage of one object, optionally at a different exposure-start placement.</td>
 </tr>
 <tr>
 <td><code>Renderer.camera_model(camera: str | None = None) -&gt; Camera | None</code></td>
@@ -8683,7 +8781,7 @@ waypoints lie more than 10 meters from the derived map route.</p>
 <td>Register textured scene assets and return their requested world-pose track entries.</td>
 </tr>
 <tr>
-<td><code>NuRecRenderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None) -&gt; np.ndarray</code></td>
+<td><code>NuRecRenderer.render_object_coverage(world_from_rig: np.ndarray, timestamp_us: int, camera: str, placed: PlacedObject, dynamic_objects=(), *, frame_start_us: int | None = None, world_from_rig_start=None, dynamic_objects_start=None, placed_start: PlacedObject | None = None) -&gt; np.ndarray</code></td>
 <td>Return visible object coverage from pure-white and pure-black scene copies.</td>
 </tr>
 </tbody>
@@ -9220,6 +9318,10 @@ exclusive stop follows the start, and <code>TypeError</code> for non-mapping <co
 <td><a href="#avsectesterattackinsertionaction">InsertObject</a></td>
 </tr>
 <tr>
+<td><code>MoveObject</code></td>
+<td><a href="#avsectesterattackinsertionaction">MoveObject</a></td>
+</tr>
+<tr>
 <td><code>InsertionAttackAction</code></td>
 <td><a href="#avsectesterattackinsertionaction">InsertionAttackAction</a></td>
 </tr>
@@ -9265,8 +9367,12 @@ exclusive stop follows the start, and <code>TypeError</code> for non-mapping <co
 </thead>
 <tbody>
 <tr>
-<td><code>InsertObject(object_id: str, asset: ObjectAsset | MeshAsset, world_from_object: np.ndarray, harmonizer: Harmonizer | None = None)</code></td>
+<td><code>InsertObject(object_id: str, asset: ObjectAsset | MeshAsset, world_from_object: np.ndarray, harmonizer: Harmonizer | None = None, velocity: Sequence[float] | np.ndarray = (0., 0., 0.))</code></td>
 <td>Subclass of <code>WorldAttackAction</code>. Insert a world-object asset through the simulator's supported sensors.</td>
+</tr>
+<tr>
+<td><code>MoveObject(object_id: str, world_from_object: np.ndarray)</code></td>
+<td>Subclass of <code>WorldAttackAction</code>. Set an inserted object's end pose for the next simulator interval.</td>
 </tr>
 <tr>
 <td><code>InsertionAttackAction(sensor: str, insertion: Insertion, compositor: PatchCompositor | None = None, active_for_us: int | None = 0)</code></td>
@@ -10855,7 +10961,7 @@ resolves them from the first frame's recorded ego and raises <code>ValueError</c
 </thead>
 <tbody>
 <tr>
-<td><code>PatchAttack(*, decision_steps, assets: np.ndarray | str | Path | Texture | None = None, candidate_hosts=None, hosts_per_window=1, sensor="front", width_m=1.0, height_m=0.5, anchor="rear_center", offset_m=(-0.01, 0.0, 0.0), orientation=None, max_distance=None, min_visible_fraction=0.0, max_windows=None, keep_tail=False, optimization=None, prop=DEFAULT_PROP, emissive=True, compositor=None)</code></td>
+<td><code>PatchAttack(*, decision_steps, assets: np.ndarray | str | Path | Texture | None = None, candidate_hosts=None, hosts_per_window=1, sensor="front", width_m=1.0, height_m=0.5, anchor="rear_center", offset_m=(-0.01, 0.0, 0.0), orientation=None, max_distance=None, min_visible_fraction=0.0, max_windows=None, keep_tail=False, optimization=None, prop=DEFAULT_PROP, prop_mesh_path: str | None = None, emissive=True, compositor=None)</code></td>
 <td>Subclass of <code>Attack</code>. Select the best visible hosts per time window, then deploy one patch artifact.</td>
 </tr>
 <tr>
@@ -10915,11 +11021,19 @@ with <code>PGD</code>. <code>device=None</code> selects <code>cuda:0</code> for 
 </thead>
 <tbody>
 <tr>
-<td><code>CarlaPatchPanel(location: tuple, rotation: tuple, texture: np.ndarray, prop: str = DEFAULT_PROP, emissive: bool = True)</code></td>
+<td><code>MESH_PROP = "static.prop.mesh"</code></td>
+<td>Native CARLA blueprint for a mesh selected by path.</td>
+</tr>
+<tr>
+<td><code>DEFAULT_PROP_MESH_PATH = "/Game/Carla/Static/Building/Props/00_LegacyAssets/SM_IronPlank01.SM_IronPlank01"</code></td>
+<td>Packaged IronPlank mesh used by default for CARLA patch panels.</td>
+</tr>
+<tr>
+<td><code>CarlaPatchPanel(location: tuple, rotation: tuple, texture: np.ndarray, prop: str = DEFAULT_PROP, emissive: bool = True, mesh_path: str | None = None)</code></td>
 <td>A native CARLA panel owned by one run, with an explicit actor-local transform.</td>
 </tr>
 <tr>
-<td><code>CarlaPatchPanel.apply(world: Any, target_actor: Any, *, tick: Callable[[], Any] | None = None, on_spawn: Callable[[Any], None] | None = None) -&gt; list</code></td>
+<td><code>CarlaPatchPanel.apply(world: Any, target_actor: Any, *, tick: Callable[[], Any] | None = None, on_spawn: Callable[[Any], None] | None = None, queue_command: Callable[[Any], None] | None = None) -&gt; list</code></td>
 <td>Spawn the panel on <code>target_actor</code> in <code>world</code> and paint it. Return spawned actors.</td>
 </tr>
 </tbody>
@@ -11463,7 +11577,7 @@ different content.</p>
 <td>Serialize this unit's index, segment identity, attack membership and split part.</td>
 </tr>
 <tr>
-<td><code>PreparedExperiment(configuration: ExperimentConfiguration, metadata: Mapping[str, tuple[AttackSegment, ...]], artifacts: Mapping[str, Any], selections: tuple[SelectionDecision, ...] = (), *, preparation: Mapping[str, Any], units: tuple[SegmentUnit, ...] = (), deployment: DeploymentPlan | None = None, offline_reports: Mapping[str, OfflineReport] = dict(), metadata_source: Mapping[str, str] | None = None)</code></td>
+<td><code>PreparedExperiment(configuration: ExperimentConfiguration, metadata: Mapping[str, tuple[AttackSegment, ...]], artifacts: Mapping[str, Any], selections: tuple[SelectionDecision, ...] = (), *, preparation: Mapping[str, Any], units: tuple[SegmentUnit, ...] = (), deployment: DeploymentPlan | None = None, offline_reports: Mapping[str, OfflineReport] = dict(), metadata_source: Mapping[str, str] | None = None, initializations: Mapping[str, Mapping[str, Initialization | Unavailable]] = dict())</code></td>
 <td>Configured factories, selected metadata and artifacts, never a live simulator or session.</td>
 </tr>
 <tr>

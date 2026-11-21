@@ -1843,8 +1843,10 @@
 <p><strong>Prerequisites:</strong> <a href="../installation/">Installation</a>, including data and model weights.</p>
 </blockquote>
 <h2 id="run-a-carla-comparison">Run a CARLA comparison<a class="headerlink" href="#run-a-carla-comparison" title="Permanent link">&para;</a></h2>
-<p>Select the available CARLA server and experiment GPUs in the Compose settings described in
-<a href="../installation/">Installation</a>. Copy the configuration first:</p>
+<p>Complete <a href="../installation/">Installation</a>, including the matching AdditionalMaps content pack,
+and select available CARLA server and experiment GPUs in the Compose settings.
+The supplied CARLA configurations contain <code>Town03_Opt</code> and <code>Town10HD_Opt</code> recipes.
+Copy the configuration first:</p>
 <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>configs/carla_phantom.yaml<span class="w"> </span>configs/my_carla.yaml
 </code></pre></div>
 <p>Edit <code>configs/my_carla.yaml</code>: <code>simulator.options.client.connect_ip</code> and

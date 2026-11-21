@@ -2033,9 +2033,9 @@
 <p><strong>Prerequisites:</strong> <a href="../../concepts/architecture/">Architecture</a>.</p>
 </blockquote>
 <h2 id="avstack-interface"><code>AVStack</code> interface<a class="headerlink" href="#avstack-interface" title="Permanent link">&para;</a></h2>
-<p><code>AVStack</code> receives an <code>Observation</code> and returns a <code>Control</code>. It declares supported command
-modes, stages and optional recorded-input requirements. The simulator and driving system must
-agree on commands and decision timing.
+<p><code>AVStack</code> receives an <code>Observation</code> and returns a <code>Control</code>. An externally controlled ego uses
+<code>None</code> instead. It declares supported command modes, stages and optional recorded-input
+requirements. The simulator and driving system must agree on commands and decision timing.
 See <a href="../../reference/configuration/#driving-specification">Configuration</a>.</p>
 <p>Interfaces live in <code>avsectester.closed_loop.avstacks</code>. Supplied implementations live below
 <code>avstacks.implemented</code>. User implementations belong in the user's package.</p>
@@ -2428,6 +2428,9 @@ See <a href="../optimization/">Optimization</a>.</p>
 <code>type: my_project.driving:CustomAVStack</code>. Declare required history, compatible command modes and
 optional decision timing. A separate binding factory exposes components or scorers when the
 experiment needs them.</p>
+<p>Use <code>ExternalAVStack</code> to represent a driving system that runs outside the framework and controls
+ego through the simulator. It declares empty command modes and returns <code>None</code>. For CARLA setup
+and runtime restrictions, see <a href="../simulators/#native-ros-2-control">native ROS 2 control</a>.</p>
 <p>A minimal actuator policy needs no simulator connection:</p>
 <!-- runnable -->
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.closed_loop.avstacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">AVStack</span>

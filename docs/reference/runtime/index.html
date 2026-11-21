@@ -1520,6 +1520,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#moving-inserted-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving inserted objects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#delivery-and-coordinates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1852,6 +1863,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#moving-inserted-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving inserted objects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#delivery-and-coordinates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2089,6 +2111,19 @@ Read captured viewpoints with <code>sensor_view(sensor)</code>.</p>
 <p>World actions returned by a decision apply at <code>simulator.step.pre</code>, before interval propagation.
 Their effects appear in later frames. <code>InsertObject</code> has zero setup ticks. Setup insertions are
 present in the first capture. Framework objects remain separate in <code>WorldSnapshot.objects</code>.</p>
+<h3 id="moving-inserted-objects">Moving inserted objects<a class="headerlink" href="#moving-inserted-objects" title="Permanent link">&para;</a></h3>
+<p><code>MoveObject</code> and <code>SimulatorRuntime.move_object</code> set the inserted object's pose at the end of
+the interval beginning at <code>simulator.step.pre</code>. Within the interval, translation is linear and
+rotation uses spherical interpolation. In an interval without a move, the object stays in place.</p>
+<p>At a movement endpoint, the recorded velocity is the velocity of the segment that arrived
+there. Within a segment, velocity is its displacement divided by its duration. After the last
+node, it is zero. At insertion and earlier, the velocity is the world-frame vector supplied to
+<code>InsertObject</code> or <code>insert_object</code>, which defaults to zero.</p>
+<p>An object inserted during reset is anchored to the origin capture. Earlier frames use its
+insertion orientation and its position extrapolated backward from the origin with the initial
+velocity. Objects inserted during a run are absent from the recorded history preceding it.</p>
+<p>Offline rendering has no decision interval. Supply the object's pose for each requested frame
+with <code>InsertObject</code>.</p>
 <h3 id="delivery-and-coordinates">Delivery and coordinates<a class="headerlink" href="#delivery-and-coordinates" title="Permanent link">&para;</a></h3>
 <p><code>Observation.t</code>, <code>vehicle_state</code>, <code>ego_speed</code> and <code>route</code> describe the decision timestamp.
 <code>deliveries[sensor_id]</code> contains this decision's newly ended frames, oldest first. Each
@@ -2119,6 +2154,11 @@ before it has aged by the delay. Delay does not introduce a recorded-motion star
 <code>executed_command_issue_time_us</code> identifies the selected reference's generation time.</p>
 <p>Trajectory coordinates retain their generation-time rig frame and timestamps. The controller
 resolves them against its ego trajectory. Actuator commands have no spatial frame.</p>
+<p>When both simulator and driving system declare no command modes, the driver returns <code>None</code>.
+This bypasses the delay buffer and records both produced and executed commands as <code>None</code>.
+CARLA native ROS 2 control records the server's applied control in <code>telemetry.ego_control</code>.
+Metrics requiring executed commands, including <code>brake_steps</code>, are unavailable. See
+<a href="../../guides/simulators/#native-ros-2-control">native ROS 2 control</a>.</p>
 <p><code>force_gt_duration_us</code> configures recorded motion independently of planning delay. A decision
 is <code>force_gt</code> when its target timestamp belongs to the inclusive interval from the origin
 through the origin plus that duration.</p>
@@ -2456,7 +2496,8 @@ decisions that name their <code>delivered_captures</code>.</p>
 outcome is <code>applied</code> or <code>not_applied</code>, describing the action rather than its driving impact. Every
 receipt has a <code>details</code> mapping, empty when there is no detail. <code>InsertionAttackAction</code> adds
 <code>rendered</code>, <code>reason</code>, <code>occlusion_source</code> and <code>ignored_occluders</code>. <code>InsertObject</code> records
-<code>object_id</code>, <code>asset_category</code> and <code>world_from_object</code>.</p>
+<code>object_id</code>, <code>asset_category</code>, <code>world_from_object</code> and <code>velocity</code>. <code>MoveObject</code> records
+<code>object_id</code> and the interval's target <code>world_from_object</code>.</p>
 <p><code>StepRecord.object_visibility</code>, the initialization event and <code>RenderResult.object_visibility</code>
 use object ID → camera name → <code>ObjectVisibility</code>. <code>ObjectVisibility</code> contains <code>occlusion_source</code>,
 <code>ignored_occluders</code> and <code>visible_pixels</code>.</p>

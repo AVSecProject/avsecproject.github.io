@@ -2215,7 +2215,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>avstack.type</code></td>
-<td><code>ModularAVStack</code>, <code>CameraForwardCollisionAVStack</code>, <code>AlpamayoAVStack</code>, <code>RuleBasedAVStack</code></td>
+<td><code>ModularAVStack</code>, <code>CameraForwardCollisionAVStack</code>, <code>AlpamayoAVStack</code>, <code>RuleBasedAVStack</code>, <code>ExternalAVStack</code></td>
 </tr>
 <tr>
 <td><code>evaluation.metrics[].type</code></td>
@@ -2223,7 +2223,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>attacks.&lt;name&gt;.type</code></td>
-<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
+<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
 </tr>
 <tr>
 <td><code>environment.sensors[].type</code></td>
@@ -2520,7 +2520,7 @@ positive, simulators without <code>trajectory</code> in their declared <code>com
 </code></pre></div>
 <p>This fragment keeps the decision grid at 100 ms and configures independent camera and LiDAR
 clocks. Camera phase from the recording is <strong>Not yet implemented.</strong> See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
 <h2 id="simulator">Simulator<a class="headerlink" href="#simulator" title="Permanent link">&para;</a></h2>
 <p>CARLA scene and prescribed motion settings belong to <code>CarlaRecipe</code>. <code>CarlaSimulator</code> receives
 the runtime client settings. For recorded sources, choose a simulator compatible with the
@@ -2535,6 +2535,70 @@ produce an integer number of microseconds per tick. The decision period must be 
 number of base ticks. <code>runs.timing.sensors</code> selects acquisition ticks.
 See <a href="../../guides/simulators/#carla">CARLA capture timing</a> for native sensor settings and LiDAR
 scans.</p>
+<p>CARLA initialization and external-control options are:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Accepted values or role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>camera_warmup_s</code></td>
+<td><code>4.0</code></td>
+<td>Nonnegative RGB-camera warmup duration</td>
+</tr>
+<tr>
+<td><code>ground_settle_s</code></td>
+<td><code>2.0</code></td>
+<td>Nonnegative duration for vehicles to settle before holding</td>
+</tr>
+<tr>
+<td><code>external_startup_s</code></td>
+<td><code>0.0</code></td>
+<td>Nonnegative hold duration for an external driving system</td>
+</tr>
+<tr>
+<td><code>ego_control</code></td>
+<td><code>"framework"</code></td>
+<td><code>"framework"</code> or <code>"ros2"</code></td>
+</tr>
+<tr>
+<td><code>realtime_factor</code></td>
+<td><code>null</code></td>
+<td>Positive simulation-time to wall-time ratio for pacing closed-loop runs, required for <code>"ros2"</code></td>
+</tr>
+</tbody>
+</table>
+<p>The three durations must each correspond to an integer number of ticks at <code>client.rate</code>.
+RGB-camera warmup is omitted when the recipe has no RGB camera. The pre-origin hold uses the
+larger of the applicable camera warmup and <code>external_startup_s</code>. See
+<a href="../../guides/simulators/#carla">CARLA initialization</a>.</p>
+<p>In <code>"ros2"</code> mode, use <code>ExternalAVStack</code> and set the ego blueprint's <code>role_name</code> to
+<code>"hero"</code> or <code>"ego"</code>. <code>runs.timing.force_gt_duration_us</code> must be zero. See
+<a href="../../guides/simulators/#native-ros-2-control">native ROS 2 control</a>.</p>
+<p>Recipe ego and sensor entries accept <code>blueprint_attributes</code>, a mapping from native attribute
+names to scalar values, converted to native strings. Unknown native attributes raise an error.
+The spawned ego's attributes must match the configured values. Sensor blueprint keys that match
+constructor options are rejected. Set those values as sensor options so they also set calibration.
+Sensor entries also accept <code>ros: true</code> to enable their ROS 2 publication after spawning.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">ego</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">blueprint_attributes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">role_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hero</span>
+<span class="w">    </span><span class="nt">ros_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ego</span>
+<span class="w">    </span><span class="nt">ros2_ackermann_control</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<span class="w">  </span><span class="nt">sensors</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CarlaLidar</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lidar-0</span>
+<span class="w">      </span><span class="nt">blueprint_attributes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ros_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lidar</span>
+<span class="w">      </span><span class="nt">ros</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Set a camera's <code>post_process_profile</code> through its <code>blueprint_attributes</code> mapping. The framework
+does not choose a profile when the attribute is omitted.
+<code>simulator_version</code> defaults to <code>"1.0"</code> and participates in saved-preparation compatibility.</p>
 <h3 id="nurec-closed-loop-settings">NuRec closed-loop settings<a class="headerlink" href="#nurec-closed-loop-settings" title="Permanent link">&para;</a></h3>
 <p><code>NuRecSimulator</code> requires a renderer and a non-null <code>time_step</code>. The loader supplies the latter
 from <code>NuRecDataset</code>. Reset requires <code>ScenarioStart</code>. Constructor defaults are:</p>
@@ -2715,9 +2779,9 @@ The loader does not infer axes. With <code>origin: file</code>, the transformed 
 including a model's ground clearance, and vertices below z = 0 are rejected.
 Supplying <code>color</code> for an already colored file is an error.</p>
 <p><strong>Not yet implemented.</strong> FBX and USD loading. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> 3DGS Gaussian PLY assets. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
 <h2 id="driving-specification">Driving specification<a class="headerlink" href="#driving-specification" title="Permanent link">&para;</a></h2>
 <p><code>avstack.type</code> selects an <code>AVStack</code> class or factory. Its options are passed to each fresh
 instance. A constructor declaring <code>seed</code> receives the run seed. Explicitly writing that reserved
@@ -2871,6 +2935,11 @@ attack environments are copied when loaded.</p>
 <p>CARLA world settings accept <code>weather</code> as a preset name or parameter mapping, <code>lighting</code>,
 <code>map_layers</code> and <code>road_friction</code>. NuRec and recorded playback reject every nonempty
 world setting.</p>
+<p><code>road_friction</code> requires a positive <code>friction_force_multiplier</code> and accepts an optional <code>actors</code>
+list of stable actor IDs. The multiplier sets each selected vehicle wheel's native friction
+force multiplier. Omitting <code>road_friction</code> preserves each wheel's vehicle-blueprint value.
+Unknown keys are rejected.
+A nonempty <code>map_layers</code> mapping is rejected on maps without layers, including <code>Town10HD_Opt</code>.</p>
 <p>Environment YAML has <code>world</code> and <code>sensors</code> keys. The base is <code>runs.environment</code>, with optional
 attack and treatment overrides. <a href="../../guides/environments/">Environments</a> describes merge and
 validation behavior. Sensor entries use <code>type</code>, <code>options</code> and an optional <code>camera</code>. Omitting

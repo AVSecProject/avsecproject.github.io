@@ -680,6 +680,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#native-ros-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native ROS 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#carla-map-packs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CARLA map packs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#carla-semantic-maps" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1837,6 +1859,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#native-ros-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native ROS 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#carla-map-packs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CARLA map packs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#carla-semantic-maps" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1984,7 +2028,8 @@ scripts/preparation/write_compose_env.sh
 <p>The script writes <code>.env</code> with the repository path, user/group IDs, Docker socket group, Docker
 executable and GPU selections. It refuses to overwrite an existing file unless --force is
 supplied. Choose available host GPUs in <code>.env</code>: <code>CARLA_SERVER_GPU</code>, <code>CARLA_EXPERIMENT_GPU</code> and
-<code>NUREC_GPU</code> each default to 0.</p>
+<code>NUREC_GPU</code> each default to 0. <code>CARLA_SERVER_ARGS</code> defaults to an empty string and appends
+arguments to the CARLA server command.</p>
 <table>
 <thead>
 <tr>
@@ -1996,7 +2041,7 @@ supplied. Choose available host GPUs in <code>.env</code>: <code>CARLA_SERVER_GP
 <tbody>
 <tr>
 <td><code>carla-server</code></td>
-<td>carlasim/carla:0.9.16</td>
+<td>carlasim/carla:1.0, pinned by digest in Compose</td>
 <td>CARLA server</td>
 </tr>
 <tr>
@@ -2033,7 +2078,8 @@ ln<span class="w"> </span>-s<span class="w"> </span>/srv/models/Alpamayo-1.5-10B
 must have the same absolute names on the host and in <code>nurec-experiment</code>. The service mounts the
 Docker socket and CLI to start sibling containers.</p>
 <h2 id="carla-environment">CARLA environment<a class="headerlink" href="#carla-environment" title="Permanent link">&para;</a></h2>
-<p>Fetch the avstack CARLA and nuScenes perception checkpoints and build the experiment image:</p>
+<p>Prepare the <a href="#carla-map-packs">CARLA map packs</a>, fetch the avstack CARLA and nuScenes
+perception checkpoints, then build the experiment image:</p>
 <div class="highlight"><pre><span></span><code>scripts/preparation/fetch_models.sh
 docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>carla-experiment
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>carla-server<span class="w"> </span>carla-experiment
@@ -2041,15 +2087,42 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 </code></pre></div>
 <p>The image provides the native avstack and detector dependencies. Model files live under
 <code>models/checkpoints</code>, <code>models/work_dirs</code> and <code>models/work_dirs_2d</code>.
-Dockerfile creates the corresponding links inside the image.</p>
+Dockerfile creates the corresponding links inside the image.
+The Python client wheel comes from the same pinned CARLA image as the server.</p>
 <p>CARLA uses host networking with RPC port 2000 and traffic-manager port 8000. Select the server
 and experiment host GPUs through <code>.env</code>. Model device indexes address GPUs visible in the
 experiment container. Stop the services with docker compose down.</p>
+<h3 id="native-ros-2">Native ROS 2<a class="headerlink" href="#native-ros-2" title="Permanent link">&para;</a></h3>
+<p>Set <code>CARLA_SERVER_ARGS='--ros2 --ros-domain-id=&lt;N&gt;'</code> in <code>.env</code> before starting the server.
+Replace <code>&lt;N&gt;</code> with an unused ROS domain ID and set <code>ROS_DOMAIN_ID</code> to the same value in the
+external driving system. Each user on a shared server must use a different domain ID.
+The external system needs network access to the server's ROS 2 topics. Configure
+<code>ExternalAVStack</code> in the experiment and see
+<a href="../../guides/simulators/#native-ros-2-control">native ROS 2 control</a> for runtime behavior.</p>
+<h3 id="carla-map-packs">CARLA map packs<a class="headerlink" href="#carla-map-packs" title="Permanent link">&para;</a></h3>
+<p><code>Town10HD_Opt</code> is included in the server image. <code>Town03_Opt</code> requires the matching
+<a href="https://downloads.carlasim.com/Linux/AdditionalMaps_1.0.tar.gz">AdditionalMaps package</a>.
+Extract the package into a directory outside the checkout, then link it for Compose:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/srv/carla/maps
+tar<span class="w"> </span>xzf<span class="w"> </span>AdditionalMaps_1.0.tar.gz<span class="w"> </span>-C<span class="w"> </span>/srv/carla/maps
+mkdir<span class="w"> </span>-p<span class="w"> </span>data
+ln<span class="w"> </span>-s<span class="w"> </span>/srv/carla/maps<span class="w"> </span>data/carla_content_packs
+</code></pre></div>
+<p>Validate the extracted pack against the pinned server image:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-e<span class="w"> </span><span class="nv">NVIDIA_VISIBLE_DEVICES</span><span class="o">=</span>void<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/srv/carla/maps:/packs:ro<span class="w"> </span>--entrypoint<span class="w"> </span>python3<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>carlasim/carla:1.0@sha256:39681ed1eff895b6a813587285c51b687d7739ef8eeabcf51e38771d7b5b0263<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/workspace/Tools/carla_pack.py<span class="w"> </span>inspect<span class="w"> </span>/packs/AdditionalMaps<span class="w"> </span>--server<span class="w"> </span>/workspace
+</code></pre></div>
+<p>Compose mounts this directory read-only at <code>/packs</code> and passes <code>-carla-packs=/packs</code> to CARLA.
+Content packs and exported semantic maps are separate: <code>data/carla_content_packs</code> contains
+the mounted packs, while <code>data/carla_maps</code> contains exported OpenDRIVE files. See
+<a href="https://carla-ue5.readthedocs.io/en/latest/map_content_packs/">CARLA content packs</a>.</p>
 <h3 id="carla-semantic-maps">CARLA semantic maps<a class="headerlink" href="#carla-semantic-maps" title="Permanent link">&para;</a></h3>
-<p>Map export is optional. With <code>carla-server</code> running, export Town03 and set the dataset's
+<p>Map export is optional. With <code>carla-server</code> running, export both configured maps and set
 <code>dataset.options.map_directory: ../data/carla_maps</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>carla-experiment<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>scripts.preparation.export_carla_maps<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">2000</span><span class="w"> </span>--town<span class="w"> </span>Town03<span class="w"> </span>--output<span class="w"> </span>data/carla_maps
+<span class="w">  </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">2000</span><span class="w"> </span>--town<span class="w"> </span>Town03_Opt<span class="w"> </span>Town10HD_Opt<span class="w"> </span>--output<span class="w"> </span>data/carla_maps
 </code></pre></div>
 <p>The files are written into the mounted checkout. Map use and unavailable-map behavior are
 described in <a href="../../guides/datasets/">Datasets</a>.</p>
@@ -2155,7 +2228,7 @@ loading options.</p>
 <p>Existing cutouts can be deployed without SAM.</p>
 <h2 id="verify-the-installation">Verify the installation<a class="headerlink" href="#verify-the-installation" title="Permanent link">&para;</a></h2>
 <p>Use the corresponding Compose service's version command, then follow the offline checks in
-<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/tests/README.md">Tests</a>. Simulator, renderer and model prerequisites are listed there.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/tests/README.md">Tests</a>. Simulator, renderer and model prerequisites are listed there.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Run <a href="../quickstart/">Quickstart</a>, then see <a href="../../guides/experiments/">Experiments</a>
 and <a href="../../reference/configuration/">Configuration</a>.</p>

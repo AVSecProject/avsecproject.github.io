@@ -1910,7 +1910,7 @@ Constructor signatures, constraints and errors are in the
 <span class="w">      </span><span class="nt">reported_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
 </code></pre></div>
 <p>A supplied attack uses the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/28551867f359e40f75941b31cf7d5cbc32aa18c6/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
+<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
 constructor parameters as attributes with the same names, or override
 <code>configuration_parameters()</code> to describe the configured inputs. Filesystem options follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">Path resolution</a>.</p>
@@ -2035,7 +2035,7 @@ supplies snapshots and a clock, rather than a service that advances the world.</
 <p>Choose <code>WorldAttackAction</code> for physical-world changes, <code>SensorAttackAction</code> for sensor-data
 replacement, and <code>AVStackAttackAction</code> for a driving-system stage value. The
 <a href="../../reference/runtime/">Runtime reference</a> describes their application order and stage semantics.
-For insertion, <code>InsertObject</code> is a <code>WorldAttackAction</code>. <code>InsertionAttackAction</code> is a
+For insertion, <code>InsertObject</code> and <code>MoveObject</code> are world actions. <code>InsertionAttackAction</code> is a
 <code>SensorAttackAction</code>. Object coordinates use +X forward, +Y left and +Z up.</p>
 <p>Placement tools belong to <code>attack.insertion</code>, not the dataset. A <code>SensorView</code> supplies camera
 geometry, actor poses and available depth for sensor composition. See
@@ -2070,6 +2070,15 @@ removal with the run's resources. This example needs no simulator server or mode
     <span class="k">assert</span> <span class="s2">"demo_stop_sign"</span> <span class="ow">in</span> <span class="n">log</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">physical_pre</span><span class="o">.</span><span class="n">objects</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">simulator_runtime</span><span class="o">.</span><span class="n">state</span><span class="p">()</span><span class="o">.</span><span class="n">objects</span>
 <span class="k">assert</span> <span class="n">log</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"completed"</span>
+</code></pre></div>
+<p>Return <code>MoveObject</code> from <code>step</code> with the object's target pose at the next decision. See
+<a href="../../reference/runtime/#moving-inserted-objects">Moving inserted objects</a> for timing and history.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.attack.insertion</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoveObject</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">world_from_object</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">MoveObject</span><span class="p">(</span><span class="s2">"demo_stop_sign"</span><span class="p">,</span> <span class="n">target</span><span class="p">)]</span>
 </code></pre></div>
 <p><code>ObjectAsset</code> uses a bottom-center local origin. Convert a map feature's reference point before
 placing the asset. <code>InsertObject</code> also accepts a <code>MeshAsset</code> for NuRec scene insertion.
