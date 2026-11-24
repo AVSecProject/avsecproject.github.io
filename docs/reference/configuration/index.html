@@ -2279,7 +2279,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>attacks.&lt;name&gt;.type</code></td>
-<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
+<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/b51995b1fdeb3d26c4854552c66b6da64c67854d/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
 </tr>
 <tr>
 <td><code>environment.sensors[].type</code></td>
@@ -2631,7 +2631,7 @@ positive, simulators without <code>trajectory</code> in their declared <code>com
 <p>This fragment keeps the decision grid at 100 ms and configures independent camera and LiDAR
 clocks.</p>
 <p><strong>Not yet implemented.</strong> Camera phase from the recording. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/b51995b1fdeb3d26c4854552c66b6da64c67854d/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
 <h2 id="simulator">Simulator<a class="headerlink" href="#simulator" title="Permanent link">&para;</a></h2>
 <p>CARLA scene and prescribed motion settings belong to <code>CarlaRecipe</code>. <code>CarlaSimulator</code> receives
 the runtime client settings. For recorded sources, choose a simulator compatible with the
@@ -2800,17 +2800,10 @@ Sensor entries also accept <code>ros: true</code> to enable their ROS 2 publicat
 </code></pre></div>
 <p>Set a camera's <code>post_process_profile</code> through its <code>blueprint_attributes</code> mapping. The framework
 does not choose a profile when the attribute is omitted.</p>
-<h4 id="hosted-carla-driving-systems">Hosted CARLA driving systems<a class="headerlink" href="#hosted-carla-driving-systems" title="Permanent link">&para;</a></h4>
-<p><code>scenario.ego_goal</code> supplies <code>x</code>, <code>y</code> and <code>yaw_deg</code> in the framework world frame. It uses meters
-and degrees. These values are already in Autoware map coordinates.</p>
-<p><code>scenario.ego.ros_rig</code> lists attached actors separate from framework sensors. Each entry declares
-a unique <code>name</code>, a <code>blueprint</code> and a <code>parent</code> of <code>ego</code> or an earlier entry. Its <code>transform</code>
-contains <code>location: {x, y, z}</code> and <code>rotation: {pitch, yaw, roll}</code> in native CARLA coordinates
-relative to the parent. Use <code>blueprint_attributes</code> for native attributes, including
-<code>sensor_tick</code>, and <code>ros: true</code> to enable ROS publication.</p>
-<h5 id="ros-rig-sensor-noise">ROS rig sensor noise<a class="headerlink" href="#ros-rig-sensor-noise" title="Permanent link">&para;</a></h5>
-<p>CARLA's own noise attributes add noise to <code>ros_rig</code> sensors before CARLA publishes their
-messages, so no forwarding is involved. Set them in the sensor's <code>blueprint_attributes</code>.</p>
+<h4 id="carla-sensor-noise">CARLA sensor noise<a class="headerlink" href="#carla-sensor-noise" title="Permanent link">&para;</a></h4>
+<p>CARLA adds sensor noise inside the simulator, before the framework or ROS receives the data.
+Enable it with native attributes in the <code>blueprint_attributes</code> of a recipe sensor or a <code>ros_rig</code>
+entry, so no forwarding is involved.</p>
 <table>
 <thead>
 <tr>
@@ -2826,27 +2819,61 @@ messages, so no forwarding is involved. Set them in the sensor's <code>blueprint
 <td>No noise</td>
 </tr>
 <tr>
-<td><code>sensor.lidar.ray_cast</code></td>
+<td><code>sensor.other.gnss</code>, <code>sensor.other.autoware_gnss</code></td>
+<td><code>noise_{lat,lon,alt}_{bias,stddev}</code></td>
+<td>No noise</td>
+</tr>
+<tr>
+<td><code>sensor.lidar.ray_cast</code>, <code>sensor.lidar.hss_lidar</code></td>
 <td><code>noise_stddev</code> and <code>dropoff_{general_rate,intensity_limit,zero_intensity}</code></td>
 <td>Dropoff enabled</td>
 </tr>
 <tr>
-<td><code>sensor.other.autoware_gnss</code></td>
-<td><code>noise_{lat,lon,alt}_{bias,stddev}</code></td>
+<td><code>sensor.other.v2x</code></td>
+<td><code>noise_{lat,lon,alt,head,yawrate}_{bias,stddev}</code>, <code>noise_vel_stddev_x</code>, <code>noise_accel_stddev_{x,y,z}</code></td>
 <td>No noise</td>
+</tr>
+<tr>
+<td><code>sensor.camera.dvs</code></td>
+<td><code>sigma_{positive,negative}_threshold</code></td>
+<td>No noise</td>
+</tr>
+<tr>
+<td><code>sensor.camera.rgb</code>, <code>sensor.camera.rgb_fisheye</code>, <code>sensor.camera.rt_lens</code></td>
+<td>None. <code>post_process_profile</code> determines the noise</td>
+<td>The default profile adds noise</td>
 </tr>
 </tbody>
 </table>
+<p><code>sensor.other.radar</code> has <code>noise_seed</code> but no noise amount. Other sensors have no noise
+attributes.</p>
 <p>IMU accelerometer noise uses meters per second squared and gyro noise and bias use radians
-per second. LiDAR <code>noise_stddev</code> is a range deviation in meters. Biases follow CARLA's sensor
-axes, and the published ROS axes can reverse their sign. The supplied configuration sets the
-LiDAR dropoff rates to zero. The published IMU and GNSS covariances stay zero with noise
-enabled. <code>sensor.other.autoware_gnss</code> accepts its noise attributes, but its published pose
-does not change. To perturb GNSS, add <code>/sensing/gnss/pose_with_covariance</code> to
-<code>modified_topics</code> and change it with a hook.</p>
-<p>When a sensor's blueprint has <code>noise_seed</code> and the entry omits it, preparation derives the seed
-from the scenario seed, as for framework LiDAR sensors. Treatments and repeats of one run seed
-share the derived seed. Each value in <code>runs.seeds</code> derives different noise seeds.</p>
+per second. GNSS latitude and longitude noise uses degrees and altitude noise uses meters. LiDAR
+<code>noise_stddev</code> is a range deviation in meters. Biases follow CARLA's sensor axes, and published
+ROS axes can reverse their sign.</p>
+<p>Camera noise follows auto exposure and has no seed. CARLA's
+<a href="https://github.com/carla-simulator/carla/blob/1.0/Docs/core_camera_presets.md">camera presets</a>
+describe the noise of each profile.</p>
+<p>Preparation derives a missing <code>noise_seed</code> from the scenario seed for <code>ros_rig</code> entries whose
+blueprint has the attribute and for the <code>noise_seed</code> option of <code>CarlaLidar</code>. Other recipe
+sensors keep CARLA's default seed unless their <code>blueprint_attributes</code> set <code>noise_seed</code>.
+Treatments and repeats of one run seed share the derived seeds. Each value in <code>runs.seeds</code>
+derives different seeds. The <code>noise</code> option of avstack's <code>CarlaGnss</code> draws avstack's own noise
+from NumPy's global generator, which does not follow the run seed. Use the native attributes
+instead.</p>
+<p>The supplied hosted Autoware configuration sets the LiDAR dropoff rates to zero. The published
+IMU and GNSS covariances stay zero with noise enabled. <code>sensor.other.autoware_gnss</code> accepts its
+noise attributes, but its published pose does not change. To perturb GNSS, add
+<code>/sensing/gnss/pose_with_covariance</code> to <code>modified_topics</code> and change it with a hook.</p>
+<h4 id="hosted-carla-driving-systems">Hosted CARLA driving systems<a class="headerlink" href="#hosted-carla-driving-systems" title="Permanent link">&para;</a></h4>
+<p><code>scenario.ego_goal</code> supplies <code>x</code>, <code>y</code> and <code>yaw_deg</code> in the framework world frame. It uses meters
+and degrees. These values are already in Autoware map coordinates.</p>
+<p><code>scenario.ego.ros_rig</code> lists attached actors separate from framework sensors. Each entry declares
+a unique <code>name</code>, a <code>blueprint</code> and a <code>parent</code> of <code>ego</code> or an earlier entry. Its <code>transform</code>
+contains <code>location: {x, y, z}</code> and <code>rotation: {pitch, yaw, roll}</code> in native CARLA coordinates
+relative to the parent. Use <code>blueprint_attributes</code> for native attributes, including
+<code>sensor_tick</code>, and <code>ros: true</code> to enable ROS publication.</p>
+<p>Use <a href="#carla-sensor-noise">CARLA sensor noise</a> to add noise to <code>ros_rig</code> sensors.</p>
 <p>Configure <code>AutowareDrivingSystem</code> under <code>external_driving_system</code>:</p>
 <table>
 <thead>
@@ -3156,9 +3183,9 @@ The loader does not infer axes. With <code>origin: file</code>, the transformed 
 including a model's ground clearance, and vertices below z = 0 are rejected.
 Supplying <code>color</code> for an already colored file is an error.</p>
 <p><strong>Not yet implemented.</strong> FBX and USD loading. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/b51995b1fdeb3d26c4854552c66b6da64c67854d/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> 3DGS Gaussian PLY assets. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/b51995b1fdeb3d26c4854552c66b6da64c67854d/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
 <h2 id="driving-specification">Driving specification<a class="headerlink" href="#driving-specification" title="Permanent link">&para;</a></h2>
 <p><code>avstack.type</code> selects an <code>AVStack</code> class or factory. Its options are passed to each fresh
 instance. A constructor declaring <code>seed</code> receives the run seed. Explicitly writing that reserved
