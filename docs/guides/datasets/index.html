@@ -1207,6 +1207,8 @@
       
         
       
+        
+      
     
     
     
@@ -1259,6 +1261,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1915,13 +1945,14 @@ returns <code>Unavailable</code> for that generated evidence. See
 uses path order. An explicit <code>usdz_paths</code> list supplies the archives directly. Scenario
 identities are native clip identifiers rather than filesystem paths.</p>
 <p>Decision frames use the configured <code>time_step</code>. Ego and actor poses interpolate within recording
-support and do not extrapolate. An actor outside its recorded support is absent. Camera
+support and do not extrapolate. An actor outside its recorded support is absent. Tracks whose
+labels match a <code>vehicle_labels</code> entry use the <code>vehicle</code> category. Camera
 timestamps describe recorded image frames and are distinct from the decision timeline. Use
 <code>camera_timestamps</code> when aligning video labels and <code>camera_geometry</code> for the optical model and
 rig-from-camera transform.</p>
-<p><code>FrameData.sensor_references</code> retains the native <code>camera_id</code>. Model-visible name changes belong
-to the <a href="../simulators/">simulator's camera_aliases</a>, not the dataset. <code>Dataset</code> camera and
-trajectory methods take <code>scenario_id</code>. Their signatures and calibration constraints are in the
+<p><code>ScenarioStart.payload</code> retains the native <code>camera_id</code>. Use the
+<a href="../simulators/#nurec">simulator's camera_aliases</a> for model-visible names. <code>NuRecDataset</code> camera
+and trajectory methods take <code>scenario_id</code>. Their signatures and calibration constraints are in the
 <a href="../../reference/python-api/#avsectesterdatasetsnurec">NuRec API</a>.</p>
 <p>The public <code>read_scene_mesh</code> function reads world-coordinate mesh vertices and triangle faces
 without selecting a camera. <code>NuRecDataset.scene_mesh</code> and the simulator share that reader. Depth
@@ -1952,7 +1983,7 @@ whether it can use that scenario.</p>
 </tr>
 <tr>
 <td>CARLA</td>
-<td>Exported OpenDRIVE through the optional CARLA client package</td>
+<td>Exported OpenDRIVE when <code>map_directory</code> is set, through the CARLA client package</td>
 </tr>
 <tr>
 <td>nuScenes</td>
@@ -2075,7 +2106,7 @@ states are recorded separately in
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

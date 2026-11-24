@@ -16,7 +16,7 @@
         <link rel="prev" href="../guides/defenses/">
       
       
-        <link rel="next" href="stop-sign-patch/">
+        <link rel="next" href="hosted-autoware/">
       
       
         
@@ -1080,6 +1080,8 @@
       
         
       
+        
+      
     
     
     
@@ -1135,6 +1137,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1632,6 +1662,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1665,7 +1706,7 @@
 <a href="../getting-started/quickstart/">Quickstart</a>.</p>
 </blockquote>
 <p>Run configurations through Compose after preparing data, weights and the local Compose
-environment. See <a href="../guides/attacks/">Writing attacks</a> for lifecycle phases.</p>
+environment. See <a href="../guides/attacks/">Implement an attack</a> for lifecycle phases.</p>
 <h2 id="configurations">Configurations<a class="headerlink" href="#configurations" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1679,91 +1720,98 @@ environment. See <a href="../guides/attacks/">Writing attacks</a> for lifecycle 
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/carla_phantom.yaml">carla_phantom.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/carla_phantom.yaml">carla_phantom.yaml</a></td>
 <td>CARLA</td>
 <td><code>ModularAVStack</code></td>
 <td>Town03_Opt (AdditionalMaps), Town10HD_Opt, <code>fetch_models.sh</code></td>
 <td><a href="phantom-injection/">Phantom injection</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/carla_patch.yaml">carla_patch.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/carla_patch.yaml">carla_patch.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>Town03_Opt (AdditionalMaps), Town10HD_Opt, <code>fetch_models.sh</code></td>
 <td><a href="physical-patch/">Physical patch</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/carla_patch_optimized.yaml">carla_patch_optimized.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/carla_patch_optimized.yaml">carla_patch_optimized.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>Town03_Opt (AdditionalMaps), Town10HD_Opt, <code>fetch_models.sh</code></td>
 <td><a href="physical-patch/">Physical patch</a>, white-box attack, algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/carla_object_insertion.yaml">carla_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/carla_object_insertion.yaml">carla_object_insertion.yaml</a></td>
 <td>CARLA</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td>Town03_Opt (AdditionalMaps), Town10HD_Opt, <code>fetch_models.sh</code></td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_patch.yaml">nurec_patch.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/carla_autoware.yaml">carla_autoware.yaml</a></td>
+<td>CARLA</td>
+<td><code>ExternalAVStack</code> with Autoware LiDAR</td>
+<td>Town10HD_Opt, <a href="../getting-started/installation/#hosted-autoware">hosted Autoware setup</a></td>
+<td><a href="hosted-autoware/">Hosted Autoware</a>, five repeats per treatment</td>
+</tr>
+<tr>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_patch.yaml">nurec_patch.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>, Alpamayo</td>
 <td><a href="physical-patch/">Physical patch</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_object_insertion.yaml">nurec_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_object_insertion.yaml">nurec_object_insertion.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>, Alpamayo</td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_vehicle_insertion_modular_2604.yaml">nurec_vehicle_insertion_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_vehicle_insertion_modular_2604.yaml">nurec_vehicle_insertion_modular_2604.yaml</a></td>
 <td>NuRec</td>
 <td><code>RuleBasedAVStack</code></td>
 <td><code>data/nurec/26.04_release</code>, COCO YOLOX-m, supplied vehicle mesh</td>
 <td><a href="vehicle-insertion/">Vehicle insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_speed_feedback.yaml">nurec_speed_feedback.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_speed_feedback.yaml">nurec_speed_feedback.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>, scene <code>023b7fcc-671c-40e3-9bd2-c66b0b073fbc</code>, Alpamayo</td>
 <td><a href="speed-feedback-attack/">Speed feedback</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nuscenes_object_insertion.yaml">nuscenes_object_insertion.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nuscenes_object_insertion.yaml">nuscenes_object_insertion.yaml</a></td>
 <td>Recorded playback</td>
 <td><code>CameraForwardCollisionAVStack</code></td>
 <td><code>data/nuscenes</code>, <code>fetch_models.sh</code></td>
 <td><a href="image-insertion/">Image insertion</a></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td>NuRec</td>
 <td><code>RuleBasedAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>, COCO YOLOX-m</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, white-box attack, algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td>NuRec</td>
 <td><code>RuleBasedAVStack</code></td>
 <td><code>data/nurec/26.04_release</code>, COCO YOLOX-m</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, white-box attack, algorithm used: <code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.01_release</code>, Alpamayo</td>
 <td><a href="stop-sign-patch/">Stop-sign patch</a>, black-box attack, algorithm used: <code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td>NuRec</td>
 <td><code>AlpamayoAVStack</code></td>
 <td><code>data/nurec/26.04_release</code>, Alpamayo</td>
@@ -1771,8 +1819,8 @@ environment. See <a href="../guides/attacks/">Writing attacks</a> for lifecycle 
 </tr>
 </tbody>
 </table>
-<p>The <code>_2601</code> and <code>_2604</code> suffixes select NuRec 26.01 and 26.04. In stop-sign configuration names,
-<code>modular</code> selects <code>RuleBasedAVStack</code>.</p>
+<p>The <code>_2601</code> and <code>_2604</code> suffixes select NuRec 26.01 and 26.04. In the NuRec stop-sign and vehicle
+insertion configuration names, <code>modular</code> selects <code>RuleBasedAVStack</code>.</p>
 <p>Run commands from the repository root. YAML paths are relative to the YAML file. Use the running
 CARLA experiment service or start an ephemeral NuRec experiment container:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>carla-experiment<span class="w"> </span>avsectester<span class="w"> </span>run<span class="w"> </span>configs/carla_phantom.yaml
@@ -1784,6 +1832,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 <p>Attack impacts and driving results must be measured in the target environment. Workflow tests
 establish preparation, execution and evaluation behavior. Report scientific impact separately
 using the <a href="../guides/evaluation/">evaluation workflow</a>.</p>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Follow a linked example, or read <a href="../guides/experiments/">Experiments</a> to configure a comparison.</p>
 
 
 
@@ -1836,13 +1886,13 @@ using the <a href="../guides/evaluation/">evaluation workflow</a>.</p>
         
         
           
-          <a href="stop-sign-patch/" class="md-footer__link md-footer__link--next" aria-label="Next: Stop-sign patch attack">
+          <a href="hosted-autoware/" class="md-footer__link md-footer__link--next" aria-label="Next: Hosted Autoware">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Stop-sign patch attack
+                Hosted Autoware
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1878,7 +1928,7 @@ using the <a href="../guides/evaluation/">evaluation workflow</a>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>

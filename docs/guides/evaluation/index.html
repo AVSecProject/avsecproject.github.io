@@ -1218,6 +1218,8 @@
       
         
       
+        
+      
     
     
     
@@ -1270,6 +1272,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1872,8 +1902,10 @@ carry reasons rather than becoming zero.</p>
 <p><code>ExperimentResult.load</code> restores the saved evidence. Report rebuilding and skipped-run notices
 follow the <a href="../../reference/cli/#evaluate">CLI evaluate command</a>.</p>
 <h2 id="comparison-groups">Comparison groups<a class="headerlink" href="#comparison-groups" title="Permanent link">&para;</a></h2>
-<p>Every unattacked treatment runs once per unit and seed. An attacked treatment runs only in units
-selected by its attack. All applicable treatments in a group are compared pairwise.</p>
+<p>Every unattacked treatment runs for each unit, seed and repeat. An attacked treatment runs only
+in units selected by its attack. All applicable treatments in a group are compared pairwise.
+In repeated experiments, two runs with the same repeat number are independent samples.
+The number groups them for reporting.</p>
 <p>The <a href="../../concepts/architecture/#terms">architecture terms</a> define units and comparison groups.
 <code>RunGroup</code> retains all supplied logs in their order, including failed, cancelled and incomplete
 logs, plus optional errors, part, treatment attacks and a scenario map.</p>
@@ -1888,13 +1920,14 @@ measurements do not receive another difference operation.</p>
 <p>Independent sensor clocks can leave decision-boundary raw observations empty. Physical
 evidence uses each sensor's latest acquisition up to the decision, regardless of input hooks
 removing its data. This includes visibility, geometry and detection-matching truth.
-<code>StepRecord.physical_captures</code> identifies these acquisitions. <code>ReplicaVisibility</code> and the visible
-condition of <code>SignDetection</code> follow this rule.</p>
+<code>StepRecord.physical_captures</code> identifies these acquisitions. The
+<a href="../../examples/stop-sign-patch/">stop-sign example</a> uses this evidence for
+<code>ReplicaVisibility</code> and the visible condition of <code>SignDetection</code>.</p>
 <p>Model association uses the latest frame delivered to the driving system. A declared
 <code>detection_sensor</code> selects this source, and <code>StepRecord.detection_capture_id</code> retains its ID across
 decisions without new delivery. Decisions before its first delivery are excluded. A run where the
 sensor never delivers has unavailable detection evidence. An undeclared source uses decision-time
-truth. <code>DetectionMetrics</code> and <code>SignDetection</code> exclude decisions where force-GT skipped the driver.
+truth. <code>DetectionMetrics</code> and <code>SignDetection</code> exclude decisions where <code>force_gt</code> skipped inference.
 Driving metrics use physical decision states. <code>DrivingMetrics.brake_steps</code>, <code>StopImpact</code> and the
 supplied stop-sign black-box stop-command outcome exclude <code>force_gt</code> decisions.
 Commands absent because driving was skipped are not stop commands.</p>
@@ -1916,7 +1949,7 @@ Commands absent because driving was skipped are not stop commands.</p>
 </tr>
 <tr>
 <td><code>DetectionMetrics</code></td>
-<td>Thresholded detection matching, precision, recall and F1</td>
+<td>Detection matching by distance, precision, recall and F1</td>
 </tr>
 <tr>
 <td><code>StopImpact</code></td>
@@ -1949,11 +1982,11 @@ provide that evidence. External control records no executed command, so command-
 measurements are unavailable. Collision is bird's-eye oriented-box overlap, not a native
 collision-sensor event. <code>TrajectoryDeviation</code> compares true ego positions at equal decision
 indices, without time or route alignment.</p>
-<p><code>DetectionMetrics</code> matches detection positions to ground-truth box centres in the capture-time
+<p><code>DetectionMetrics</code> matches detection positions to ground-truth box centers in the capture-time
 ego frame, using sensor mounting geometry independently of model localization. It greedily
-pairs detections with the nearest centres within <code>match_distance</code>. Its range filtering is
-horizontal. Category matching follows <code>category_map</code> when configured. The thresholded detections
-do not define TN or AP/mAP.</p>
+pairs detections with the nearest centers within <code>match_distance</code>. Its range filtering is
+horizontal. Category matching follows <code>category_map</code> when configured. The metric evaluates
+the supplied detections and reports TP, FP, FN, precision, recall and F1.</p>
 <p><code>StopLineMetrics</code> uses <code>segment.user_data["stop_line_id"]</code> to identify a stop line in the
 saved map and assumes the run starts before it. It uses the initial physical state and each
 decision's physical result. Distances to the line are horizontal and positive before the first
@@ -1978,23 +2011,35 @@ parameter constraints.</p>
 decisions as the denominator and is unavailable if any decision lacks text.</p>
 <h2 id="reports-and-statistics">Reports and statistics<a class="headerlink" href="#reports-and-statistics" title="Permanent link">&para;</a></h2>
 <p>Boolean values display as <code>yes</code> or <code>no</code>, floats with four decimal places, and unavailable or
-nonfinite values as an em dash (—). Numeric summaries use <code>mean ± std</code> and <code>n = k</code>, omitting the
-standard deviation for one observation. Boolean summaries show the true fraction and
-<code>x of K groups</code>. HTML pages contain inline styling without scripts or external resources. Saved
-images and CSV files are linked relative to the page. JSON and CSV retain full precision.</p>
+nonfinite values as an em dash (—). Numeric summaries show <code>mean ± std</code> with the population
+standard deviation (ddof=0), the median and range, and <code>n = k</code>. A single observation shows only
+its value and <code>n = 1</code>. Boolean summaries show the true fraction and <code>x of K groups</code>. HTML pages
+contain inline styling without scripts or external resources. Saved images and CSV files are
+linked relative to the page. JSON and CSV retain full precision.</p>
 <p>Treatment summaries group measurements by part and treatment. Pair summaries group by part and
-treatment pair. Numeric summaries use the mean and population standard deviation (ddof=0), with
-a separate available-group count for each field. Boolean summaries use the true fraction.
-<code>Unavailable</code> values are excluded from that field's denominator.</p>
+treatment pair. Each field has its own count of available values, and <code>Unavailable</code> values are
+excluded from it. <code>runs.csv</code> and group details list every run, with its repeat number in repeated
+experiments.</p>
 <p><code>treatment_summary.csv</code> is a long table with one row per part, treatment and measurement field.
 <code>pair_summary.csv</code> has one row per part, treatment pair, measurement type and field.
 Its <code>measurement</code> column is <code>paired_difference</code> for treatment B minus treatment A, with booleans
-represented as 0 and 1, or <code>pair_metric</code> for a <code>PairMetric</code> result. Numeric fields retain mean and
-standard deviation. Boolean fields retain the true fraction. Unused statistical cells are empty.
+represented as 0 and 1, or <code>pair_metric</code> for a <code>PairMetric</code> result. In repeated experiments,
+<code>mean_difference</code> rows hold the difference of treatment means in <code>mean</code> or the reason for its
+absence in <code>reason</code>. Numeric rows fill the mean, standard deviation, median, minimum and maximum.
+Boolean rows fill the true fraction and true count. Unused statistical cells are empty.
 Both CSVs contain the summaries from <code>report.json</code> and preserve full numeric precision.</p>
-<p>Paired differences are computed inside each group before aggregation. <code>PairMetric</code> measurements
-are summarized separately. Statistics do not infer an attack-success label. See the
-<a href="../../examples/#attack-impact">example interpretation rule</a>.</p>
+<p>Paired differences are computed inside each group before aggregation. In repeated experiments,
+<code>mean_differences</code> also reports B's mean minus A's mean across each side's completed runs, using
+true fractions for booleans. It is unavailable with a reason if either side lacks values. The two
+means can use a different set of runs from the within-group differences. Statistics do not infer
+an attack-success label. See the <a href="../../examples/#attack-impact">example interpretation rule</a>.</p>
+<p>When repeats and pair metrics are configured, each treatment's <strong>noise floor</strong> measures every pair
+of completed repeats within the same part, segment and seed using the configured <code>PairMetric</code>
+implementations. <code>repeat_pairs</code> and <code>repeat_pair.csv</code> list the pair measurements. The same-treatment
+rows in <code>pair_summaries</code> and the HTML pair metric table show their distributions alongside the
+between-treatment results. Read outcomes of asynchronous driving systems alongside their
+within-treatment variation. The framework reports descriptive statistics without significance tests
+or confidence intervals.</p>
 <p>The HTML report presents experiment setup, metric definitions, run status, per-part results,
 paired differences and group details. Group details retain unavailable reasons and saved plots.
 The command line shows per-part metric tables, notes and errors. Paired tables are in the HTML
@@ -2037,12 +2082,13 @@ recorded evidence and does not require simulator startup, dataset access or mode
 Saved runs reach metrics without sensor payloads, as described in
 <a href="../../reference/configuration/#recording">recording configuration</a>.</p>
 <p>See <a href="#built-in-metrics">Built-in metrics</a> for acquisition truth, model associations and
-force-GT exclusions, and <a href="../../reference/runtime/#runlog">Runtime</a> for stored records.</p>
+<code>force_gt</code> exclusions, and <a href="../../reference/runtime/#runlog">Runtime</a> for stored records.</p>
 <h2 id="visualize-saved-observations">Visualize saved observations<a class="headerlink" href="#visualize-saved-observations" title="Permanent link">&para;</a></h2>
 <p>Retain the needed sensor payloads before execution using
 <a href="../../reference/configuration/#recording">recording configuration</a>. <code>camera_view</code> and
 <code>lidar_bev</code> read saved inputs. <code>labels_view</code> projects recorded true actors, while
-<code>detections_view</code> projects recorded detections. <code>sensor_view</code> reconstructs only logged geometry.</p>
+<code>detections_view</code> projects recorded detections. The visualization module's
+<code>sensor_view(record)</code> reconstructs geometry from a saved record.</p>
 <p>The following example requires retained camera payloads in a saved run:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.runlog</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.evaluation.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">camera_view</span><span class="p">,</span> <span class="n">record_run</span><span class="p">,</span> <span class="n">save_gif</span>
@@ -2051,14 +2097,15 @@ force-GT exclusions, and <a href="../../reference/runtime/#runlog">Runtime</a> f
 <span class="n">record_run</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="s2">"export/frames"</span><span class="p">,</span> <span class="n">visualize</span><span class="o">=</span><span class="n">camera_view</span><span class="p">)</span>
 <span class="n">save_gif</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="s2">"export/drive.gif"</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
-<p><code>record_run</code> exports frames, filmstrip creates a grid and <code>save_sequence</code> exports images and
+<p><code>record_run</code> exports frames, <code>filmstrip</code> creates a grid and <code>save_sequence</code> exports images and
 animation. These functions consume saved records and do not drive a world. Missing input
 produces no view. Overlays use only the recorded camera geometry. See the
 <a href="../../reference/python-api/#avsectesterevaluationvisualization">visualization API</a>
 for constraints.</p>
 <h2 id="evaluate-existing-runlog-objects">Evaluate existing <code>RunLog</code> objects<a class="headerlink" href="#evaluate-existing-runlog-objects" title="Permanent link">&para;</a></h2>
 <p>Use <code>RunGroup</code> and <code>evaluate_groups</code> directly when logs are already in memory. They require
-neither <code>Experiment</code> nor a dataset. Save the returned report when persistent files are needed.</p>
+neither <code>Experiment</code> nor a dataset. Save the returned report when persistent files are needed.
+For repeated runs, pass <code>repeats</code> and give each group its zero-based <code>repeat</code>.</p>
 <!-- runnable -->
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.attack</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttackSegment</span>
@@ -2080,10 +2127,11 @@ neither <code>Experiment</code> nor a dataset. Save the returned report when per
 <span class="k">assert</span> <span class="n">report</span><span class="o">.</span><span class="n">notes</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"Existing in-memory log"</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">format_summary</span><span class="p">())</span>
 </code></pre></div>
-<p>Decision previews prefer recorded model images and otherwise use recorded raw images.
-A decision without an image payload has no image tile. Previews do not reconstruct a driver's cache.
-For frame-by-frame playback, select images from <code>RunLog.captures</code> and pass them to <code>save_gif</code>.
-<code>plot_group</code> shades force-GT intervals and plots executed actuator braking only outside them.</p>
+<p>The HTML report's decision previews prefer recorded model images and otherwise use recorded raw
+images. A decision without an image payload has no image tile. Previews do not reconstruct a driving
+system's cache. For frame-by-frame playback, select images from <code>RunLog.captures</code> and pass them to
+<code>save_gif</code>. <code>plot_group</code> shades <code>force_gt</code> intervals and plots executed actuator braking only
+outside them.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../reference/runtime/#runlog">Runtime</a>,
 <a href="../../reference/python-api/#avsectesterevaluation">the evaluation API</a>
@@ -2182,7 +2230,7 @@ and <a href="../../reference/configuration/#evaluation">Configuration</a>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

@@ -974,6 +974,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Online phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosted-autoware-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosted Autoware messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1218,6 +1235,8 @@
       
         
       
+        
+      
     
     
     
@@ -1270,6 +1289,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1798,6 +1845,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Online phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosted-autoware-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosted Autoware messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1910,7 +1974,7 @@ Constructor signatures, constraints and errors are in the
 <span class="w">      </span><span class="nt">reported_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
 </code></pre></div>
 <p>A supplied attack uses the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/avsectester/implemented_attacks/README.md">implemented-attacks layout</a>. Keep explicit
 constructor parameters as attributes with the same names, or override
 <code>configuration_parameters()</code> to describe the configured inputs. Filesystem options follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">Path resolution</a>.</p>
@@ -1949,7 +2013,8 @@ action receipts.</p>
 <h2 id="select-segments">Select segments<a class="headerlink" href="#select-segments" title="Permanent link">&para;</a></h2>
 <p><code>ScenarioView</code> provides the decision timeline, frame data, semantic map and preparation
 services. Use <code>record_reason()</code> to explain rejected candidates, and
-<code>session.can_start_at(position)</code> to check start requirements before returning a segment.
+a session from <code>scenario.services.session(scenario.seed)</code> to check
+<code>session.can_start_at(position)</code> before returning a segment.
 Placement and visibility criteria belong to the attack. The framework does not infer them
 from <code>user_data</code>.</p>
 <p><code>AttackSegment</code> contains <code>scenario_id</code>, <code>start</code>, <code>stop</code> and <code>user_data</code>. The decision interval
@@ -1972,7 +2037,8 @@ includes an eligible tail:</p>
 <span class="k">assert</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">decision_steps</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="offline-phase">Offline phase<a class="headerlink" href="#offline-phase" title="Permanent link">&para;</a></h2>
-<p>A candidate rollout request is created from the chosen segment and deployment:</p>
+<p>Build a candidate request from the <code>OfflineContext</code> and the selected segment. Here, <code>self</code> is
+the attack and <code>artifacts</code> contains the candidate's prepared parameters.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.execution.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">CandidateRequest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.execution.runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordingPolicy</span>
 
@@ -1980,6 +2046,8 @@ includes an eligible tail:</p>
     <span class="n">segment</span><span class="o">=</span><span class="n">segment</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span> <span class="n">decision_steps</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">decision_steps</span><span class="p">,</span>
     <span class="n">environment</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">recording</span><span class="o">=</span><span class="n">RecordingPolicy</span><span class="p">(),</span>
     <span class="n">attack</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifacts</span><span class="o">=</span><span class="n">artifacts</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">context</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
 <p>Set <code>terminate_when</code> to a predicate on each recorded <code>StepRecord</code> to finish a candidate early
 while retaining its recorded steps and normal attack cleanup.</p>
@@ -2022,7 +2090,7 @@ the objective depends on a driving response. Each candidate has its own run stat
 request records and capability checks are defined in the
 <a href="../../reference/python-api/">Python API</a>.</p>
 <h2 id="online-phase">Online phase<a class="headerlink" href="#online-phase" title="Permanent link">&para;</a></h2>
-<p>An online attack's <code>step</code> receives the raw frames ending exactly at the decision timestamp.
+<p>Subscribe to <code>ResultSubscription("observation")</code> to read the input observation in <code>step</code>.
 Sensor-action timing and duration follow <a href="../../reference/runtime/#attack-actions">Runtime</a>.</p>
 <p>The deployment tick budget is the maximum of
 <code>hooks.setup_ticks + attack.deployment_ticks(segment)</code> across all configured attacks, segments,
@@ -2037,10 +2105,51 @@ replacement, and <code>AVStackAttackAction</code> for a driving-system stage val
 <a href="../../reference/runtime/">Runtime reference</a> describes their application order and stage semantics.
 For insertion, <code>InsertObject</code> and <code>MoveObject</code> are world actions. <code>InsertionAttackAction</code> is a
 <code>SensorAttackAction</code>. Object coordinates use +X forward, +Y left and +Z up.</p>
+<p>Use <code>SetActorState</code> to set an existing actor's physical state. The supplied relocation
+workflow is described in <a href="../../examples/hosted-autoware/">Hosted Autoware</a>.</p>
 <p>Placement tools belong to <code>attack.insertion</code>, not the dataset. A <code>SensorView</code> supplies camera
 geometry, actor poses and available depth for sensor composition. See
 <a href="../../examples/image-insertion/">Image insertion</a> and
 <a href="../../examples/physical-patch/">Physical patch</a> for the supplied deployment paths.</p>
+<h3 id="hosted-autoware-messages">Hosted Autoware messages<a class="headerlink" href="#hosted-autoware-messages" title="Permanent link">&para;</a></h3>
+<p>In a hosted CARLA experiment, add <code>/sensing/imu/tamagawa/imu_raw</code> and <code>/planning/trajectory</code> to
+<code>simulator.options.external_driving_system.options.modified_topics</code> for these actions.
+<code>SensorAttackAction.sensor</code> names the rig entry. <code>AVStackAttackAction.stage</code> names the original
+output topic. Return the actions from <code>AttackRuntime.step</code>. Both receive and return <code>RosMessage</code>
+objects.</p>
+<p>Use <code>observed_topics</code> to subscribe passively. Read-only hooks receive observed messages, and
+RunLog can save their payloads. Attack runtimes do not receive observed messages, and neither
+<code>SensorAttackAction</code> nor <code>AVStackAttackAction</code> can target them. For duration rules see
+<a href="../../reference/runtime/#ros-message-stages">Message stages</a>, and for recording message contents see
+<a href="../../examples/hosted-autoware/">Hosted Autoware</a>.</p>
+<p>User callbacks run serially with message-stage hooks and actions. Time spent in a callback can
+delay messages waiting to be processed. See
+<a href="../../reference/runtime/#ros-message-stages">message-stage timing</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.attack</span><span class="w"> </span><span class="kn">import</span> <span class="n">AVStackAttackAction</span><span class="p">,</span> <span class="n">SensorAttackAction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">avsectester.data_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RosMessage</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">IncreaseImuUncertainty</span><span class="p">(</span><span class="n">SensorAttackAction</span><span class="p">):</span>
+    <span class="n">sensor</span> <span class="o">=</span> <span class="s2">"imu"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="n">covariance</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s2">"angular_velocity_covariance"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">covariance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">RosMessage</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"angular_velocity_covariance"</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">covariance</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">stationary_trajectory</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s2">"points"</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">points</span><span class="p">[</span><span class="s2">"longitudinal_velocity_mps"</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">RosMessage</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">message</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"points"</span><span class="p">:</span> <span class="n">points</span><span class="p">})</span>
+
+
+<span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">IncreaseImuUncertainty</span><span class="p">(),</span>
+    <span class="n">AVStackAttackAction</span><span class="p">(</span><span class="s2">"/planning/trajectory"</span><span class="p">,</span> <span class="n">stationary_trajectory</span><span class="p">),</span>
+<span class="p">]</span>
+</code></pre></div>
 <h2 id="insert-a-world-object">Insert a world object<a class="headerlink" href="#insert-a-world-object" title="Permanent link">&para;</a></h2>
 <p>Return <code>InsertObject</code> from setup to include an object in the first capture. The action registers
 removal with the run's resources. This example needs no simulator server or model weights:</p>
@@ -2265,7 +2374,7 @@ and <a href="../evaluation/">Evaluation</a>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

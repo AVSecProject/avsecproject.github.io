@@ -1078,6 +1078,8 @@
       
         
       
+        
+      
     
     
     
@@ -1130,6 +1132,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1545,6 +1575,17 @@
   
     <nav class="md-nav" aria-label="Simulator">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#carla-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CARLA settings
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#nurec-closed-loop-settings" class="md-nav__link">
@@ -2013,6 +2054,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#carla-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CARLA settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#nurec-closed-loop-settings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2214,6 +2266,10 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 <td><code>CarlaSimulator</code>, <code>NuRecSimulator</code>, <code>RecordedReplaySimulator</code></td>
 </tr>
 <tr>
+<td><code>simulator.options.external_driving_system.type</code></td>
+<td><code>AutowareDrivingSystem</code></td>
+</tr>
+<tr>
 <td><code>avstack.type</code></td>
 <td><code>ModularAVStack</code>, <code>CameraForwardCollisionAVStack</code>, <code>AlpamayoAVStack</code>, <code>RuleBasedAVStack</code>, <code>ExternalAVStack</code></td>
 </tr>
@@ -2223,7 +2279,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 <tr>
 <td><code>attacks.&lt;name&gt;.type</code></td>
-<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
+<td>Discovered <code>Attack</code> subclasses in <a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/avsectester/implemented_attacks/README.md">class-name-derived directories</a></td>
 </tr>
 <tr>
 <td><code>environment.sensors[].type</code></td>
@@ -2231,7 +2287,7 @@ Type paths and hook imports execute Python code. Use only trusted sources.</p>
 </tr>
 </tbody>
 </table>
-<p>Nested <code>type</code> mappings construct only dataset, simulator, driving-system and metric short names
+<p>Nested <code>type</code> mappings construct the registered component short names
 from this table, or <code>module:name</code> paths. Attack names, corruption names and other values pass
 through as native data.</p>
 <h2 id="top-level-keys">Top-level keys<a class="headerlink" href="#top-level-keys" title="Permanent link">&para;</a></h2>
@@ -2345,8 +2401,61 @@ is separate. See <a href="../cli/#automatic-local-services">automatic local serv
 <h2 id="dataset">Dataset<a class="headerlink" href="#dataset" title="Permanent link">&para;</a></h2>
 <p><code>dataset</code> selects the scenario source. <code>NuRecDataset</code> accepts either <code>dataroot</code>, searched
 recursively for USDZ archives, or an explicit <code>usdz_paths</code> sequence. The two options are
-mutually exclusive. Dataset behavior and semantic maps are described
-in <a href="../../guides/datasets/">Datasets</a>.</p>
+mutually exclusive. Dataset behavior and semantic maps are described in
+<a href="../../guides/datasets/">Datasets</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Option</th>
+<th>Default or requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NuRecDataset</code></td>
+<td><code>time_step</code></td>
+<td><code>0.1</code> seconds</td>
+</tr>
+<tr>
+<td><code>NuRecDataset</code></td>
+<td><code>camera_id</code></td>
+<td><code>camera_front_wide_120fov</code></td>
+</tr>
+<tr>
+<td><code>NuRecDataset</code></td>
+<td><code>vehicle_labels</code></td>
+<td><code>[automobile, car, truck, bus, trailer, van, vehicle]</code></td>
+</tr>
+<tr>
+<td><code>NuScenesDataset</code></td>
+<td><code>dataroot</code></td>
+<td>Required dataset root</td>
+</tr>
+<tr>
+<td><code>NuScenesDataset</code></td>
+<td><code>version</code></td>
+<td><code>v1.0-trainval</code></td>
+</tr>
+<tr>
+<td><code>NuScenesDataset</code></td>
+<td><code>camera</code></td>
+<td><code>CAM_FRONT</code></td>
+</tr>
+<tr>
+<td><code>CarlaDataset</code></td>
+<td><code>recipes</code></td>
+<td>Required mapping from names to <code>CarlaRecipe</code></td>
+</tr>
+<tr>
+<td><code>CarlaDataset</code></td>
+<td><code>map_directory</code></td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each <code>CarlaRecipe</code> requires <code>scenario</code>, <code>decision_steps</code>, <code>time_step</code> and <code>motion</code>.
+Its <code>metadata</code> defaults to an empty mapping.</p>
 <h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
 <p>The JSON file contains <code>format: "avsectester.metadata"</code>, <code>version: 1</code>,
 <code>dataset_type: "module:Class"</code> and <code>segments</code> encoded by <code>DEFAULT_REGISTRY</code>. The dataset type
@@ -2365,7 +2474,8 @@ per-treatment overrides.
 The preparation records the source path and raw-byte SHA256. Compatibility depends only on that
 hash, so moving an unchanged file is allowed. Changing any bytes, including whitespace, changes
 its identity. Reusing preparation for execution checks the current file's hash and rechecks
-saved segment frames. Other checks follow <a href="../../guides/experiments/#input-validation">Input validation</a>.
+saved segment frames. Other checks follow
+<a href="../../guides/experiments/#input-validation">Input validation</a>.
 Reevaluation uses the saved hash and segments without reading this file. Adding or removing
 <code>metadata.load</code> relative to the saved configuration is incompatible.</p>
 <p>The <a href="../python-api/">Python API</a> provides <code>save_metadata</code> and <code>load_metadata</code> for user-generated
@@ -2492,7 +2602,7 @@ ordering, and <a href="../../guides/simulators/">Simulators</a> for capture beha
 </tr>
 <tr>
 <td>CARLA</td>
-<td>Frame/report intervals, planner delay and force-GT duration must align with physical ticks. Exposure is zero</td>
+<td>Frame/report intervals, planner delay and <code>force_gt</code> duration must align with physical ticks. Exposure is zero</td>
 </tr>
 <tr>
 <td>Recorded replay</td>
@@ -2519,8 +2629,9 @@ positive, simulators without <code>trajectory</code> in their declared <code>com
 <span class="w">        </span><span class="nt">frame_interval_us</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
 </code></pre></div>
 <p>This fragment keeps the decision grid at 100 ms and configures independent camera and LiDAR
-clocks. Camera phase from the recording is <strong>Not yet implemented.</strong> See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
+clocks.</p>
+<p><strong>Not yet implemented.</strong> Camera phase from the recording. See
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#recorded-camera-phase">Recorded camera phase</a>.</p>
 <h2 id="simulator">Simulator<a class="headerlink" href="#simulator" title="Permanent link">&para;</a></h2>
 <p>CARLA scene and prescribed motion settings belong to <code>CarlaRecipe</code>. <code>CarlaSimulator</code> receives
 the runtime client settings. For recorded sources, choose a simulator compatible with the
@@ -2529,12 +2640,76 @@ dataset. <a href="../../guides/simulators/">Simulators</a> describes their behav
 the dataset provides it. This injection does not recurse into nested constructors. Explicit
 values are retained, but <code>ExperimentConfiguration</code> rejects a dataset/simulator mismatch.
 The loader also injects <code>decision_period_us</code> from that grid into the simulator's top-level
-constructor when it declares that parameter. Explicit options take precedence.
-<code>client.rate</code> sets the native physics base tick, not the driving decision frequency. It must
+constructor when it declares that parameter. Explicit options take precedence.</p>
+<h3 id="carla-settings">CARLA settings<a class="headerlink" href="#carla-settings" title="Permanent link">&para;</a></h3>
+<p><code>client.rate</code> sets the native physics base tick, not the driving decision frequency. It must
 produce an integer number of microseconds per tick. The decision period must be an integer
 number of base ticks. <code>runs.timing.sensors</code> selects acquisition ticks.
 See <a href="../../guides/simulators/#carla">CARLA capture timing</a> for native sensor settings and LiDAR
 scans.</p>
+<p>The physics substep options belong to <code>CarlaSimulator.client</code>. A recipe's <code>client</code> may not
+set them.</p>
+<table>
+<thead>
+<tr>
+<th>Client option</th>
+<th>Native default</th>
+<th>Accepted values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>connect_ip</code></td>
+<td>required</td>
+<td>Server host, typically <code>127.0.0.1</code></td>
+</tr>
+<tr>
+<td><code>connect_port</code></td>
+<td>required</td>
+<td>RPC port, typically <code>2000</code></td>
+</tr>
+<tr>
+<td><code>traffic_manager_port</code></td>
+<td>required</td>
+<td>Traffic Manager port, typically <code>8000</code></td>
+</tr>
+<tr>
+<td><code>rate</code></td>
+<td><code>20.0</code></td>
+<td>Positive native ticks per second</td>
+</tr>
+<tr>
+<td><code>synchronous</code></td>
+<td><code>true</code></td>
+<td>Must be <code>true</code></td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td><code>null</code></td>
+<td>Nonnegative native CARLA seed. Preparation assigns one if omitted</td>
+</tr>
+<tr>
+<td><code>traffic_manager_seed</code></td>
+<td><code>seed</code></td>
+<td>Optional nonnegative Traffic Manager seed</td>
+</tr>
+<tr>
+<td><code>substepping</code></td>
+<td><code>true</code></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>max_substep_delta_time</code></td>
+<td><code>0.01</code></td>
+<td>Positive finite seconds</td>
+</tr>
+<tr>
+<td><code>max_substeps</code></td>
+<td><code>10</code></td>
+<td>Positive integer</td>
+</tr>
+</tbody>
+</table>
 <p>CARLA initialization and external-control options are:</p>
 <table>
 <thead>
@@ -2545,6 +2720,26 @@ scans.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>simulator_version</code></td>
+<td><code>"1.0"</code></td>
+<td>Participates in saved-preparation compatibility</td>
+</tr>
+<tr>
+<td><code>settle_iters</code></td>
+<td><code>100</code></td>
+<td>Nonnegative polling iteration budget for native sensor delivery</td>
+</tr>
+<tr>
+<td><code>depth_camera</code></td>
+<td><code>null</code></td>
+<td>RGB camera selected for aligned depth</td>
+</tr>
+<tr>
+<td><code>occlusion_tolerance_m</code></td>
+<td><code>0.1</code></td>
+<td>Nonnegative occlusion tolerance in meters</td>
+</tr>
 <tr>
 <td><code>camera_warmup_s</code></td>
 <td><code>4.0</code></td>
@@ -2558,7 +2753,7 @@ scans.</p>
 <tr>
 <td><code>external_startup_s</code></td>
 <td><code>0.0</code></td>
-<td>Nonnegative hold duration for an external driving system</td>
+<td>Nonnegative fixed hold duration for an external system without a lifecycle plugin</td>
 </tr>
 <tr>
 <td><code>ego_control</code></td>
@@ -2568,13 +2763,20 @@ scans.</p>
 <tr>
 <td><code>realtime_factor</code></td>
 <td><code>null</code></td>
-<td>Positive simulation-time to wall-time ratio for pacing closed-loop runs, required for <code>"ros2"</code></td>
+<td>Positive simulation-time to wall-time ratio on the cumulative pacing schedule, required for <code>"ros2"</code></td>
+</tr>
+<tr>
+<td><code>external_driving_system</code></td>
+<td><code>null</code></td>
+<td>Lifecycle plugin for <code>ego_control: ros2</code></td>
 </tr>
 </tbody>
 </table>
 <p>The three durations must each correspond to an integer number of ticks at <code>client.rate</code>.
-RGB-camera warmup is omitted when the recipe has no RGB camera. The pre-origin hold uses the
-larger of the applicable camera warmup and <code>external_startup_s</code>. See
+See <a href="../runtime/#carla-tick-pacing">CARLA tick pacing</a> for catch-up and resynchronization.
+RGB-camera warmup is omitted when the recipe has no RGB camera. The hold uses the larger of the
+applicable camera warmup and <code>external_startup_s</code>. An <code>external_driving_system</code> then extends it
+until its session is ready, so it cannot be combined with <code>external_startup_s</code>. See
 <a href="../../guides/simulators/#carla">CARLA initialization</a>.</p>
 <p>In <code>"ros2"</code> mode, use <code>ExternalAVStack</code> and set the ego blueprint's <code>role_name</code> to
 <code>"hero"</code> or <code>"ego"</code>. <code>runs.timing.force_gt_duration_us</code> must be zero. See
@@ -2597,8 +2799,152 @@ Sensor entries also accept <code>ros: true</code> to enable their ROS 2 publicat
 <span class="w">      </span><span class="nt">ros</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <p>Set a camera's <code>post_process_profile</code> through its <code>blueprint_attributes</code> mapping. The framework
-does not choose a profile when the attribute is omitted.
-<code>simulator_version</code> defaults to <code>"1.0"</code> and participates in saved-preparation compatibility.</p>
+does not choose a profile when the attribute is omitted.</p>
+<h4 id="hosted-carla-driving-systems">Hosted CARLA driving systems<a class="headerlink" href="#hosted-carla-driving-systems" title="Permanent link">&para;</a></h4>
+<p><code>scenario.ego_goal</code> supplies <code>x</code>, <code>y</code> and <code>yaw_deg</code> in the framework world frame. It uses meters
+and degrees. These values are already in Autoware map coordinates.</p>
+<p><code>scenario.ego.ros_rig</code> lists attached actors separate from framework sensors. Each entry declares
+a unique <code>name</code>, a <code>blueprint</code> and a <code>parent</code> of <code>ego</code> or an earlier entry. Its <code>transform</code>
+contains <code>location: {x, y, z}</code> and <code>rotation: {pitch, yaw, roll}</code> in native CARLA coordinates
+relative to the parent. Use <code>blueprint_attributes</code> for native attributes, including
+<code>sensor_tick</code>, and <code>ros: true</code> to enable ROS publication.</p>
+<h5 id="ros-rig-sensor-noise">ROS rig sensor noise<a class="headerlink" href="#ros-rig-sensor-noise" title="Permanent link">&para;</a></h5>
+<p>CARLA's own noise attributes add noise to <code>ros_rig</code> sensors before CARLA publishes their
+messages, so no forwarding is involved. Set them in the sensor's <code>blueprint_attributes</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Blueprint</th>
+<th>Noise attributes</th>
+<th>CARLA default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensor.other.imu</code></td>
+<td><code>noise_accel_stddev_{x,y,z}</code>, <code>noise_gyro_stddev_{x,y,z}</code>, <code>noise_gyro_bias_{x,y,z}</code></td>
+<td>No noise</td>
+</tr>
+<tr>
+<td><code>sensor.lidar.ray_cast</code></td>
+<td><code>noise_stddev</code> and <code>dropoff_{general_rate,intensity_limit,zero_intensity}</code></td>
+<td>Dropoff enabled</td>
+</tr>
+<tr>
+<td><code>sensor.other.autoware_gnss</code></td>
+<td><code>noise_{lat,lon,alt}_{bias,stddev}</code></td>
+<td>No noise</td>
+</tr>
+</tbody>
+</table>
+<p>IMU accelerometer noise uses meters per second squared and gyro noise and bias use radians
+per second. LiDAR <code>noise_stddev</code> is a range deviation in meters. Biases follow CARLA's sensor
+axes, and the published ROS axes can reverse their sign. The supplied configuration sets the
+LiDAR dropoff rates to zero. The published IMU and GNSS covariances stay zero with noise
+enabled. <code>sensor.other.autoware_gnss</code> accepts its noise attributes, but its published pose
+does not change. To perturb GNSS, add <code>/sensing/gnss/pose_with_covariance</code> to
+<code>modified_topics</code> and change it with a hook.</p>
+<p>When a sensor's blueprint has <code>noise_seed</code> and the entry omits it, preparation derives the seed
+from the scenario seed, as for framework LiDAR sensors. Treatments and repeats of one run seed
+share the derived seed. Each value in <code>runs.seeds</code> derives different noise seeds.</p>
+<p>Configure <code>AutowareDrivingSystem</code> under <code>external_driving_system</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>image</code></td>
+<td>Pinned Autoware 1.9.0 image</td>
+<td>Local Docker image. See <a href="../../getting-started/installation/#hosted-autoware">Installation</a></td>
+</tr>
+<tr>
+<td><code>gpu</code></td>
+<td>required</td>
+<td>Host GPU index</td>
+</tr>
+<tr>
+<td><code>ros_domain_id</code></td>
+<td>required</td>
+<td>Domain used by the CARLA server, an integer from 0 through 232</td>
+</tr>
+<tr>
+<td><code>autoware_data_directory</code></td>
+<td>required</td>
+<td>Writable model directory on the Docker host</td>
+</tr>
+<tr>
+<td><code>assets_directory</code></td>
+<td>required</td>
+<td>Extracted official CARLA Autoware assets</td>
+</tr>
+<tr>
+<td><code>dds_directory</code></td>
+<td>required</td>
+<td>Directory containing <code>cyclonedds.xml</code></td>
+</tr>
+<tr>
+<td><code>work_directory</code></td>
+<td>required</td>
+<td>Per-run logs and traffic signal files</td>
+</tr>
+<tr>
+<td><code>launch_arguments</code></td>
+<td><code>vehicle_model: sample_vehicle</code>, <code>sensor_model: awsim_sensor_kit</code>, <code>perception_mode: lidar</code></td>
+<td>Autoware launch arguments to override or extend</td>
+</tr>
+<tr>
+<td><code>modified_topics</code></td>
+<td><code>[]</code></td>
+<td>Absolute names from the <a href="../../guides/simulators/#hosted-ros-topics">modifiable topic list</a></td>
+</tr>
+<tr>
+<td><code>observed_topics</code></td>
+<td><code>[]</code></td>
+<td>Absolute names of topics to subscribe to for read-only processing</td>
+</tr>
+<tr>
+<td><code>startup_timeout_s</code></td>
+<td><code>300.0</code></td>
+<td>Positive readiness timeout in wall seconds</td>
+</tr>
+<tr>
+<td><code>engage_timeout_s</code></td>
+<td><code>10.0</code></td>
+<td>Positive autonomous-mode timeout in simulation seconds</td>
+</tr>
+<tr>
+<td><code>localization_tolerance_m</code></td>
+<td><code>0.5</code></td>
+<td>Maximum planar localization error in meters</td>
+</tr>
+<tr>
+<td><code>localization_tolerance_deg</code></td>
+<td><code>5.0</code></td>
+<td>Maximum localization heading error in degrees</td>
+</tr>
+<tr>
+<td><code>distortion_check_s</code></td>
+<td><code>12.0</code></td>
+<td>Diagnostic check window in wall seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Launch argument names are identifiers and values are scalars. Booleans become lowercase strings.
+The plugin fixes <code>simulator_type</code>, <code>launch_simulator_interface</code>, <code>rviz</code> and <code>map_path</code>.
+You cannot supply an argument used to remap a selected topic.
+Preparation compatibility includes the image, launch arguments, configuration override version,
+check thresholds and timeouts. When topics are configured, it also includes both topic lists
+and the producer rewrite version. The lists must be disjoint and require paced execution.
+Each observed topic must resolve to a single message type at startup. See
+<a href="../../guides/simulators/#hosted-ros-topics">hosted ROS topics</a>.</p>
+<p><code>modified_topics</code>, <code>observed_topics</code> and <code>recording.topics</code> require absolute ROS topic names.
+Each slash-separated component starts with an ASCII letter or underscore and contains only
+ASCII letters, digits and underscores.</p>
 <h3 id="nurec-closed-loop-settings">NuRec closed-loop settings<a class="headerlink" href="#nurec-closed-loop-settings" title="Permanent link">&para;</a></h3>
 <p><code>NuRecSimulator</code> requires a renderer and a non-null <code>time_step</code>. The loader supplies the latter
 from <code>NuRecDataset</code>. Reset requires <code>ScenarioStart</code>. Constructor defaults are:</p>
@@ -2670,8 +3016,8 @@ from <code>NuRecDataset</code>. Reset requires <code>ScenarioStart</code>. Const
 </table>
 <p><code>nurec_patch.yaml</code>, <code>nurec_speed_feedback.yaml</code> and <code>nurec_object_insertion.yaml</code> use
 <code>ground_mesh: mesh</code> and the default mesh depth. The four stop-sign configurations use
-<code>ground_mesh: mesh_ground</code> and <code>depth: none</code>. All seven explicitly select map navigation and ego
-ground contact with <code>AlpaSimController</code>.</p>
+<code>ground_mesh: mesh_ground</code> and <code>depth: none</code>. All eight supplied NuRec configurations select
+<code>route_generator: map</code>, <code>physics_update_mode: ego_only</code> and <code>AlpaSimController</code> explicitly.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">simulator</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NuRecSimulator</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
@@ -2689,8 +3035,38 @@ ground contact with <code>AlpaSimController</code>.</p>
 <span class="w">    </span><span class="nt">dynamics</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.closed_loop.simulators.ego_dynamics:AlpaSimController</span>
 </code></pre></div>
-<p>NuRec cameras render at their native resolution.
-<code>NuRecRenderer.lidar</code> defaults to <code>null</code>. Set it to the scene's logical LiDAR sensor name to
+<p>NuRec cameras render at their native resolution.</p>
+<table>
+<thead>
+<tr>
+<th><code>NuRecRenderer</code> option</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>endpoint</code></td>
+<td><code>127.0.0.1:50051</code></td>
+</tr>
+<tr>
+<td><code>scene_id</code></td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>cameras</code></td>
+<td><code>[camera_front_wide_120fov]</code></td>
+</tr>
+<tr>
+<td><code>image_quality</code></td>
+<td><code>95.0</code></td>
+</tr>
+<tr>
+<td><code>track_padding_m</code></td>
+<td><code>[1.0, 1.0, 0.25]</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>NuRecRenderer.lidar</code> defaults to <code>null</code>. Set it to the scene's logical LiDAR sensor name to
 collect scans. See <a href="../../guides/simulators/#lidar">NuRec LiDAR</a> for timing and sensor constraints.</p>
 <p><code>NuRecRenderer.asset_directory</code> defaults to <code>null</code>. It is the client-side directory for generated
 NRE assets, including occlusion probes and scene objects. Its path resolves relative to the YAML
@@ -2698,7 +3074,8 @@ file. <code>server_asset_directory</code> also defaults to <code>null</code>, us
 client. Set this unchanged server-side string only when connecting to an externally managed NRE
 whose asset mount has a different path. See
 <a href="../cli/#automatic-local-services">automatic local services</a> for startup and mounts.</p>
-<p>For insertion behavior, see <a href="../../guides/simulators/#inserted-world-objects">Inserted world objects</a>.</p>
+<p>For insertion behavior, see
+<a href="../../guides/simulators/#inserted-world-objects">Inserted world objects</a>.</p>
 <h3 id="reactive-traffic">Reactive traffic<a class="headerlink" href="#reactive-traffic" title="Permanent link">&para;</a></h3>
 <p>Add the following under <code>simulator.options</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">traffic</span><span class="p">:</span>
@@ -2779,9 +3156,9 @@ The loader does not infer axes. With <code>origin: file</code>, the transformed 
 including a model's ground clearance, and vertices below z = 0 are rejected.
 Supplying <code>color</code> for an already colored file is an error.</p>
 <p><strong>Not yet implemented.</strong> FBX and USD loading. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#fbx-and-usd-assets">TODO</a>.</p>
 <p><strong>Not yet implemented.</strong> 3DGS Gaussian PLY assets. See
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/docs/development/TODO.md#gaussian-assets">TODO</a>.</p>
 <h2 id="driving-specification">Driving specification<a class="headerlink" href="#driving-specification" title="Permanent link">&para;</a></h2>
 <p><code>avstack.type</code> selects an <code>AVStack</code> class or factory. Its options are passed to each fresh
 instance. A constructor declaring <code>seed</code> receives the run seed. Explicitly writing that reserved
@@ -2841,7 +3218,8 @@ Attacks that do not override <code>build_metadata</code> require <code>metadata.
 <a href="#experiment-configuration">component construction</a> for user type paths.</p>
 <h2 id="hooks">Hooks<a class="headerlink" href="#hooks" title="Permanent link">&para;</a></h2>
 <p><code>hooks</code> is a sequence of stage handlers shared by every treatment. Each mapping declares <code>stage</code>
-and exactly one of <code>type</code> or <code>native_hook</code>. A type-based hook accepts <code>options</code>. Optional
+and exactly one of <code>type</code> or <code>native_hook</code>. For hosted topics, <code>stage</code> is the original
+absolute ROS topic name. A type-based hook accepts <code>options</code>. Optional
 <code>imports</code> lists modules imported before constructing the handler.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">hooks</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perception.post</span>
@@ -2859,7 +3237,8 @@ to <a href="../runtime/#hook-stages">Runtime</a>.</p>
 provides canonical detections. An explicit empty list selects no metrics. Repeated metric types
 are rejected. <code>DetectionMetrics</code> is rejected during loading when the configured stack declares
 no detections.</p>
-<p>Custom metrics use <code>package.module:Class</code>. See <a href="#experiment-configuration">Experiment configuration</a>.</p>
+<p>Custom metrics use <code>package.module:Class</code>. See
+<a href="#experiment-configuration">Experiment configuration</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">evaluation</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">StopLineMetrics</span><span class="p p-Indicator">}</span>
@@ -2887,6 +3266,11 @@ no detections.</p>
 <td><code>seeds</code></td>
 <td>[0]</td>
 <td>Nonempty unique nonnegative integers</td>
+</tr>
+<tr>
+<td><code>repeats</code></td>
+<td><code>1</code></td>
+<td>Positive integer. Values above one require simulator support, currently CARLA. See <a href="../../guides/experiments/#repeating-treatments">Repeating treatments</a></td>
 </tr>
 <tr>
 <td><code>decision_steps</code></td>
@@ -2920,10 +3304,11 @@ no detections.</p>
 </tr>
 </tbody>
 </table>
-<p>Attack and treatment names must be nonempty, contain no path separators and differ from
-<code>.</code> and <code>..</code>. Treatment names
-must be unique. A treatment without <code>attack_name</code> has no enabled attack. Otherwise that field
-must reference a configured attack. Group membership is defined
+<p>Treatments can be a sequence of entries with <code>name</code>, or a mapping keyed by treatment name.
+Attack and treatment names must be nonempty, contain no path separators and differ from
+<code>.</code> and <code>..</code>. Treatment names must be unique and must not have the form <code>repeat-&lt;n&gt;</code>, which
+names <a href="../cli/#output-layout">repeat directories</a>. A treatment without <code>attack_name</code> has no
+enabled attack. Otherwise that field must reference a configured attack. Group membership is defined
 in <a href="../../guides/evaluation/#comparison-groups">Evaluation</a>.</p>
 <h3 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h3>
 <p><code>TreatmentConfiguration</code>, <code>RunsConfiguration</code>, <code>RunRequest</code>, <code>CandidateRequest</code>, <code>SensorRequest</code>
@@ -2950,10 +3335,10 @@ camera binds to the first initial <code>sensor_data</code> entry, which must be 
 <span class="w">    </span><span class="nt">sensors</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">GaussianNoise</span><span class="p p-Indicator">,</span><span class="nt"> options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="nv">0.2</span><span class="p p-Indicator">},</span><span class="nt"> camera</span><span class="p">:</span><span class="w"> </span><span class="nv">front</span><span class="p p-Indicator">}</span>
 </code></pre></div>
-<p>Custom corruptions use <code>package.module:Class</code>. See <a href="#experiment-configuration">Experiment configuration</a>.
-Severity is in [0, 1] and defaults to 0.5. <code>ColorTemp</code> also accepts
-<code>warm</code>, which defaults to <code>true</code>. <code>AlbumentationsCorruption</code> requires <code>transform</code>. The
-<a href="../python-api/">Python API</a> lists the available corruption classes.</p>
+<p>Custom corruptions use <code>package.module:Class</code>. See
+<a href="#experiment-configuration">Experiment configuration</a>. Severity defaults to 0.5 and is clipped to
+[0, 1]. <code>ColorTemp</code> also accepts <code>warm</code>, which defaults to <code>true</code>. <code>AlbumentationsCorruption</code>
+requires <code>transform</code>. The <a href="../python-api/">Python API</a> lists the available corruption classes.</p>
 <h3 id="recording">Recording<a class="headerlink" href="#recording" title="Permanent link">&para;</a></h3>
 <p>Python <code>RecordingPolicy</code> values are immutable and hashable.</p>
 <table>
@@ -2980,12 +3365,20 @@ Severity is in [0, 1] and defaults to 0.5. <code>ColorTemp</code> also accepts
 <td><code>1</code></td>
 <td>Save every Nth acquisition of each selected sensor</td>
 </tr>
+<tr>
+<td><code>topics</code></td>
+<td><code>[]</code></td>
+<td>Original names of modifiable or observed ROS topics whose payloads are saved</td>
+</tr>
 </tbody>
 </table>
-<p>Empty <code>sensor_ids</code> retains no image payloads. State, commands, actions, outputs, available
+<p>Empty <code>sensor_ids</code> retains no sensor payloads. State, commands, actions, outputs, available
 components and detections are recorded every decision. Reevaluation cannot recover omitted
 sensor payloads. With an output directory, recorded sensor payloads stay on disk. Logs in
 experiment results then have empty observation <code>sensor_data</code>, and <code>RunLog.read(path)</code> loads it.</p>
+<p><code>topics</code> accepts names from <code>modified_topics</code> and <code>observed_topics</code> on the hosted driving system.
+Configured topics outside this list keep metadata only. See the
+<a href="../runtime/#runlog">message record</a> for their saved fields.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">runs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">recording</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">sensor_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">front</span><span class="p p-Indicator">]</span>
@@ -2993,9 +3386,9 @@ experiment results then have empty observation <code>sensor_data</code>, and <co
 <span class="w">    </span><span class="nt">every_n_captures</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
 <h2 id="constructor-filesystem-parameters">Constructor filesystem parameters<a class="headerlink" href="#constructor-filesystem-parameters" title="Permanent link">&para;</a></h2>
-<p>Filesystem options follow constructor annotations for dataset, simulator, <code>AVStack</code>, attack,
-hook, metric and nested constructors. <code>Path</code> or <code>os.PathLike</code> annotations mark paths, including
-unions and sequence elements such as <code>str | Path</code> or <code>list[Path]</code>.</p>
+<p>Filesystem options follow constructor annotations for dataset, simulator, <code>AVStack</code>, attack, hook,
+metric, observation pipeline, binding, corruption and nested constructors. <code>Path</code> or <code>os.PathLike</code>
+annotations mark paths, including unions and sequence elements such as <code>str | Path</code> or <code>list[Path]</code>.</p>
 <p>Relative values become absolute strings resolved beside the YAML file that contains them. A
 leading <code>~</code> is expanded. Absolute paths preserve their location. URI strings containing <code>://</code>
 are unchanged. Plain <code>str</code>, unannotated parameters, <code>Any</code>, <code>**kwargs</code> and untyped mappings do
@@ -3010,19 +3403,18 @@ counts/seed, merged offline environments, <code>runs.timing</code> and the drivi
 A current metadata file must have the saved raw-byte hash, but its path may differ. A mismatch
 raises <code>ConfigurationMismatchError</code>. Saved preparations require an offline report for every
 completed attack, including attacks whose offline phase is a no-op.</p>
-<p>Additional <code>seeds</code>, <code>treatments</code>, <code>recording</code>, <code>output</code>, <code>strict</code>, decision limits, <code>split.execute</code>
-and evaluation settings may change. The first seed, partition and offline environments must match.
-<code>run --prepared</code> writes the loaded preparation record, units, deployment budget and metadata
-source unchanged into the new output. Driving-system options that change its history affect
-compatibility through that declaration. Other <code>AVStack</code> and hook settings are not compared.
-Preparations without timing/history declarations require default timing. Each saved segment
-is rechecked with <code>can_start_at</code> under the current driving history before execution or resume.
-<code>Attack</code> constructor options are compared as written,
-including an explicitly written default versus an omitted option. Lists and tuples with
-identical contents compare equally. Booleans, integers and floating-point numbers remain
-distinct, so <code>true</code>, <code>1</code> and <code>1.0</code> are incompatible.
-The current hooks' setup ticks plus the attack's deployment requirement must not exceed the
-saved deployment tick budget. Execution fails otherwise.</p>
+<p>Additional <code>seeds</code>, <code>treatments</code>, <code>repeats</code>, <code>recording</code>, <code>output</code>, <code>strict</code>, decision limits,
+<code>split.execute</code> and evaluation settings may change. The first seed, partition and offline
+environments must match. <code>run --prepared</code> writes the loaded preparation record, units, deployment
+budget and metadata source unchanged into the new output. Driving-system options that change its
+history affect compatibility through that declaration. Other <code>AVStack</code> and hook settings are not
+compared. Current preparations require matching timing and driving history declarations. Legacy
+preparations without these declarations require default timing and recheck saved starts with
+<code>can_start_at</code> under the current driving history. <code>Attack</code> constructor options are compared as
+written, including an explicitly written default versus an omitted option. Lists and tuples with
+identical contents compare equally. Booleans, integers and floating-point numbers remain distinct,
+so <code>true</code>, <code>1</code> and <code>1.0</code> are incompatible. The current hooks' setup ticks plus the attack's
+deployment requirement must not exceed the saved deployment tick budget. Execution fails otherwise.</p>
 <p>YAML declarations retain their constructor options. Direct Python attacks describe their inputs
 through <code>configuration_parameters()</code>. An undescribable value produces a warning and marks
 parameters unverified. Loading or evaluating that preparation is then rejected.</p>
@@ -3123,7 +3515,7 @@ external metadata file or the dataset. Workflow details are in
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

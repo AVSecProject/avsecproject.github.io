@@ -1062,10 +1062,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#avstack-modular-pipeline-modularavstack" class="md-nav__link">
+  <a href="#modular-avstack-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        avstack modular pipeline (ModularAVStack)
+        Modular avstack pipeline
       
     </span>
   </a>
@@ -1166,6 +1166,17 @@
     <span class="md-ellipsis">
       
         Components and scorers for offline work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hosted-autoware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosted Autoware
       
     </span>
   </a>
@@ -1302,6 +1313,8 @@
       
         
       
+        
+      
     
     
     
@@ -1354,6 +1367,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1858,10 +1899,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#avstack-modular-pipeline-modularavstack" class="md-nav__link">
+  <a href="#modular-avstack-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        avstack modular pipeline (ModularAVStack)
+        Modular avstack pipeline
       
     </span>
   </a>
@@ -1969,6 +2010,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hosted-autoware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosted Autoware
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#use-a-custom-driving-system" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2042,7 +2094,7 @@ See <a href="../../reference/configuration/#driving-specification">Configuration
 <p><code>ObservationPipeline</code> processes current input in this order:</p>
 <ol>
 <li><code>sensors.post</code> hooks.</li>
-<li><code>localization.pre</code> hooks and the configured localizer, when present.</li>
+<li>If a localizer is configured, <code>localization.pre</code> hooks followed by the localizer.</li>
 <li><code>localization.post</code> hooks.</li>
 <li><code>observation</code> hooks.</li>
 </ol>
@@ -2070,22 +2122,21 @@ an error. History requirements control selection and recorded reads.</p>
 pose estimates through <code>observation.estimated_states()</code>. Convert measurements with their
 frame's pose and use the decision state for planning. See
 <a href="../../reference/runtime/#delivery-and-coordinates">delivery and coordinates</a>.</p>
-<p><code>reset(observation)</code> receives the first input with its recorded context. Drivers cache the
+<p><code>reset(observation)</code> receives the first input with its recorded context. Driving systems cache the
 history they need. A sensor whose due frames were all dropped is missing for that decision.
-Supplied drivers do not fill a dropped input from their cache.</p>
+Supplied driving systems leave dropped input absent.</p>
 <p>The runner calls <code>__call__</code> once per decision, or <code>ingest(observation)</code> when
-<code>skip_driver_during_force_gt</code> skips inference. Stateful drivers can retain input in <code>ingest</code>
+<code>skip_driver_during_force_gt</code> skips inference. Stateful driving systems can retain input in <code>ingest</code>
 without predicting. Do not ingest and call the same observation twice.</p>
-<h2 id="avstack-modular-pipeline-modularavstack">avstack modular pipeline (<code>ModularAVStack</code>)<a class="headerlink" href="#avstack-modular-pipeline-modularavstack" title="Permanent link">&para;</a></h2>
-<p>The <code>*_modular_*</code> stop-sign configurations use <code>RuleBasedAVStack</code>, described below.</p>
+<h2 id="modular-avstack-pipeline">Modular avstack pipeline<a class="headerlink" href="#modular-avstack-pipeline" title="Permanent link">&para;</a></h2>
 <p><code>ModularAVStack</code> wraps avstack's perception, tracking, planning and control pipeline. Each run
-gets fresh component histories. Native models and component outputs remain avstack objects.
-Before inference, each native sensor body reference uses that sensor's capture-time
-model-visible pose. Native payload timestamps remain acquisition timestamps. The current
-decision state separately reaches planning and control. Localization therefore affects perception
-in the frame the driver believes without moving physical truth. Recorded inputs retain their
-capture poses. When no new perception frame arrives, the native pipeline uses its latest
-retained frame with its original timestamp, while planning and control use the decision state.</p>
+constructs its own stack and component histories. Native models and component outputs remain avstack
+objects. Before inference, each native sensor body reference uses that sensor's capture-time
+model-visible pose. Native payload timestamps remain acquisition timestamps. The current decision
+state separately reaches planning and control. Localization therefore affects perception in the
+frame the driving system uses without moving physical truth. Recorded inputs retain their capture
+poses. When no new perception frame arrives, the native pipeline uses its latest retained frame with
+its original timestamp, while planning and control use the decision state.</p>
 <p><code>instrument</code> captures selected component outputs. <code>detections</code> converts supported perception
 boxes to the capture-time ego frame without another inference call. These ego-frame boxes do
 not depend on localization. Unsupported perception output returns <code>None</code>, while an empty
@@ -2099,12 +2150,12 @@ throttle. It uses the latest delivered camera image and retains its acquisition 
 A decision without a new image reuses its most recent detection result.
 Its learned model loads lazily and can be shared with bound scorers.</p>
 <p><code>CameraForwardCollisionAVStack</code> exposes its scorer through <code>modular_driving_adapter</code>.</p>
-<p>This policy exposes 2D component diagnostics, not canonical 3D detections. <code>DetectionMetrics</code>
+<p>This policy exposes 2D component diagnostics. <code>DetectionMetrics</code>
 requires a driving system that provides 3D detections. See <a href="../evaluation/">Evaluation</a>.</p>
 <h2 id="nurec-rule-based-driving-system">NuRec rule-based driving system<a class="headerlink" href="#nurec-rule-based-driving-system" title="Permanent link">&para;</a></h2>
 <p><code>RuleBasedAVStack</code> composes a <code>YOLOXDetector</code>, <code>StopSignTracker</code> and <code>RuleBasedPlanner</code>.
 It requires the selected camera's <code>CameraCalibration</code> and a planar ego state. Detection runs
-once per decision on the latest delivered camera. Stop-sign detections use known-size ranging
+when a newly delivered camera frame is available. Stop-sign detections use known-size ranging
 and bearing EKF tracking. Tracking uses the camera sample's pose and acquisition time, while
 planning uses the decision pose and clock. A decision without a new camera frame retains tracks
 without updating perception or tracking, then replans with the current decision state. LiDAR
@@ -2112,194 +2163,25 @@ frames are retained independently, so camera updates can use the latest earlier 
 Supplying a <code>VehicleTracker</code> also enables vehicle following, which additionally requires the
 selected LiDAR's <code>PointCloud</code> and <code>LidarCalibration</code>. With <code>vehicle_tracker: null</code>, vehicle
 detections are ignored and the stop-sign driving behavior is preserved.</p>
-<p>The cruise reference <code>v0</code> is <code>cruise_speed_mps</code>, or the speed at reset bounded below by
-<code>min_cruise_speed_mps</code> when cruise speed is omitted. The stop-sign tracker never deletes tracks,
-adds no process noise, and wraps bearing residuals across ±π. Stop signs facing another direction
-can still trigger a stop if they pass the route filters. <code>provides_detections=False</code> makes this
-stack incompatible with <code>DetectionMetrics</code>.</p>
-<p>The stack selects stop-sign boxes and confidence. Ranging uses the angular height of a
-box and the assumed sign height, then transforms the point from optical-camera coordinates into
-rig coordinates. Distance error scales with error in the assumed physical sign size.</p>
-<p>The tracker stores stationary signs in world coordinates. Range and bearing uncertainty
-determine association. Bearing-only EKF updates refine associated tracks. The planner identifies
-a target and served signs by track ID.</p>
-<p>The planner projects tracks onto the navigation route, filters signs outside its forward/lateral
-range, and places the stop target before a relevant sign. With no route it uses a straight
-route. Cruise acceleration is the IDM free-road term, <code>a_max * (1 - (v / v0) ** delta)</code>. Here
-<code>a_max</code> is <code>max_acceleration_mps2</code> and <code>delta</code> is <code>acceleration_exponent</code>.</p>
-<p>For a stop target at remaining route distance <code>d</code>, the required deceleration is <code>v² / (2d)</code>.
-Reaching <code>comfortable_deceleration_mps2</code> latches braking. The planner then follows that required
-deceleration and does not return to cruise for the same target. Acceleration is limited by the
-configured acceleration/deceleration bounds. Late detection can require more braking than
-available and can produce a stop beyond the target.</p>
-<p>After the speed and position criteria are met, the planner holds its stop for the configured
-duration, marks that track served, and resumes cruise. Reset clears tracking and planning state.
-The <a href="../../reference/python-api/">Python API</a> lists defaults, parameter meanings and errors.</p>
+<p>The planner stops before relevant route-side signs, waits, then resumes cruise. A sign
+facing another approach can trigger a stop if it passes the route filters. With late
+detections, the vehicle can stop farther along the route than intended.</p>
+<p>The supplied modular stop-sign and vehicle insertion configurations use this driving system.</p>
 <h3 id="optional-vehicle-following">Optional vehicle following<a class="headerlink" href="#optional-vehicle-following" title="Permanent link">&para;</a></h3>
-<p>Enable the tracker in the driving-system options:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">avstack</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuleBasedAVStack</span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">vehicle_tracker</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avsectester.closed_loop.avstacks.implemented.modules:VehicleTracker</span>
-</code></pre></div>
-<p>Keep the detector options from the supplied configuration. <code>vehicle_labels</code> defaults to
-<code>[car, truck, bus]</code> and can select other detector class names. <code>lidar_id</code> defaults to
-<code>lidar_gt_top_p128</code>. The calibrated transform converts LiDAR points to its capture rig. When
-camera and LiDAR times differ, their capture-time model-visible poses move the points into the
-camera capture rig before projection.</p>
-<p>With following enabled, detection uses
-<code>min(detector.score_threshold, vehicle_tracker.low_score_threshold)</code> for that call.
-Stop signs still require <code>detector.score_threshold</code>. This remains the detector's configured
-threshold and the bound scorer's <code>decision_threshold</code>. With following disabled, detection uses
-the configured threshold and does not read LiDAR.</p>
-<p><code>estimate_vehicle_face_points(box_xyxy, calibration, rig_points)</code> projects the rig-coordinate
-LiDAR points into the camera. It keeps points more than 0.5 m forward in camera coordinates,
-then selects the box's middle 80% horizontally and 10% to 60% vertically from its top.
-Horizontal distance to the camera defines a near cluster: points no farther than the 20th
-percentile plus 1 m. Both the selected region and this cluster require at least five points.
-Insufficient points raise <code>ValueError</code>, and the stack skips and counts that vehicle detection.</p>
-<p>The result is a <code>(3, 3)</code> rig-coordinate array in meters, ordered left, center and right, with
-<code>z = 0</code> as a horizontal representation. All three x coordinates use the near cluster's 10th
-percentile. Left and right y use its 95th and 5th percentiles, respectively. Center y is the
-midpoint of those two endpoints.</p>
-<p><code>VehicleTracker.update(vehicle_state, t, face_points_rig, scores)</code> transforms each three-point
-measurement into horizontal world coordinates using ego's planar pose. Scores correspond
-one-to-one with measurements and must be finite in <code>[0, 1]</code>. Each track has a constant-velocity
-Kalman state <code>[x, y, vx, vy]</code>. Prediction uses white acceleration noise.
-The face midpoint supplies the position measurement, with isotropic standard deviation
-<code>max(min_measurement_noise_m, measurement_noise_fraction * horizontal_range)</code>.
-Here horizontal range is measured from the rig origin to the face midpoint.
-Initial position covariance uses that measurement variance. Initial velocity is zero, with
-standard deviation <code>initial_velocity_sigma_mps</code>.</p>
-<p>ByteTrack-style association has two stages. Measurements at or above <code>high_score_threshold</code>
-first associate with all retained tracks, including lost tracks. Measurements from
-<code>low_score_threshold</code> up to but excluding the high threshold then associate only with tracks
-matched in the previous update and still unmatched in the current update. Each stage greedily
-selects the smallest squared Mahalanobis innovation within <code>association_gate_chi2</code>, using each
-track and measurement once. Only unmatched high-score measurements create tracks.
-The score thresholds must satisfy <code>0 &lt;= low_score_threshold &lt;= high_score_threshold &lt;= 1</code>.</p>
-<p>Associated tracks receive a Kalman update. <code>half_width_m</code> is half the measured visible face's
-lateral span. Unassociated tracks retain their predicted motion for re-association and are
-deleted after <code>max_missed_updates</code> consecutive misses. <code>tracks</code> returns independent snapshots
-only for tracks matched in the latest update and with at least <code>min_hits</code> measurements,
-counting initialization as the first hit. Lost tracks remain internal. Equal timestamps allow
-measurement updates without prediction. Backward timestamps are rejected. <code>reset()</code> clears
-the tracks and timestamp history.</p>
-<table>
-<thead>
-<tr>
-<th>Tracker option</th>
-<th style="text-align: right;">Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>acceleration_noise_mps2</code></td>
-<td style="text-align: right;">2 m/s²</td>
-</tr>
-<tr>
-<td><code>min_measurement_noise_m</code></td>
-<td style="text-align: right;">0.3 m</td>
-</tr>
-<tr>
-<td><code>measurement_noise_fraction</code></td>
-<td style="text-align: right;">0.05</td>
-</tr>
-<tr>
-<td><code>initial_velocity_sigma_mps</code></td>
-<td style="text-align: right;">5 m/s</td>
-</tr>
-<tr>
-<td><code>association_gate_chi2</code></td>
-<td style="text-align: right;">9.21</td>
-</tr>
-<tr>
-<td><code>high_score_threshold</code></td>
-<td style="text-align: right;">0.5</td>
-</tr>
-<tr>
-<td><code>low_score_threshold</code></td>
-<td style="text-align: right;">0.1</td>
-</tr>
-<tr>
-<td><code>min_hits</code></td>
-<td style="text-align: right;">2</td>
-</tr>
-<tr>
-<td><code>max_missed_updates</code></td>
-<td style="text-align: right;">10</td>
-</tr>
-</tbody>
-</table>
-<p>The planner projects each vehicle onto the navigation route, with signed lateral offset
-positive to the left. The vehicle's lateral interval is its center offset plus or minus
-<code>half_width_m</code>. It is relevant when that interval overlaps the ego corridor
-<code>[-(ego_half_width_m + lateral_margin_m), +(ego_half_width_m + lateral_margin_m)]</code> and its
-forward arc distance is positive and within <code>vehicle_lookahead_m</code>. Touching interval edges
-counts as overlap. The nearest eligible vehicle ahead supplies the lead.
-The planner takes its velocity along the route tangent, bounded below by zero.
-The distance from ego's origin to that visible face is reduced by <code>ego_front_offset_m</code> to
-obtain the following gap <code>s</code>. The points represent the near side of the detected vehicle,
-so the planner does not subtract another vehicle half-length.</p>
-<p>Following uses the IDM interaction term:</p>
-<div class="highlight"><pre><span></span><code>s_star = s0 + max(0, v*T + v*(v - v_lead)/(2*sqrt(a_max*b)))
-a_follow = a_max * (1 - (v/v0)**delta - (s_star/s)**2)
-</code></pre></div>
-<p>Here <code>v</code> is ego speed, <code>v0</code> the cruise reference, <code>v_lead</code> the lead speed and <code>delta</code> the existing
-acceleration exponent. <code>a_max</code> is <code>max_acceleration_mps2</code>, and <code>b</code> is
-<code>comfortable_deceleration_mps2</code>. A nonpositive gap requests maximum deceleration. Every forecast
-step uses the smaller of the sign/free-road acceleration and following acceleration, then
-applies the existing acceleration limits. The lead advances along the route at constant speed
-within the forecast. Timed stop-sign holds still keep ego stationary.</p>
-<table>
-<thead>
-<tr>
-<th>Planner option</th>
-<th>Meaning</th>
-<th style="text-align: right;">Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>vehicle_lookahead_m</code></td>
-<td>Maximum forward route distance of an eligible lead</td>
-<td style="text-align: right;">60 m</td>
-</tr>
-<tr>
-<td><code>ego_half_width_m</code></td>
-<td>Half of ego's horizontal width</td>
-<td style="text-align: right;">1 m</td>
-</tr>
-<tr>
-<td><code>lateral_margin_m</code></td>
-<td>Additional corridor width on each side</td>
-<td style="text-align: right;">0.3 m</td>
-</tr>
-<tr>
-<td><code>min_gap_m</code> (<code>s0</code>)</td>
-<td>Desired stationary following gap</td>
-<td style="text-align: right;">2 m</td>
-</tr>
-<tr>
-<td><code>time_headway_s</code> (<code>T</code>)</td>
-<td>Desired time headway</td>
-<td style="text-align: right;">1.5 s</td>
-</tr>
-<tr>
-<td><code>ego_front_offset_m</code></td>
-<td>Distance from the rig origin to ego's front</td>
-<td style="text-align: right;">3.7 m</td>
-</tr>
-</tbody>
-</table>
-<p><code>min_gap_m</code> is a desired gap, not a guaranteed minimum clearance. A very close lead can cease
-to be detected. Without a matched lead, the planner resumes cruise unless a stop sign constrains
-it. Occlusion and truncated boxes can distort the estimated face position and width.
-NuRec LiDAR returns from scene-inserted assets have larger surface error near the ground. See
-<a href="../simulators/#scene-insertion">Scene insertion</a>. The system follows the centerline without lane
-changes. Limited braking and late detection can cause an overlap. Recorded non-reactive traffic
-can also hit ego from behind. <code>DrivingMetrics.collision</code> records physical box overlaps.</p>
+<p>To enable following, start from the
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_vehicle_insertion_modular_2604.yaml">vehicle insertion configuration</a>.
+Its <code>vehicle_tracker</code> option enables following. Keep the detector and configure the NuRec
+renderer's LiDAR and the stack's matching <code>lidar_id</code>. The stack projects LiDAR points into
+the camera capture frame and tracks visible vehicle faces. It follows the nearest relevant
+vehicle and continues to stop for signs. Late detections, occlusion and limited braking can
+cause a collision. Recorded traffic follows its trajectories without responding to the ego
+vehicle and can hit it from behind. <code>DrivingMetrics.collision</code> records top-down contact or
+overlap of physical bounding boxes.</p>
+<p>The API reference gives the formulas and association rules for
+<a href="../../reference/python-api/#avsectesterclosed_loopavstacksimplementedmodulesranging">ranging</a>,
+<a href="../../reference/python-api/#avsectesterclosed_loopavstacksimplementedmodulestracker">tracking</a>,
+<a href="../../reference/python-api/#avsectesterclosed_loopavstacksimplementedmodulesplanner">planning</a>
+and the <a href="../../reference/python-api/#avsectesterclosed_loopavstacksimplementedmodulesstack">stack</a>.</p>
 <h3 id="component-outputs">Component outputs<a class="headerlink" href="#component-outputs" title="Permanent link">&para;</a></h3>
 <p>The component log retains sign boxes, position estimates, world tracks, target distance, state
 and braking. <code>state</code> describes stop-sign handling. Vehicle following adds:</p>
@@ -2354,7 +2236,7 @@ that planned first-step acceleration is positive. Reset clears both trackers and
 acceleration and navigation into a rig-frame trajectory. Navigation comes from
 <code>Observation.route</code>, which the simulator generates as route intent. It is independent of the
 executed future path. See <a href="../simulators/#navigation">Navigation</a>. By default it uses the four
-cameras of AlpaSim's Alpamayo 1.5 driver: front wide, front tele and both cross cameras. The
+cameras of AlpaSim's Alpamayo 1.5 policy: front wide, front tele and both cross cameras. The
 renderer must provide every listed camera.</p>
 <p>Component logs contain <code>policy</code>, <code>command</code>, <code>route_waypoints</code>, <code>navigation_command</code>,
 <code>navigation_note</code>, <code>history_pose_count</code>, <code>selected_image_times</code> and <code>selected_capture_ids</code>.
@@ -2384,9 +2266,9 @@ unsupported. The <a href="../../reference/runtime/">Runtime reference</a> descri
 and serialization.</p>
 <h2 id="components-and-scorers-for-offline-work">Components and scorers for offline work<a class="headerlink" href="#components-and-scorers-for-offline-work" title="Permanent link">&para;</a></h2>
 <p>A <code>DrivingAdapter</code> binds reusable component/scorer declarations to a factory that creates fresh
-driving systems. Discovery reads static declarations and configured options without constructing
-a stack or loading model weights. Constructor injection belongs
-to <a href="../../reference/configuration/#driving-specification">Configuration</a>.</p>
+driving systems. Discovery reads static declarations and configured options without constructing a
+stack or loading model weights. Select a binding with <code>avstack.bindings</code>. Constructor injection
+belongs to <a href="../../reference/configuration/#driving-specification">Configuration</a>.</p>
 <p><code>rule_based_driving_adapter</code> exposes <code>rule_based.detection_confidence</code>. Its <code>sensor_id</code> comes
 from the configured <code>camera_id</code> or the stack default, and <code>decision_threshold</code> comes from
 <code>detector.score_threshold</code>. Missing detector configuration or a detector other than
@@ -2401,11 +2283,11 @@ from the configured <code>camera_id</code> or the stack default, and <code>decis
 <tbody>
 <tr>
 <td><code>modular_driving_adapter</code></td>
-<td>Modular perception components and bound image scorers</td>
+<td>Modular perception components and the <code>mmdet.inference</code> and <code>mmdet.rpn_objectness</code> scorers</td>
 </tr>
 <tr>
 <td><code>rule_based_driving_adapter</code></td>
-<td>The rule-based driver's detection-confidence scorer</td>
+<td>Detection-confidence scoring for the rule-based system</td>
 </tr>
 <tr>
 <td><code>alpamayo_driving_adapter</code></td>
@@ -2423,6 +2305,12 @@ Image and target batch lengths must agree.</p>
 <p>Scorers also declare objective direction, camera and decision threshold where applicable. A
 white-box attack can use the same detector as the driving system through its scorer binding.
 See <a href="../optimization/">Optimization</a>.</p>
+<h2 id="hosted-autoware">Hosted Autoware<a class="headerlink" href="#hosted-autoware" title="Permanent link">&para;</a></h2>
+<p><code>ExternalAVStack</code> lets CARLA accept commands from a process outside the framework.
+<code>AutowareDrivingSystem</code> hosts that process for each closed-loop run. Configure it under
+<code>simulator.options.external_driving_system</code> and select <code>ExternalAVStack</code> as the driving
+system. Follow <a href="../../examples/hosted-autoware/">Hosted Autoware</a> for the supplied comparison
+and <a href="../simulators/#hosted-external-driving-systems">Simulators</a> for the lifecycle.</p>
 <h2 id="use-a-custom-driving-system">Use a custom driving system<a class="headerlink" href="#use-a-custom-driving-system" title="Permanent link">&para;</a></h2>
 <p>Implement <code>AVStack</code> in a user package and reference it as
 <code>type: my_project.driving:CustomAVStack</code>. Declare required history, compatible command modes and
@@ -2586,7 +2474,7 @@ and runtime restrictions, see <a href="../simulators/#native-ros-2-control">nati
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

@@ -935,6 +935,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Treatments and common origins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repeating-treatments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating treatments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1262,6 +1279,8 @@
       
         
       
+        
+      
     
     
     
@@ -1314,6 +1333,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1831,6 +1878,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Treatments and common origins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repeating-treatments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating treatments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1955,8 +2019,9 @@
 <h2 id="prepare-and-execute-attacks">Prepare and execute attacks<a class="headerlink" href="#prepare-and-execute-attacks" title="Permanent link">&para;</a></h2>
 <p><code>Experiment</code> accepts a typed configuration, mapping or YAML path. <code>prepare</code> selects or loads
 segments and runs each configured attack's offline phase. <code>execute</code> runs the selected treatment
-groups. <code>evaluate</code> measures their recorded evidence. <code>PreparedExperiment</code> contains metadata,
-units, artifacts and offline reports, without live simulator or <code>AVStack</code> history.</p>
+groups. The module-level <code>evaluate</code> function measures the recorded evidence.
+<code>PreparedExperiment</code> contains metadata, units, artifacts, offline reports, the deployment
+plan and prepared initializations.</p>
 <p>This complete example uses the repository's memory components and a temporary output directory.
 It needs no simulator service, model weights or GPU.</p>
 <!-- runnable -->
@@ -2011,7 +2076,7 @@ per call before offline work.</p>
 connection. Loaded metadata follows
 <a href="#save-and-reuse-selected-metadata">Save and reuse selected metadata</a>.</p>
 <p>For resume with saved preparation or progress, validation checks frames and compatibility,
-skipping eligibility and <code>validate_start</code>. The CLI skips this preflight when it
+skipping start eligibility checks and <code>validate_start</code>. The CLI skips this preflight when it
 has already loaded preparation for <code>--prepared</code> or a completed preparation resume.
 <a href="../../reference/cli/#exit-codes">CLI exit codes</a> distinguish input failures from
 execution failures.</p>
@@ -2024,10 +2089,24 @@ Unattacked runs do not create an <code>AttackRuntime</code>. Each run creates fr
 state, with cleanup on success, failure or interruption. The
 <a href="../../reference/configuration/#run-settings">treatment schema</a> defines how to enable attacks and
 environment overrides.</p>
+<h3 id="repeating-treatments">Repeating treatments<a class="headerlink" href="#repeating-treatments" title="Permanent link">&para;</a></h3>
+<p>With <a href="../../reference/configuration/#run-settings"><code>runs.repeats</code></a>, each unit and seed runs all
+applicable treatments in configuration order, then repeats that sequence. All rounds share
+the seed, start and prepared reference. Each run creates its own attack runtime and hooks.
+Only simulators that declare <a href="../simulators/"><code>can_repeat_runs</code></a>, currently CARLA, accept more
+than one repeat. NuRec runs once per treatment, unit and seed.</p>
+<p>See <a href="../../reference/cli/#output-layout">Output layout</a> for repeated run directories and
+metadata.</p>
 <h2 id="results-and-failures">Results and failures<a class="headerlink" href="#results-and-failures" title="Permanent link">&para;</a></h2>
 <p><code>ExperimentResult.runs</code> holds every treatment result. <code>failures</code> lists failed or incomplete
 runs. <code>selection_errors</code> lists selection errors. The <code>runs.strict</code> setting raises the first error.
 See <a href="../../reference/configuration/#run-settings">Run settings</a>.</p>
+<p><code>TreatmentResult.repeat</code> is the zero-based repeat number and defaults to zero.
+<code>TreatmentResult.group</code> and the keys of <code>ExperimentResult.groups</code> are
+<code>(segment_index, seed, repeat)</code>. Each key identifies one comparison group.</p>
+<p>With <code>runs.output</code> set, execution streams records to disk. After all treatments finish,
+<code>Experiment.execute</code> reads back the saved logs for the returned result without loading sensor
+payloads from observations.</p>
 <h2 id="save-and-reuse-selected-metadata">Save and reuse selected metadata<a class="headerlink" href="#save-and-reuse-selected-metadata" title="Permanent link">&para;</a></h2>
 <p>Loading validates dataset type, scenario and frame membership, decision windows, each attack's
 <code>validate_segment</code>, the shared deployment tick budget and simulator start requirements. An
@@ -2054,11 +2133,13 @@ controlled by the attack. See
 <a href="../../reference/python-api/#avsectesterexperimentmodels">the preparation API</a>.</p>
 <h2 id="resume-interrupted-work">Resume interrupted work<a class="headerlink" href="#resume-interrupted-work" title="Permanent link">&para;</a></h2>
 <p>Prepare with <code>resume=True</code> to reuse saved selection and completed offline phases. Execute with
-<code>resume=True</code> to retain completed runs whose expected metadata matches. Missing, failed or
-mismatched runs are retried individually. An already complete group needs no new initialization.</p>
+<code>resume=True</code> to retain runs whose manifest reports completion and matches the expected
+metadata. Missing, failed or mismatched runs are retried individually. An already complete group
+needs no new initialization.</p>
 <p>Execution resume compares <code>attack_name</code>, <code>segment_index</code>, <code>part</code>, the complete <code>segment</code>,
-<code>treatment</code>, <code>seed</code>, <code>environment</code>, <code>decision_steps</code>, <code>selected_decision_steps</code>
-and <code>deployment_ticks</code>.</p>
+<code>treatment</code>, <code>seed</code>, <code>environment</code>, <code>decision_steps</code>, <code>selected_decision_steps</code>,
+<code>deployment_ticks</code> and, for repeated experiments, <code>repeat</code>. The repeat count does not change
+preparation compatibility.</p>
 <p>An interrupted offline phase leaves progress and a partial failed report. Resuming archives that
 attack's report directory before restarting its offline phase. The
 <a href="../../reference/cli/#preparation-reuse">CLI resume workflow</a> defines command options and output
@@ -2190,7 +2271,7 @@ and <a href="../../reference/cli/">CLI</a>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

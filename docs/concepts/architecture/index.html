@@ -841,6 +841,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1213,6 +1224,8 @@
       
         
       
+        
+      
     
     
     
@@ -1265,6 +1278,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1823,6 +1864,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1953,7 +2005,7 @@ The <a href="../../reference/python-api/">Python API</a> lists public modules an
 </tr>
 <tr>
 <td>Comparison group</td>
-<td>A unit and seed with the applicable treatments</td>
+<td>A unit, seed and repeat with the applicable treatments</td>
 </tr>
 <tr>
 <td>Offline phase</td>
@@ -2019,7 +2071,7 @@ The <a href="../../reference/python-api/">Python API</a> lists public modules an
 <tbody>
 <tr>
 <td><code>./</code></td>
-<td>Shared records, validation, serialization, type paths and CLI entry points</td>
+<td>Shared records, validation, serialization, array copies, type paths and CLI entry points</td>
 </tr>
 <tr>
 <td><code>geometry/</code></td>
@@ -2039,15 +2091,23 @@ The <a href="../../reference/python-api/">Python API</a> lists public modules an
 </tr>
 <tr>
 <td><code>closed_loop/</code></td>
-<td>Hooks, environments and sensor corruptions</td>
+<td>Hooks, environments, sensor corruptions, Docker lifecycle in <code>docker_containers.py</code> and clocks in <code>timing.py</code></td>
+</tr>
+<tr>
+<td><code>closed_loop/ros_interception/</code></td>
+<td>ROS declarations, socket transport, forwarding and observation processes, message conversion and pose projection</td>
 </tr>
 <tr>
 <td><code>closed_loop/simulators/</code></td>
 <td>Contracts, recorded playback, dynamics, navigation, ground contact and object composition</td>
 </tr>
 <tr>
+<td><code>closed_loop/simulators/messages.py</code></td>
+<td>Message-stage and relay transport contracts for simulators</td>
+</tr>
+<tr>
 <td><code>closed_loop/simulators/carla/</code></td>
-<td>CARLA world and sensor integration</td>
+<td>CARLA world and sensor integration, including physical snapshots, rig geometry and hosted driving systems</td>
 </tr>
 <tr>
 <td><code>closed_loop/simulators/nurec/</code></td>
@@ -2075,11 +2135,11 @@ The <a href="../../reference/python-api/">Python API</a> lists public modules an
 </tr>
 <tr>
 <td><code>runlog/</code></td>
-<td>Recording and reading steps, events and payloads</td>
+<td>Recording and reading steps, events, captures and native messages</td>
 </tr>
 <tr>
 <td><code>execution/</code></td>
-<td>Runner, services and frame-data caching</td>
+<td>Runner, services, frame-data caching and native message processing</td>
 </tr>
 <tr>
 <td><code>evaluation/</code></td>
@@ -2112,7 +2172,7 @@ The declared type-only exception below permits annotations without a runtime dep
 <tbody>
 <tr>
 <td>L0</td>
-<td><code>geometry/</code>, <code>validation.py</code>, <code>type_paths.py</code>, <code>serialization.py</code></td>
+<td><code>geometry/</code>, <code>validation.py</code>, <code>type_paths.py</code>, <code>structured_arrays.py</code>, <code>serialization.py</code></td>
 <td>L0</td>
 </tr>
 <tr>
@@ -2179,6 +2239,7 @@ The declared type-only exception below permits annotations without a runtime dep
 </tbody>
 </table>
 <p>Map readers do not depend on datasets. Rendering does not depend on simulators or attacks.
+Within L2, the ROS socket transport implements the simulator's message channel contract.
 Generic attack tools do not import concrete attacks, and concrete attacks do not import one
 another. Optional SDK, model and GPU imports stay inside their owning implementations.</p>
 <h2 id="supported-configurations">Supported configurations<a class="headerlink" href="#supported-configurations" title="Permanent link">&para;</a></h2>
@@ -2201,6 +2262,11 @@ another. Optional SDK, model and GPU imports stay inside their owning implementa
 <td><code>CarlaDataset</code></td>
 <td><code>CarlaSimulator</code></td>
 <td><code>CameraForwardCollisionAVStack</code></td>
+</tr>
+<tr>
+<td><code>CarlaDataset</code></td>
+<td><code>CarlaSimulator</code></td>
+<td><code>ExternalAVStack</code> with <code>AutowareDrivingSystem</code></td>
 </tr>
 <tr>
 <td><code>NuRecDataset</code></td>
@@ -2235,6 +2301,9 @@ separate processes. See the
 Comparison groups are defined in <a href="#terms">Terms</a>.</p>
 <p>See <a href="../../guides/experiments/#treatments-and-common-origins">experiment workflows</a> for resource
 scopes and <a href="../../guides/evaluation/">evaluation</a> for grouping and measurements.</p>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Follow <a href="../../guides/experiments/">Experiments</a> to prepare and execute a comparison, or
+<a href="../../development/contributing/">Contributing</a> to extend the framework.</p>
 
 
 
@@ -2329,7 +2398,7 @@ scopes and <a href="../../guides/evaluation/">evaluation</a> for grouping and me
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

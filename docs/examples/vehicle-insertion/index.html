@@ -1080,6 +1080,8 @@
       
         
       
+        
+      
     
     
     
@@ -1135,6 +1137,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1814,13 +1844,12 @@ origin, with the wheels resting on z = 0. The file already contains face colors,
 <p>The supplied <code>real_car.ply</code> is a white low-polygon body without wheels.
 <code>real_car_painted.ply</code> scales it to 4.2 m × 1.9 m × 1.6 m and adds body paint, dark window
 panes, lights, a plate and four wheels, with simple shading baked into its colors.
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/scripts/preparation/paint_demo_vehicle.py">paint_demo_vehicle.py</a> regenerates it from
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/scripts/preparation/paint_demo_vehicle.py">paint_demo_vehicle.py</a> regenerates it from
 <code>real_car.ply</code>. Both are illustrative assets. Replace the asset specification to use another
 model. The attack has no default model.</p>
 <h2 id="selection-and-placement">Selection and placement<a class="headerlink" href="#selection-and-placement" title="Permanent link">&para;</a></h2>
 <p>The metabuilder uses the framework's segment helper and checks each start through the public
-closed-loop services. Starts without sufficient recorded history or deployment support are
-excluded.</p>
+closed-loop services.</p>
 <p>At each start, the metabuilder constructs the same navigation route as the simulator reset,
 using its <code>route_generator</code> setting, complete recorded trajectory and scenario map. Map and
 recorded routes use the generated navigation points. With navigation disabled, placement uses
@@ -1854,7 +1883,7 @@ stop behind the inserted vehicle. The planner also retains its stop-sign policy.
 ranging and available braking determine the outcome. The desired gap is not a hard clearance
 limit. See <a href="../../guides/driving-systems/#nurec-rule-based-driving-system">Driving systems</a> for
 parameters and limitations.</p>
-<p>The configuration records camera and point-cloud payloads as <code>model_input</code> at each decision.
+<p>The configuration records camera and point-cloud payloads as <code>model_input</code> at each capture.
 NRE renders the inserted vehicle, so <code>raw</code> captures would be identical. Use those captures,
 insertion receipts and object-visibility evidence to inspect deployment. Driving and trajectory
 metrics compare the treatments. <code>DrivingMetrics</code> includes the inserted vehicle in its
@@ -1958,7 +1987,7 @@ bounding-box distance and collision measurements, as described in
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

@@ -1218,6 +1218,8 @@
       
         
       
+        
+      
     
     
     
@@ -1270,6 +1272,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1922,9 +1952,9 @@ It loads without a simulator service, model weights or GPU.</p>
 requires the augment extra. It uses the same sensor-environment mechanism. See
 <a href="../../reference/configuration/#environment">constructor options</a>.</p>
 <h2 id="custom-sensor-corruptions">Custom sensor corruptions<a class="headerlink" href="#custom-sensor-corruptions" title="Permanent link">&para;</a></h2>
-<p>Implement apply(rgb, rng), or a callable with that signature, returning uint8 RGB with the same
-shape. Select it with a constructor path such as <code>my_project.corruptions:DimImage</code>.
-Filesystem constructor parameters follow
+<p>Provide a constructor that returns an object with <code>apply(rgb, rng)</code> or a callable accepting
+<code>(rgb, rng)</code>. The result must be a uint8 RGB array with the same shape. Configure the constructor's
+<code>type</code> path and <code>options</code>. Filesystem constructor parameters follow
 <a href="../../reference/configuration/#constructor-filesystem-parameters">path resolution</a>.</p>
 <!-- runnable -->
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -1947,8 +1977,8 @@ than as static environment settings. Native simulator behavior is described
 in <a href="../simulators/">Simulators</a>.</p>
 <h2 id="randomness">Randomness<a class="headerlink" href="#randomness" title="Permanent link">&para;</a></h2>
 <p>Sensor corruptions use a fresh NumPy generator. Frames ending at decision timestamps use
-<code>(run_seed, grid_position, corruption_index)</code>. Other frames use
-<code>(run_seed, grid_position, corruption_index, interval_capture_index)</code>, where the last value is
+<code>(hook_seed, grid_position, corruption_index)</code>. Other frames use
+<code>(hook_seed, grid_position, corruption_index, interval_capture_index)</code>, where the last value is
 that camera's frame ordinal within the decision interval, starting at one. Pre-origin frames
 use the containing interval's grid position with floor rounding and the same camera-specific
 index. Corruptions run only when their sensor is due.</p>
@@ -2052,7 +2082,7 @@ lifecycle.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

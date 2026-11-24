@@ -1078,6 +1078,8 @@
       
         
       
+        
+      
     
     
     
@@ -1130,6 +1132,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -2014,8 +2044,8 @@ preparation compatibility.</p>
 </tr>
 </tbody>
 </table>
-<p>A nonempty output directory is rejected without <code>--resume</code>. <code>--prepared</code> and <code>--resume</code> are
-mutually exclusive.</p>
+<p>The output path must be a directory. A nonempty directory requires <code>--resume</code>. <code>--prepared</code> and
+<code>--resume</code> are mutually exclusive.</p>
 <h3 id="preparation-reuse">Preparation reuse<a class="headerlink" href="#preparation-reuse" title="Permanent link">&para;</a></h3>
 <p><code>--prepared</code> maps to loading a complete preparation. <code>--resume</code> continues saved preparation and
 execution. See <a href="../../guides/experiments/#resume-interrupted-work">Experiments</a> for validation,
@@ -2026,7 +2056,9 @@ resume and persistence semantics.</p>
 </code></pre></div>
 <p><code>run</code> checks the configured NuRec renderer and traffic endpoints after configuration, output and
 preparation checks. A running service must contain every configured dataset scene. A compatible
-service is reused and left running. A scene mismatch is an error.</p>
+service is reused and left running. A scene mismatch is an error. When <code>run</code> starts services, it
+uses their default images and an NRE cache size of two. Use the service commands to select an image
+explicitly.</p>
 <p>Missing services can start only on local endpoints: <code>127.0.0.1</code>, <code>localhost</code>, <code>0.0.0.0</code> or <code>::1</code>.
 Starting traffic requires <code>--trafficsim-models</code>. GPU selection uses the explicit service option
 or <code>AVSECTESTER_HOST_GPU</code>, which the NuRec Compose service sets from <code>NUREC_GPU</code>. The value must
@@ -2059,7 +2091,8 @@ or unexpected treatments are reported and skipped.</p>
 Evaluate rebuilds both pages from saved files. See <a href="../../guides/evaluation/">Evaluation</a> for
 terminal summaries, statistics and unavailable values.</p>
 <h2 id="nre">NRE<a class="headerlink" href="#nre" title="Permanent link">&para;</a></h2>
-<p><code>nre serve CONFIG --gpu N [--name NAME] [--image IMAGE] [--cache-size 2] [--timeout 600] [--dry-run]</code>
+<p><div class="highlight"><pre><span></span><code>nre serve CONFIG --gpu N [--name NAME] [--image IMAGE] [--cache-size 2] [--timeout 600] [--dry-run]
+</code></pre></div>
 loads the configuration, starts Docker and waits for <code>Serving on</code>.</p>
 <table>
 <thead>
@@ -2113,7 +2146,8 @@ remain readable.</p>
 <p><code>nre stop CONFIG [--name NAME]</code> derives the default name from the endpoint without enumerating
 dataset archives, then stops and removes that container. A missing container is an error.</p>
 <h2 id="trafficsim">Trafficsim<a class="headerlink" href="#trafficsim" title="Permanent link">&para;</a></h2>
-<p><code>trafficsim serve CONFIG --gpu N --models DIR [--name NAME] [--image IMAGE] [--timeout 600] [--dry-run]</code>
+<p><div class="highlight"><pre><span></span><code>trafficsim serve CONFIG --gpu N --models DIR [--name NAME] [--image IMAGE] [--timeout 600] [--dry-run]
+</code></pre></div>
 requires <code>NuRecDataset</code> and a configured <code>AlpaSimTraffic</code> with a local endpoint.</p>
 <table>
 <thead>
@@ -2186,6 +2220,9 @@ Checkpoint and retry behavior follow
   evaluation/plots/
   evaluation_report.html
 </code></pre></div>
+<p>Repeated experiments add <code>repeat-R</code> between the seed and treatment directories and add
+<code>repeat: R</code> to run metadata, with zero-based repeat numbers. Single runs omit both.
+Repeated experiments write <code>evaluation/repeat_pair.csv</code> even when it has no data rows.</p>
 <p>Each attack directory holds the selected segments in <code>metadata.json</code>, its artifacts in
 <code>artifacts/</code> and its offline report in <code>offline_report/</code>. The <code>artifacts/</code> directory is created
 only when the offline phase returns a value other than <code>None</code>. A failed or interrupted offline
@@ -2193,8 +2230,9 @@ phase moves its partial report to <code>incomplete_offline_reports/</code> befor
 Artifact filenames above describe the default trusted-pickle format. Attacks may override
 artifact persistence, and their files stay inside <code>artifacts/</code>. Segment numbers are global unit
 indexes. Each run directory contains
-<code>manifest.json</code>, published Parquet decision, event and acquisition parts, and payload shards in its
-<a href="../runtime/#runlog">RunLog</a>. Offline report content is described in
+<code>manifest.json</code>, published Parquet step, event and capture parts, and payload shards in its
+<a href="../runtime/#runlog">RunLog</a>. Runs with ROS topic processing also publish <code>messages/</code> parts.
+Offline report content is described in
 <a href="../../guides/optimization/">Optimization</a>, and evaluation content
 in <a href="../../guides/evaluation/">Evaluation</a>.</p>
 <p>Preparation manifests list attacks with saved artifacts in <code>attacks_with_artifacts</code>, in
@@ -2216,11 +2254,11 @@ load artifacts for every completed attack.</p>
 </tr>
 <tr>
 <td>1</td>
-<td>Configuration load error, preparation load/validation error, selection, execution, result reading, metric evaluation or service startup/stop failed</td>
+<td>Unexpected configuration loading errors, preparation load or validation errors, selection, execution, result reading, metric evaluation or service startup/stop failed</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Invalid configuration or metadata contents, output conflict or incompatible saved preparation</td>
+<td>Invalid command usage, configuration or metadata contents, output conflict or incompatible saved preparation</td>
 </tr>
 <tr>
 <td>130</td>
@@ -2229,13 +2267,10 @@ load artifacts for every completed attack.</p>
 </tbody>
 </table>
 <p>Service scene mismatch, a missing service at a nonlocal endpoint, absent <code>--trafficsim-models</code>
-and invalid GPU selection are configuration errors (exit 2). Container launch, readiness and
-explicit stop failures exit 1. Unsupported hook stages or incompatible commands fail the
-affected run at its start (exit 1). <code>evaluate</code> requires <code>prepared.json</code> and exits 1 if it is
-missing. With <code>--prepared</code> or <code>--resume</code>, the current hook <code>simulator.setup</code> ticks plus
-<code>Attack.deployment_ticks(segment)</code> must fit the saved deployment tick budget. Exceeding it
-fails execution with exit 1. See
-<a href="../configuration/#saved-preparation-compatibility">saved-preparation compatibility</a>.</p>
+and invalid automatic GPU selection are configuration errors (exit 2). The explicit service
+commands pass <code>--gpu</code> to Docker, whose startup failures exit 1. Container readiness and
+explicit stop failures also exit 1. <code>evaluate</code> exits 1 if <code>prepared.json</code> is missing or if
+expected runs without manifests are marked incomplete.</p>
 <h2 id="supplied-configurations">Supplied configurations<a class="headerlink" href="#supplied-configurations" title="Permanent link">&para;</a></h2>
 <p>See the complete <a href="../../examples/">configuration list</a> and
 <a href="../configuration/">configuration reference</a>.</p>
@@ -2333,7 +2368,7 @@ fails execution with exit 1. See
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

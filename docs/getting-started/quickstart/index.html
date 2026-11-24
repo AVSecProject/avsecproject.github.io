@@ -1207,6 +1207,8 @@
       
         
       
+        
+      
     
     
     
@@ -1259,6 +1261,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1845,10 +1875,11 @@
 <h2 id="run-a-carla-comparison">Run a CARLA comparison<a class="headerlink" href="#run-a-carla-comparison" title="Permanent link">&para;</a></h2>
 <p>Complete <a href="../installation/">Installation</a>, including the matching AdditionalMaps content pack,
 and select available CARLA server and experiment GPUs in the Compose settings.
-The supplied CARLA configurations contain <code>Town03_Opt</code> and <code>Town10HD_Opt</code> recipes.
+The supplied phantom configuration contains <code>Town03_Opt</code> and <code>Town10HD_Opt</code> recipes.
 Copy the configuration first:</p>
 <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>configs/carla_phantom.yaml<span class="w"> </span>configs/my_carla.yaml
 </code></pre></div>
+<p>Experiments can occupy GPUs for hours. Set a small <code>runs.decision_steps</code> for your first run.</p>
 <p>Edit <code>configs/my_carla.yaml</code>: <code>simulator.options.client.connect_ip</code> and
 <code>simulator.options.client.connect_port</code> select the endpoint, and
 <code>avstack.options.pipeline_cfg.perception.gpu</code> selects the perception GPU. Set
@@ -1858,10 +1889,13 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 </code></pre></div>
 <p>The command prepares the configured attacks, executes treatments and evaluates saved evidence.
 Workflow and resume behavior are described in <a href="../../guides/experiments/">Experiments</a>.</p>
+<p>For CARLA with a native ROS 2 driving system, follow
+<a href="../../examples/hosted-autoware/">Hosted Autoware</a>.</p>
 <h2 id="run-a-nurec-comparison">Run a NuRec comparison<a class="headerlink" href="#run-a-nurec-comparison" title="Permanent link">&para;</a></h2>
 <p>Place NuRec 26.01 scenes under <code>data/nurec/26.01_release</code> and prepare the YOLOX weights listed in
 <a href="../installation/#yolox-detector-weights">Installation</a>.
 The supplied <code>split.train_segments: 5</code> requires at least six selected approaches.
+See <a href="../../reference/configuration/#data-split">Data split</a>.
 Copy the configuration within <code>configs/</code>:</p>
 <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>configs/nurec_stop_sign_patch_modular_2601.yaml<span class="w"> </span>configs/my_stop_sign.yaml
 </code></pre></div>
@@ -1890,7 +1924,7 @@ to <code>../results/carla_phantom_reused</code>:</p>
 <p>For NuRec, use the same command through <code>nurec-experiment</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>run<span class="w"> </span>CONFIG.yaml<span class="w"> </span>--prepared<span class="w"> </span>RESULTS_DIRECTORY
 </code></pre></div>
-<p>See <a href="../../reference/configuration/#saved-preparation-compatibility">Saved-preparation compatibility</a>.
+<p><a href="../../reference/configuration/#saved-preparation-compatibility">Saved preparation</a> describes reuse.
 To continue interrupted preparation or execution, use <code>--resume</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nurec-experiment<span class="w"> </span>run<span class="w"> </span>CONFIG.yaml<span class="w"> </span>--resume
 </code></pre></div>
@@ -2003,7 +2037,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>

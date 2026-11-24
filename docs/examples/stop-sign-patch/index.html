@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://avsecproject.github.io/docs/examples/stop-sign-patch/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../hosted-autoware/">
       
       
         <link rel="next" href="../physical-patch/">
@@ -1080,6 +1080,8 @@
       
         
       
+        
+      
     
     
     
@@ -1135,6 +1137,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted-autoware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hosted Autoware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -2002,25 +2032,25 @@ includes unoptimized controls.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_modular_2601.yaml">nurec_stop_sign_patch_modular_2601.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_modular_2604.yaml">nurec_stop_sign_patch_modular_2604.yaml</a></td>
 <td><code>RuleBasedAVStack</code></td>
 <td>white-box attack</td>
 <td><code>PGD</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_alpamayo_2601.yaml">nurec_stop_sign_patch_alpamayo_2601.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
 </tr>
 <tr>
-<td><a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
+<td><a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/configs/nurec_stop_sign_patch_alpamayo_2604.yaml">nurec_stop_sign_patch_alpamayo_2604.yaml</a></td>
 <td><code>AlpamayoAVStack</code></td>
 <td>black-box attack</td>
 <td><code>NES</code></td>
@@ -2129,7 +2159,7 @@ before it.</p>
 configurations use the defaults of 50 m and 20 m. The selector waits for required recorded
 history and includes <code>hold_steps</code> hold decisions, with a default of 20. A start closer than
 <code>min_approach_m</code> is rejected. Constructor defaults are in the
-<a href="../../reference/python-api/#avsectesterimplemented_attacksstop_sign_patch_attackattack">stop-sign attack API</a>.</p>
+<a href="../../reference/python-api/#avsectesterimplemented_attacksstop_sign_patch_attackattack">API</a>.</p>
 <p>The runtime inserts a post-free canonical MUTCD R1-1 replica face over the reconstructed sign.
 The <code>mask_path</code> binary mask selects which face-texture colors form the patch. The default
 <code>rp2_bars.png</code> places bars above and below STOP. <code>face_interior.png</code> is the packaged
@@ -2188,9 +2218,9 @@ in the <a href="../../reference/python-api/#avsectesterrenderingharmonizers">har
 <span class="w">  </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">execute</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">test</span><span class="p p-Indicator">]</span>
 </code></pre></div>
-<p>This needs at least six selected approaches: five training units and at least one test unit. See
-<a href="../../reference/configuration/#data-split">split configuration</a> for unit identity, allocation
-and training input rules.</p>
+<p>The supplied <code>split.train_segments: 5</code> requires at least six selected approaches.
+See <a href="../../reference/configuration/#data-split">Data split</a> for unit allocation and training
+input requirements.</p>
 <h2 id="prepare-the-white-box-attack">Prepare the white-box attack<a class="headerlink" href="#prepare-the-white-box-attack" title="Permanent link">&para;</a></h2>
 <p>The white-box attack uses the driving system's YOLOX detector through <code>avstack.bindings</code>.
 Algorithm used: <code>PGD</code>. <code>rule_based_driving_adapter</code> declares <code>rule_based.detection_confidence</code>,
@@ -2361,8 +2391,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 <a href="../../guides/evaluation/">Evaluation</a> defines the stop-line, driving and reasoning metrics.
 <code>RuleBasedAVStack</code> has no reasoning text, so its configuration omits <code>ReasoningPhraseRate</code>.</p>
 <p>The repository includes the white-box results of both modular configurations in
-<a href="https://github.com/AVSecProject/AVSecTester/tree/17fae3e4f6ee0e5e4361a539f850914032c5abcd/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
-and <a href="https://github.com/AVSecProject/AVSecTester/tree/17fae3e4f6ee0e5e4361a539f850914032c5abcd/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
+<a href="https://github.com/AVSecProject/AVSecTester/tree/747d79db036b8263d1b5c1c376f5880d52fc0563/results/nurec_stop_sign_patch_modular_2601">results/nurec_stop_sign_patch_modular_2601</a>
+and <a href="https://github.com/AVSecProject/AVSecTester/tree/747d79db036b8263d1b5c1c376f5880d52fc0563/results/nurec_stop_sign_patch_modular_2604">results/nurec_stop_sign_patch_modular_2604</a>.
 They contain the reports and deployed textures. Run logs and saved maps are not included, so
 <code>evaluate</code> cannot recompute these results. To rerun the closed loop with these textures, copy a
 configuration, set <code>runs.output</code> to a new directory and run it with <code>--prepared</code>.</p>
@@ -2396,7 +2426,7 @@ among those where the replica is visible in <code>camera_id</code>, the camera t
 <p>For a user metric, implement the same public methods in your own package and use its
 <code>package.module:Class</code> path. See the <a href="../../guides/evaluation/">metric authoring guide</a> for that
 interface, and the
-<a href="https://github.com/AVSecProject/AVSecTester/blob/17fae3e4f6ee0e5e4361a539f850914032c5abcd/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
+<a href="https://github.com/AVSecProject/AVSecTester/blob/747d79db036b8263d1b5c1c376f5880d52fc0563/avsectester/implemented_attacks/stop_sign_patch_attack/metrics.py">supplied implementation</a>
 for a concrete example.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Read <a href="../../guides/experiments/">Experiment workflows</a>, <a href="../../guides/evaluation/">Evaluation</a> and
@@ -2436,7 +2466,7 @@ the <a href="../#attack-impact">attack-impact guidance</a>.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Supplied examples">
+          <a href="../hosted-autoware/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hosted Autoware">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2446,7 +2476,7 @@ the <a href="../#attack-impact">attack-impact guidance</a>.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Supplied examples
+                Hosted Autoware
               </div>
             </div>
           </a>
@@ -2495,7 +2525,7 @@ the <a href="../#attack-impact">attack-impact guidance</a>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.1.0"}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.tooltips", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": "0.2.0"}</script>
     
     
       <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
